@@ -30,7 +30,5 @@ services:
       - POSTGRES_PASSWORD=secret
     volumes:
       - miniflux-db:/var/lib/postgresql/data
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
 volumes:
   miniflux-db:
