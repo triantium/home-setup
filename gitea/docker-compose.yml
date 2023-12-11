@@ -11,6 +11,8 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
+      - GITEA__server__SSH_PORT=222
+      - GITEA__server__LISTEN_PORT=22
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__HOST=db:5432
       - GITEA__database__NAME=gitea
