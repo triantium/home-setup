@@ -1,0 +1,36 @@
+version: '3'
+services:
+  miniflux:
+    image: miniflux/miniflux:2.0.50
+    restart: always
+    ports:
+      - "8290:8080"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=on
+      - LOG_DATE_TIME=1
+      - DATABASE_URL=postgres://miniflux:secret@db/miniflux?sslmode=disable
+      - RUN_MIGRATIONS=1
+      - CREATE_ADMIN=1
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - METRICS_COLLECTOR=1
+      - METRICS_ALLOWED_NETWORKS=0.0.0.0/0
+      - POLLING_SCHEDULER=entry_frequency
+      - SCHEDULER_ENTRY_FREQUENCY_MIN_INTERVAL=5
+      - SCHEDULER_ENTRY_FREQUENCY_MAX_INTERVAL=3*60
+      - POLLING_FREQUENCY=30
+      - BATCH_SIZE=50
+      - BASE_URL=https://${DNS_RECORD}/miniflux
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=miniflux
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - miniflux-db:/var/lib/postgresql/data
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+volumes:
+  miniflux-db:
