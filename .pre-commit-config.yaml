@@ -1,11 +1,16 @@
 repos:
   -   repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.4.0
+      rev: v4.6.0
       hooks:
         -   id: check-yaml
         -   id: end-of-file-fixer
         -   id: trailing-whitespace
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.0
+    rev: v8.18.2
     hooks:
       - id: gitleaks
+  - repo: https://github.com/bridgecrewio/checkov.git
+    rev: '3.2.90' # change to tag or sha
+    hooks:
+      - id: checkov
+        files: \.y(a)?ml$
