@@ -11,7 +11,7 @@ services:
       - INFLUXDB_ADMIN_USER=openhab
       - INFLUXDB_ADMIN_PASSWORD=openhab1
   chronograf:
-    image:            chronograf:1.10.4
+    image:            chronograf:1.10.5
     ports:
       - '8888:8888'
     volumes:
