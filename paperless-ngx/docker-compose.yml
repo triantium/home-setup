@@ -60,9 +60,9 @@ services:
     volumes:
       - data:/usr/src/paperless/data
       - media:/usr/src/paperless/media
-      - ./export:/usr/src/paperless/export
-      - ./consume:/usr/src/paperless/consume
-    env_file: docker-compose.env
+      - export:/usr/src/paperless/export
+      - consume:/usr/src/paperless/consume
+    # env_file: docker-compose.env
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
@@ -72,6 +72,7 @@ services:
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
       PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL:-root@localhost}
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-deu}
 
 
   gotenberg:
@@ -94,5 +95,5 @@ volumes:
   media:
   pgdata:
   redisdata:
-  #export:
-  #consume:
+  export:
+  consume:
