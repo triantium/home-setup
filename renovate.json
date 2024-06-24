@@ -3,5 +3,12 @@
   "extends": [
     "config:base"
   ],
-  "automerge": true
+  "automerge": true,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "matchPackageNames": ["postgres"],
+      "automerge": false
+    }
+  ]
 }
