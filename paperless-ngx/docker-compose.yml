@@ -91,18 +91,19 @@ services:
   tika:
     image: docker.io/apache/tika:2.9.2.1
     restart: unless-stopped
-#  exporter:
-#    image: ghcr.io/hansmi/prometheus-paperless-exporter:v0.0.4
-#    restart: on-failure
-#    init: true
-#    ports:
-#      - 8086:8081
-#    depends_on:
-#      - webserver
-#    environment:
-#      PAPERLESS_URL: http://webserver
-#      PAPERLESS_AUTH_TOKEN_FILE: /etc/exporter/auth-token.txt
-#      PAPERLESS_SERVER_TIMEZONE: Europe/Berlin
+  exporter:
+    image: ghcr.io/hansmi/prometheus-paperless-exporter:v0.0.4
+    restart: on-failure
+    init: true
+    ports:
+      - 8086:8081
+    depends_on:
+      - webserver
+    environment:
+      PAPERLESS_URL: http://webserver:8080
+      PAPERLESS_AUTH_USERNAME: ${PAPERLESS_EXPORTER_USERNAME:-exporter}
+      PAPERLESS_AUTH_PASSWORD: ${PAPERLESS_EXPORTER_PASSWORD}
+      PAPERLESS_SERVER_TIMEZONE: Europe/Berlin
 volumes:
   data:
   media:
