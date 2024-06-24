@@ -100,7 +100,7 @@ services:
     depends_on:
       - webserver
     environment:
-      PAPERLESS_URL: http://webserver:8000
+      PAPERLESS_URL: http://webserver:8000/paperless
       PAPERLESS_AUTH_USERNAME: ${PAPERLESS_EXPORTER_USERNAME:-exporter}
       PAPERLESS_AUTH_PASSWORD: ${PAPERLESS_EXPORTER_PASSWORD}
       PAPERLESS_SERVER_TIMEZONE: Europe/Berlin
