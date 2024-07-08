@@ -8,8 +8,8 @@ services:
     volumes:
       - mosquitto-config:/mosquitto/config/
       - mosquitto-data:/mosquitto/data
-      - mosqitto-log:/mosquitto/log
+      - mosquitto-log:/mosquitto/log
 volumes:
   mosquitto-data:
-  mosqitto-log:
+  mosquitto-log:
   mosquitto-config:
