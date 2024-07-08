@@ -1,0 +1,18 @@
+version: '3'
+services:
+  mosquitto:
+    image:  eclipse-mosquitto:2.0.18
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto-data:/mosquitto/data
+      - mosqitto-log:/mosquitto/log
+    environment:
+      - INFLUXDB_DB=openhab
+      - INFLUXDB_ADMIN_USER=openhab
+      - INFLUXDB_ADMIN_PASSWORD=openhab1
+volumes:
+  mosquitto-data:
+  mosqitto-log:
