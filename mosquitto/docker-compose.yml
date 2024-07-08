@@ -9,10 +9,6 @@ services:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mosquitto-data:/mosquitto/data
       - mosqitto-log:/mosquitto/log
-    environment:
-      - INFLUXDB_DB=openhab
-      - INFLUXDB_ADMIN_USER=openhab
-      - INFLUXDB_ADMIN_PASSWORD=openhab1
 volumes:
   mosquitto-data:
   mosqitto-log:
