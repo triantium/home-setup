@@ -24,7 +24,7 @@ services:
       - BATCH_SIZE=50
       - BASE_URL=https://${DNS_RECORD}/miniflux
   db:
-    image: postgres:16
+    image: postgres:16.3
     restart: always
     environment:
       - POSTGRES_USER=miniflux
