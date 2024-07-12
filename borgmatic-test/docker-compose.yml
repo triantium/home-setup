@@ -1,0 +1,31 @@
+version: "3"
+services:
+  borgmatic:
+    container_name: Borgmatic
+    volumes:
+      - borgmatic-source:/mnt/source               # first backup source
+      #- ${VOLUME_SOURCE}:/mnt/source/anothervolume # second backup source (has to be /mnt/source/<whatever)
+      - borgmatic-backup:/mnt/borg-repository      # backup target
+      #- borgmatic-config:/etc/borgmatic.d/  # borgmatic config file(s) + crontab.txt
+      #- borgmatic-config:/root/.config/borg   # config and keyfiles
+      - borgmatic-ssh:/root/.ssh                   # ssh key for remote repositories
+      - borgmatic-cache:/root/.cache/borg     # checksums used for deduplication
+#  networks:
+#    - isonet # Choose your own network settings - can be isolated/no-net.
+    environment:
+      - TZ=Europe/Berlin
+      #- BORG_PASSPHRASE=${BORG_PASSPHRASE}
+      - RUN_ON_STARTUP
+    image: ghcr.io/borgmatic-collective/borgmatic
+    restart: always
+volumes:
+  borgmatic-source:
+  borgbase-backup:
+    external: true
+  borgmatic-config:
+  borgmatic-ssh:
+  borgmatic-cache:
+networks:
+  postgres-postgres:
+    external: true
+# ssh://ql0v959x@ql0v959x.repo.borgbase.com/./repo
