@@ -13,7 +13,7 @@ services:
     networks:
       postgres:
   pgadmin:
-    image: dpage/pgadmin4:8.11
+    image: dpage/pgadmin4:8.12
     container_name: pgadmin4_container
     restart: always
     depends_on:
