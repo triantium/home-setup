@@ -38,7 +38,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:16.4
+    image: postgres:16.5
     restart: always
     environment:
         - POSTGRES_USER=gitea
