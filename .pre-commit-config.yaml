@@ -1,16 +1,30 @@
+ci:
+  # This section is specific to pre-commit.ci, telling it to create a pull request
+  # to update the linter version tag every month.
+  autoupdate_schedule: monthly
+  # If you have other Ansible collection dependencies (requirements.yml)
+  # `pre-commit.ci` will not be able to install them because it runs in offline mode,
+  # and you will need to tell it to skip the hook.
+  # skip:
+  #   - ansible-lint
+
 repos:
   -   repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.6.0
+      rev: v5.0.0
       hooks:
         -   id: check-yaml
         -   id: end-of-file-fixer
         -   id: trailing-whitespace
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.3
+    rev: v8.23.1
     hooks:
       - id: gitleaks
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: '3.2.133' # change to tag or sha
+    rev: '3.2.353' # change to tag or sha
     hooks:
       - id: checkov
         files: \.y(a)?ml$
+#  - repo: https://github.com/ansible/ansible-lint.git
+#    rev: v25.1.0
+#    hooks:
+#      - id: ansible-lint

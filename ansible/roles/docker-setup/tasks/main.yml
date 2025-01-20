@@ -1,5 +1,5 @@
 - name: modprobe br_netfilter
-  modprobe:
+  community.general.modprobe:
     name: "{{item}}"
     state: present
   with_items:
