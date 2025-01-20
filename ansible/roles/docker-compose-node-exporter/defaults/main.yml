@@ -1,0 +1,2 @@
+service_name: node-exporter
+uri: node-exporter.triantium.de

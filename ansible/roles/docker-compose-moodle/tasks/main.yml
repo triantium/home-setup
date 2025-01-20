@@ -1,0 +1,27 @@
+- name: Create a directory for the moodle service
+  ansible.builtin.file:
+    path: /opt//moodle
+    state: directory
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /opt//moodle/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Start the moodle service with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /opt//moodle
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: docker compose pull
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: docker compose restart

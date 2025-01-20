@@ -1,0 +1,27 @@
+- name: modprobe br_netfilter
+  modprobe:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - overlay
+    - br_netfilter
+- name: Check is docker installed
+  shell: docker
+  register: is_docker_exists
+  ignore_errors: yes
+
+- name: Check is docker installed
+  shell: docker compose
+  register: docker_compose_exists
+  ignore_errors: yes
+
+- name: Install Docker
+  ansible.builtin.package:
+    name: docker.io
+    state: present
+
+- systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+    name: docker

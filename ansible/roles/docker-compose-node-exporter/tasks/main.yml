@@ -1,0 +1,27 @@
+- name: Create a directory for the node-exporter service
+  ansible.builtin.file:
+    path: /opt//node-exporter
+    state: directory
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /opt//node-exporter/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Start the node-exporter service with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /opt//node-exporter
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: docker compose pull
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: docker compose restart

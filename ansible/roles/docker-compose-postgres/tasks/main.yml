@@ -1,0 +1,27 @@
+- name: Create a directory for the postgres service
+  ansible.builtin.file:
+    path: /opt//postgres
+    state: directory
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /opt//postgres/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Start the postgres service with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /opt//postgres
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: docker compose pull
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: docker compose restart

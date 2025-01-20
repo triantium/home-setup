@@ -1,0 +1,2 @@
+service_name: influxdb
+uri: influxdb.triantium.de

@@ -1,0 +1,22 @@
+- hosts: all
+  become: yes
+  roles:
+    - role: docker-compose-traefik
+    - role: docker-compose-semaphore
+    - role: docker-compose-postgres
+    - role: docker-compose-portainer-agent
+    - role: docker-compose-portainer
+    - role: docker-compose-paperless-ngx
+    - role: docker-compose-node-exporter
+    - role: docker-compose-navidrome
+    - role: docker-compose-mosquitto
+    - role: docker-compose-moodle
+    - role: docker-compose-minio
+    - role: docker-compose-miniflux
+    - role: docker-compose-minecraft
+    - role: docker-compose-keycloak
+    - role: docker-compose-jellyfin
+    - role: docker-compose-influxdb
+    - role: docker-compose-home-assistent
+    - role: docker-compose-gitea
+    - role: docker-setup
