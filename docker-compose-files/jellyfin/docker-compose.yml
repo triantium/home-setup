@@ -1,0 +1,23 @@
+version: '3.5'
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.10.3
+    container_name: jellyfin
+    ports:
+      - '8096:8096'
+      - '8920:8920' #optional
+      - '7359:7359/udp' #optional
+      - '1900:1900/udp' #optional
+    # user: uid:gid
+    volumes:
+      - config:/config
+      - cache:/cache
+      - "$HOST_MEDIA_DIR/:/media:ro"
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - HOST_MEDIA_DIR=${HOST_MEDIA_DIR}
+      #- JELLYFIN_PublishedServerUrl=http://example.com
+volumes:
+  cache:
+  config:

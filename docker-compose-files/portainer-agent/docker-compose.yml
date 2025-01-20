@@ -1,0 +1,11 @@
+version: "3"
+services:
+  portainer-agent:
+    image:  portainer/agent:2.26.0
+    restart: always
+    ports:
+      - "9001:9001"
+    environment: []
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes

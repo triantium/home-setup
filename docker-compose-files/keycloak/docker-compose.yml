@@ -48,7 +48,8 @@ services:
       LDAP_CONFIG_PASSWORD: "config"
       LDAP_READONLY_USER: "false"
       #LDAP_READONLY_USER_USERNAME: "readonly"
-      LDAP_RFC2307BIS_SCHEMA: "false" #gitleaks:allow
+      #LDAP_READONLY_USER_PASSWORD: "readonly"
+      LDAP_RFC2307BIS_SCHEMA: "false"
       LDAP_BACKEND: "mdb"
       LDAP_TLS: "true"
       LDAP_TLS_CRT_FILENAME: "ldap.crt"

@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  mosquitto:
+    image:  eclipse-mosquitto:2.0.20
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - mosquitto-config:/mosquitto/config/
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+  exporter:
+    image: sapcc/mosquitto-exporter:0.8.0
+    ports:
+      - '9234:9234'
+    environment:
+      - BROKER_ENDPOINT=tcp://mosquitto:1883
+      - MQTT_USER=${MQTT_EXPORTER_USER:-exporter}
+      - MQTT_PASS=${MQTT_EXPORTER_PASS}
+volumes:
+  mosquitto-data:
+  mosquitto-log:
+  mosquitto-config:
