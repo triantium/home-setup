@@ -1,0 +1,11 @@
+- hosts: berserker
+  tasks:
+    - command: whoami
+      register: whoami
+    - debug:
+        var: whoami.stdout
+  roles:
+#    - role: docker-setup
+    - role: docker-compose-postgres
+#    - role: docker-compose-keycloak
+#    - role: docker-compose-semaphore

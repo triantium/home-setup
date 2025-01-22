@@ -1,0 +1,8 @@
+all:
+  vars:
+    ansible_become: True
+development:
+  hosts:
+    berserker:
+      ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/berserker/login') }}"
+      ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/berserker/login', subkey='login') }}"
