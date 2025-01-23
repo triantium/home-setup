@@ -12,16 +12,22 @@
     - pgbackups
     - pgadmin-data
     - postgres-data
+    - autorestic
 
-- name: Template a file to /etc/file.conf
+- name: Templating Environment
   ansible.builtin.template:
     src: .env.j2
     dest: /opt/postgres/.env
 
-- name: Template a file to /etc/file.conf
+- name: Template pgAdmin
   ansible.builtin.template:
     src: servers.json.j2
     dest: /opt/postgres/pgadmin4/servers.json
+
+- name: Template Autorestic Config
+  ansible.builtin.template:
+    src: autorestic/config.yml.j2
+    dest: /opt/postgres/autorestic/config.yml
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:

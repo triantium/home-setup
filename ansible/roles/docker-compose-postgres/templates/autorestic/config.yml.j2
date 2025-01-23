@@ -1,0 +1,9 @@
+backends:
+  borgbase:
+    type: rest
+    path: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' ) }}
+locations:
+  my-location:
+    from: /backups
+    to:
+      - borgbase

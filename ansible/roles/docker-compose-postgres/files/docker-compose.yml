@@ -55,5 +55,12 @@ services:
       - BACKUP_KEEP_WEEKS=4
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=8080
+#  autorestic:
+#    image:  pascaliske/autorestic:latest
+#    restart: always
+#    volumes:
+#      - ./autorestic/config.yml:/etc/autorestic/config.yml
+#      - ./pgbackups:/backups
+
 networks:
   postgres:
