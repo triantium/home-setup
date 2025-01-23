@@ -5,8 +5,13 @@
 
 - name: Create a directory for the postgres service
   ansible.builtin.file:
-    path: /opt/postgres/pgadmin4
+    path: "/opt/postgres/{{item}}"
     state: directory
+  loop:
+    - pgadmin4
+    - pgbackups
+    - pgadmin-data
+    - postgres-data
 
 - name: Template a file to /etc/file.conf
   ansible.builtin.template:

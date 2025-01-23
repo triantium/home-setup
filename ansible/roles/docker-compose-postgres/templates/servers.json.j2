@@ -6,7 +6,7 @@
             "Port": 5432,
             "Username": "postgres",
             "PasswordExecCommand": "echo '{{ lookup('community.general.passwordstore', 'hosts/berserker/postgres', missing='create') }}'",
-            "Host": "db",
+            "Host": "postgres",
             "SSLMode": "prefer",
             "MaintenanceDB": "postgres"
         }
