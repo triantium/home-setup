@@ -1,0 +1,13 @@
+version: 2
+backends:
+  borgbase:
+    type: rest
+    path: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' , subkey='location') }}
+    key: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' ) }}
+    # requireKey: true
+locations:
+  postgres-backups:
+    cron: '5 3 * * *'
+    from: /backups
+    to:
+      - borgbase

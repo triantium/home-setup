@@ -55,12 +55,16 @@ services:
       - BACKUP_KEEP_WEEKS=4
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=8080
-#  autorestic:
-#    image:  pascaliske/autorestic:latest
-#    restart: always
-#    volumes:
-#      - ./autorestic/config.yml:/etc/autorestic/config.yml
-#      - ./pgbackups:/backups
+  autorestic:
+    image:  pascaliske/autorestic:latest
+    restart: always
+    environment:
+      - RESTIC_HOST=postgres
+    volumes:
+      - ./autorestic/config.yml:/etc/autorestic/config.yml
+      - ./pgbackups:/backups
+      - ./autorestic/cron:/etc/cron/
+    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
 
 networks:
   postgres:
