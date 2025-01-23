@@ -1,2 +1,2 @@
 PATH="/usr/local/bin:/usr/bin:/bin"
-*/5 * * * * autorestic -c /etc/autorestic/config.yml --ci cron
+51 */6 * * * autorestic -c /etc/autorestic/config.yml --ci cron
