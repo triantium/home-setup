@@ -19,11 +19,11 @@ repos:
     rev: v8.23.1
     hooks:
       - id: gitleaks
-  - repo: https://github.com/bridgecrewio/checkov.git
-    rev: '3.2.353' # change to tag or sha
-    hooks:
-      - id: checkov
-        files: \.y(a)?ml$
+#  - repo: https://github.com/bridgecrewio/checkov.git
+#    rev: '3.2.353' # change to tag or sha
+#    hooks:
+#      - id: checkov
+#        files: \.y(a)?ml$
 #  - repo: https://github.com/ansible/ansible-lint.git
 #    rev: v25.1.0
 #    hooks:

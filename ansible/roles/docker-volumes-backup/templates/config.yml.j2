@@ -1,0 +1,17 @@
+version: 2
+backends:
+  borgbase:
+    type: rest
+    path: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' , subkey='location') }}
+    key: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' ) }}
+    # requireKey: true
+locations:
+  {{ansible-hostname}}-backups:
+    cron: '* * * * *'
+    from: /var/lib/docker/volumes
+    to:
+      - borgbase
+    options:
+      backup:
+        exclude:
+          - 'restic/**'

@@ -1,0 +1,8 @@
+all:
+  vars:
+    ansible_become: True
+development:
+  hosts:
+    nas:
+      ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/nas/login') }}"
+      ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/nas/login', subkey='login') }}"

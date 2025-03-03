@@ -1,0 +1,14 @@
+services:
+  autorestic:
+    image:  pascaliske/autorestic:latest
+    restart: always
+    environment:
+      - RESTIC_HOST=${RESTIC_HOST}
+    volumes:
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - ./autorestic/config.yml:/etc/autorestic/config.yml
+      - ./autorestic/cron:/etc/cron/
+    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
+
+networks:
+  pihole:

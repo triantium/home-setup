@@ -1,0 +1,52 @@
+- name: Create a directory for the backup service
+  ansible.builtin.file:
+    path: /opt/docker-backup
+    state: directory
+
+- name: Create a directory for the backup service
+  ansible.builtin.file:
+    path: "/opt/docker-backup/{{item}}"
+    state: directory
+  loop:
+    - autorestic
+    - autorestic/cron
+
+- name: Templating Environment
+  ansible.builtin.template:
+    src: env.j2
+    dest: /opt/docker-backup/.env
+
+
+- name: Copy cron definition
+  ansible.builtin.copy:
+    src: cron
+    dest: /opt/docker-backup/autorestic/
+
+- name: Template Autorestic Config
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: /opt/docker-backup/autorestic/config.yml
+
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /opt/docker-backup/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Start the docker-backup service with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /opt/docker-backup
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/docker-backup
+    cmd: docker compose pull
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/docker-backup
+    cmd: docker compose restart

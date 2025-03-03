@@ -6,6 +6,6 @@
         var: whoami.stdout
   roles:
 #    - role: docker-setup
-    - role: docker-compose-postgres
+    - role: docker-compose-pi-hole
 #    - role: docker-compose-keycloak
 #    - role: docker-compose-semaphore
