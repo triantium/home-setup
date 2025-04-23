@@ -1,7 +1,7 @@
 version: '3'
 services:
   miniflux:
-    image: miniflux/miniflux:2.2.7
+    image: miniflux/miniflux:2.2.8
     restart: always
     ports:
       - "8290:8080"
