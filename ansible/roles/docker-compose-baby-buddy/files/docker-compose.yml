@@ -1,0 +1,12 @@
+version: "3"
+services:
+  babybuddy:
+    image: lscr.io/linuxserver/babybuddy:2.7.1
+    container_name: babybuddy
+    volumes:
+      - ./babybuddy:/config
+    ports:
+      - 8000:8000
+    environment:
+      SUB_PATH: /babybuddy
+    restart: unless-stopped
