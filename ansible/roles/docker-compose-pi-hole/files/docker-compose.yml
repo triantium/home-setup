@@ -36,6 +36,14 @@ services:
       # Optional, if Pi-hole should get some more processing time
       - SYS_NICE
     restart: unless-stopped
+  exporter:
+    container_name: exporter
+    image:  ekofr/pihole-exporter:v1.0.1
+    ports:
+      - 9617:9617
+    environment:
+      PIHOLE_HOSTNAME: 'pihole'
+      PIHOLE_PASSWORD: ${PIHOLE_PASSWORD}
   autorestic:
     image: pascaliske/autorestic:latest
     restart: always
