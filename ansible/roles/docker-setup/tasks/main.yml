@@ -14,7 +14,7 @@
   register: is_docker_exists
   ignore_errors: yes
 
-- name: Check is docker installed
+- name: Check if docker compose installed
   shell: docker compose
   register: docker_compose_exists
   ignore_errors: yes
