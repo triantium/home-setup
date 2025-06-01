@@ -3,7 +3,7 @@
     path: /opt/pihole
     state: directory
 
-- name: Create a directory for the pihole service
+- name: Copy Files which are defining the service
   ansible.builtin.file:
     path: "/opt/pihole/{{item}}"
     state: directory
