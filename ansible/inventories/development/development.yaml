@@ -9,3 +9,6 @@ development:
     heimdall:
         ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/heimdall/login') }}"
         ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/heimdall/login', subkey='login') }}"
+    v2202210185501204536.quicksrv.de:
+      ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/v2202210185501204536.quicksrv.de/login') }}"
+      ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/v2202210185501204536.quicksrv.de/login', subkey='login') }}"

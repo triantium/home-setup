@@ -8,3 +8,10 @@
     - role: geerlingguy.pip
     - role: geerlingguy.docker
     - role: docker-compose-pi-hole
+- hosts: all
+  tasks:
+    - name: Register name
+      command: whoami
+      register: whoami
+    - debug:
+        var: whoami.stdout

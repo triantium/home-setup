@@ -1,12 +1,12 @@
-- hosts: berserker
+- hosts: v2202210185501204536.quicksrv.de
   tasks:
     - command: whoami
       register: whoami
     - debug:
         var: whoami.stdout
   roles:
-#    - role: geerlingguy.pip
-#    - role: geerlingguy.docker
-    - role: docker-compose-pi-hole
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker
+#    - role: docker-compose-pi-hole
 #    - role: docker-compose-keycloak
 #    - role: docker-compose-semaphore
