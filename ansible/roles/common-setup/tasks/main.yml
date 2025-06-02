@@ -1,0 +1,33 @@
+- name:               Upgrade all repositories
+  apt:
+    upgrade:          yes
+    force:            yes
+    update_cache:     yes
+    cache_valid_time: 3600
+    autoclean:        yes
+    autoremove:       yes
+
+- name: Install tools via apt
+  apt:
+    pkg:
+      - vim
+      - git
+      - restic
+      - zsh
+      - unattended-upgrades
+    state: present
+- name: Add the user
+  ansible.builtin.user:
+    name: triantium
+    shell: /usr/bin/zsh
+    append: true
+    state: present
+    groups:
+      - docker
+- name: Set authorized keys taken from url
+  ansible.posix.authorized_key:
+    user: triantium
+    state: present
+    key: https://github.com/triantium.keys
+# // MAYBE chezmoi
+# sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply $GITHUB_USERNAME

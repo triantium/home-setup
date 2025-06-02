@@ -6,6 +6,9 @@ development:
     berserker:
       ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/berserker/login') }}"
       ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/berserker/login', subkey='login') }}"
+    gloin:
+      ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/heimdall/login') }}"
+      ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/heimdall/login', subkey='login') }}"
     heimdall:
         ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/heimdall/login') }}"
         ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/heimdall/login', subkey='login') }}"
