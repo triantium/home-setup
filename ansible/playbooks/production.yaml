@@ -1,17 +1,15 @@
-- hosts: heimdall
-  tasks:
-    - command: whoami
-      register: whoami
-    - debug:
-        var: whoami.stdout
+#- hosts: heimdall
+#  tasks:
+#    - command: whoami
+#      register: whoami
+#    - debug:
+#        var: whoami.stdout
+#  roles:
+#    - role: geerlingguy.pip
+#    - role: geerlingguy.docker
+#    - role: docker-compose-pi-hole
+- hosts: divera
   roles:
     - role: geerlingguy.pip
-    - role: geerlingguy.docker
-    - role: docker-compose-pi-hole
-- hosts: all
-  tasks:
-    - name: Register name
-      command: whoami
-      register: whoami
-    - debug:
-        var: whoami.stdout
+    #- role: geerlingguy.docker
+    - role: common-setup

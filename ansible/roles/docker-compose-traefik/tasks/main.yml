@@ -1,27 +1,37 @@
 - name: Create a directory for the traefik service
   ansible.builtin.file:
-    path: /opt//traefik
+    path: /opt/traefik
+    state: directory
+
+- name: Create a directory for the traefik service
+  ansible.builtin.file:
+    path: /opt/traefik/{{uri}}
     state: directory
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt//traefik/docker-compose.yml
+    dest: /opt/traefik/{{uri}}/docker-compose.yml
   register: docker_compose_yaml
+
+- name: Templating Environment
+  ansible.builtin.template:
+    src: env.j2
+    dest: /opt/traefik/{{uri}}/.env
 
 - name: Start the traefik service with Docker Compose
   ansible.builtin.command:
     cmd: docker compose up -d
-    chdir: /opt//traefik
+    chdir: /opt/traefik/{{uri}}
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/monitoring-stack
+    chdir: /opt/traefik/{{uri}}
     cmd: docker compose pull
 
 - name: Restart on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/monitoring-stack
+    chdir: /opt/traefik/{{uri}}
     cmd: docker compose restart
