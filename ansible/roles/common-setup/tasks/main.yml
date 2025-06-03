@@ -1,7 +1,6 @@
 - name:               Upgrade all repositories
   apt:
     upgrade:          yes
-    force:            yes
     update_cache:     yes
     cache_valid_time: 3600
     autoclean:        yes
