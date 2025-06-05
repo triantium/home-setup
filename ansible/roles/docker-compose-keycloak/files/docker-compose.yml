@@ -33,7 +33,10 @@ services:
       KC_HOSTNAME: localhost
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-    entrypoint: ['/opt/keycloak/bin/kc.sh']
+    #  KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/server.keystore
+    entrypoint: ['/opt/keycloak/bin/kc.sh', 'start-dev']
+    volumes:
+      - ./certs/server.keystore:/opt/keycloak/server.keystore
     depends_on:
       - postgres
   openldap:

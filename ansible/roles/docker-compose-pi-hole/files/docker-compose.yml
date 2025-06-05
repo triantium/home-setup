@@ -5,8 +5,8 @@ services:
     image: pihole/pihole:2025.05.1
     ports:
       # DNS Ports
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "153:53/tcp"
+      - "153:53/udp"
       # Default HTTP Port
       - "80:80/tcp"
       # Default HTTPs Port. FTL will generate a self-signed certificate
@@ -25,6 +25,7 @@ services:
     volumes:
       # For persisting Pi-hole's databases and common configuration file
       - ./pihole:/etc/pihole
+      - ./pihole/etc/dnsmasq.d/01-pihole.conf:/etc/dnsmasq.d/01-pihole.conf
       # Uncomment the below if you have custom dnsmasq config files that you want to persist. Not needed for most starting fresh with Pi-hole v6. If you're upgrading from v5 you and have used this directory before, you should keep it enabled for the first v6 container start to allow for a complete migration. It can be removed afterwards. Needs environment variable FTLCONF_misc_etc_dnsmasq_d: 'true'
       #- './etc-dnsmasq.d:/etc/dnsmasq.d'
     cap_add:
@@ -36,6 +37,15 @@ services:
       # Optional, if Pi-hole should get some more processing time
       - SYS_NICE
     restart: unless-stopped
+#  unbound:
+#    container_name: unbound
+#    image: mvance/unbound:1.22.0
+#    ports:
+#      - 5335:5335/tcp
+#      - 5335:5335/udp
+#    volumes:
+#      # For persisting Pi-hole's databases and common configuration file
+#      - ./unbound:/opt/unbound/etc/unbound/
   exporter:
     container_name: exporter
     image: ekofr/pihole-exporter:v1.0.1

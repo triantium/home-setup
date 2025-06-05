@@ -9,6 +9,7 @@
     state: directory
   loop:
     - pihole
+    - pihole/etc
     - autorestic
     - autorestic/cron
 
@@ -17,6 +18,10 @@
     src: env.j2
     dest: /opt/pihole/.env
 
+- name: Copy dnsmasq
+  ansible.builtin.copy:
+    src: etc/dnsmasq.d/01-pihole.conf
+    dest: /opt/pihole/pihole/etc
 
 - name: Copy cron definition
   ansible.builtin.copy:
