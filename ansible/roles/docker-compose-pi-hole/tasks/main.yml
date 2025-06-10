@@ -56,3 +56,52 @@
   command:
     chdir: /opt/pihole
     cmd: docker compose restart
+- name: Wait for DNS-Port
+  ansible.builtin.wait_for:
+    port: 53
+    sleep: 5
+- name: Wait for http-Port
+  ansible.builtin.wait_for:
+    port: 80
+    sleep: 5
+- name: Wait for https-Port
+  ansible.builtin.wait_for:
+    port: 443
+    sleep: 5
+- name: Wait for exporter-Port
+  ansible.builtin.wait_for:
+    port: 9617
+    sleep: 5
+# // TODO
+#- name: Test DNS
+#  ansible.builtin.debug:
+#    msg: "Querying localhost for IPv4 address for triantium.de. produces {{ lookup('community.general.dig', 'triantium.de' , fail_on_error=true ) }}"
+-
+#  https://docs.pi-hole.net/api/auth/
+- name: Get Session Token
+  uri:
+    url: "http://{{ansible_hostname}}/api/auth"
+    method: POST
+    body_format: json
+    body:
+      password: "{{ lookup('community.general.passwordstore', 'hosts/' + ansible_hostname +'/pihole') }}"
+  register: pihole_session
+- name: Debug Session Token
+  ansible.builtin.debug:
+    msg: "{{ pihole_session }}"
+# https://ftl.pi-hole.net/master/docs/#put-/lists/-list-
+- name: Check Blocking
+  uri:
+    url: "http://{{ansible_hostname}}/api/dns/blocking"
+    method: GET
+    headers:
+      X-FTL-SID: "{{ pihole_session.json.session.sid }}"
+# // TODO add Lists
+#  https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+#  https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/light.txt
+- name: Update Gravity
+  uri:
+    url: "http://{{ansible_hostname}}/api/action/gravity"
+    method: POST
+    headers:
+      X-FTL-SID: "{{ pihole_session.json.session.sid }}"
