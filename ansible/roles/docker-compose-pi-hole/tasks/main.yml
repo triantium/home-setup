@@ -89,16 +89,29 @@
 - name: Debug Session Token
   ansible.builtin.debug:
     msg: "{{ pihole_session }}"
-# https://ftl.pi-hole.net/master/docs/#put-/lists/-list-
+
 - name: Check Blocking
   uri:
     url: "http://{{ansible_hostname}}/api/dns/blocking"
     method: GET
     headers:
       X-FTL-SID: "{{ pihole_session.json.session.sid }}"
-# // TODO add Lists
+# // TODO fetch Lists, check missing and update
+# https://ftl.pi-hole.net/master/docs/#put-/lists/-list-
 #  https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 #  https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/light.txt
+#- name: Add hagezi List
+#  uri:
+#    url: "http://{{ansible_hostname}}/api/lists"
+#    method: POST
+#    headers:
+#      X-FTL-SID: "{{ pihole_session.json.session.sid }}"
+#    body_format: json
+#    body:
+#      address: https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/light.txt
+#      type: block
+#      comment: "Added pi ansible"
+#      enabled: true
 - name: Update Gravity
   uri:
     url: "http://{{ansible_hostname}}/api/action/gravity"
