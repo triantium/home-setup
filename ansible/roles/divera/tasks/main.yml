@@ -47,12 +47,7 @@
       - libttspico-utils
       - vlc
       - xdotool
-- name: Copy Autostart
-  ansible.builtin.copy:
-    src: divera.desktop
-    dest: /home/monitor/.config/autostart/divera.desktop
-    mode: 0777
-    owner: monitor
+
 - name: Set architecture specific variables
   set_fact:
     arch: "{{ 'arm64' if ansible_facts.architecture == 'aarch64' else 'x86_64' }}"
@@ -70,7 +65,16 @@
     group: root
     mode: '0755'
     state: link
+- name: Copy Autostart for all users
+  ansible.builtin.copy:
+    src: divera.desktop
+    dest: /etc/xdg/autostart/autostart/divera.desktop
+    mode: 0777
+    owner: monitor
 - name: Reboot on Monitor App Update
   when: monitor_app.changed
   ansible.builtin.reboot:
     reboot_timeout: 300 # 5 Minuten, weil wir langsame Maschinen annehmen
+- name: Setup User for the Monitor
+  ansible.builtin.include_tasks:
+    file: validate.yml

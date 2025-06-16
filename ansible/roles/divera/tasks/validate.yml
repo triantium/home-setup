@@ -1,0 +1,11 @@
+- name: Getting process IDs of the Monitor Process
+  pids:
+    name: /usr/local/bin/Monitor.AppImage
+  register: pids_of_monitor
+  failed_when:
+    - pids_of_monitor.pids is defined
+    - pids_of_monitor.pids | type_debug == 'list'
+    - pids_of_monitor.pids | length < 1
+- name: Printing the process IDs obtained
+  debug:
+    msg: "PIDS of Monitor:{{pids_of_monitor.pids|join(',')}}"
