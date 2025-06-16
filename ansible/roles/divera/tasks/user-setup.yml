@@ -1,0 +1,11 @@
+- name: Add the Monitor user
+  ansible.builtin.user:
+    name: monitor
+    append: true
+    state: present
+    password: "{{ lookup('community.general.passwordstore', 'hosts/' + ansible_hostname +'/users/monitor', missing='create') | password_hash('sha512', 'mysecretsalt') }}"
+- name: Ensure User is marked for autologin
+  ansible.builtin.lineinfile:
+    path: /etc/lightdm/lightdm.conf
+    regexp: '^autologin-user='
+    line: autologin-user=monitor

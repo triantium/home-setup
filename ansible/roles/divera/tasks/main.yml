@@ -1,3 +1,7 @@
+- name: Setup User for the Monitor
+  ansible.builtin.include_tasks:
+    file: user-setup.yml
+
 - name:               Upgrade all repositories
   apt:
     upgrade:          yes
@@ -5,7 +9,7 @@
     cache_valid_time: 3600
     autoclean:        yes
     autoremove:       yes
-
+# https://help.divera247.com/pages/viewpage.action?pageId=119865769
 - name: Install tools via apt
   apt:
     pkg:
@@ -13,6 +17,7 @@
       - dbus
       - notification-daemon
       - software-properties-common
+      - prometheus-node-exporter # Systemmonitoring
     state: present
 - name: Copy Files which are defining the service
   ansible.builtin.file:
@@ -21,21 +26,21 @@
   loop:
     - /usr/share/dbus-1
     - /usr/share/dbus-1/services/
-    - /home/triantium/.config
-    - /home/triantium/.config/autostart
+    - /home/monitor/.config
+    - /home/monitor/.config/autostart
 - name: Copy Notification Service
   ansible.builtin.copy:
     src: org.freedesktop.Notifications.service
     dest: /usr/share/dbus-1/services/org.freedesktop.Notifications.service
-#- name: Add contrib and non-free repositories
-#  ansible.builtin.command:
-#    cmd: "apt-add-repository -yn non-free"
-#  register: debian_repo
-#  changed_when: "'Adding component(s)' in repo_add.stdout"
-#- name: Update apt cache after adding repositories
-#  ansible.builtin.apt:
-#    update_cache: yes
-#  when: debian_repo.changed
+- name: Add contrib and non-free repositories
+  ansible.builtin.command:
+    cmd: "apt-add-repository -yn non-free"
+  register: debian_repo
+  changed_when: "'Adding component(s)' in repo_add.stdout"
+- name: Update apt cache after adding repositories
+  ansible.builtin.apt:
+    update_cache: yes
+  when: debian_repo.changed
 - name: Install tools via apt
   apt:
     pkg:
@@ -45,15 +50,26 @@
 - name: Copy Autostart
   ansible.builtin.copy:
     src: divera.desktop
-    dest: /home/triantium/.config/autostart/divera.desktop
+    dest: /home/monitor/.config/autostart/divera.desktop
     mode: 0777
-    owner: triantium
+    owner: monitor
+- name: Set architecture specific variables
+  set_fact:
+    arch: "{{ 'arm64' if ansible_facts.architecture == 'aarch64' else 'x86_64' }}"
 - name: Download Divera Monitor App
   ansible.builtin.get_url:
-    url: https://s3.florian.divera247.de/public/software/monitor/DIVERA247-Monitor-2.1.0-arm64.AppImage
-    dest: /usr/local/bin/Monitor.AppImage
+    url: "https://s3.florian.divera247.de/public/software/monitor/DIVERA247-Monitor-{{monitor_version}}-{{arch}}.AppImage"
+    dest: "/usr/local/bin/DIVERA247-Monitor-{{monitor_version}}-{{arch}}.AppImage"
     mode: '0755'
   register: monitor_app
+- name: Create a symbolic link
+  ansible.builtin.file:
+    src: "/usr/local/bin/DIVERA247-Monitor-{{monitor_version}}-{{arch}}.AppImage"
+    dest: /usr/local/bin/Monitor.AppImage
+    owner: root
+    group: root
+    mode: '0755'
+    state: link
 - name: Reboot on Monitor App Update
   when: monitor_app.changed
   ansible.builtin.reboot:
