@@ -10,6 +10,7 @@
 #    - role: docker-compose-pi-hole
 - hosts: divera
   roles:
-    - role: geerlingguy.pip
-    #- role: geerlingguy.docker
-    - role: common-setup
+#    - role: geerlingguy.pip
+#    - role: geerlingguy.docker
+#    - role: common-setup
+    - role: divera

@@ -11,6 +11,6 @@ production:
       ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/heimdall/login', subkey='login') }}"
 divera:
   hosts:
-    display-01:
+    display-02:
       ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/display-01/login') }}"
       ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/display-01/login', subkey='login') }}"
