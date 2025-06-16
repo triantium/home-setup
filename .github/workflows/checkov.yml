@@ -18,3 +18,5 @@ jobs:
         uses: bridgecrewio/checkov-action@master
         with:
           directory: .
+          framework: terraform,kubernetes,dockerfile,github_actions
+          skip_framework: ansible
