@@ -48,7 +48,7 @@ services:
 #      - ./unbound:/opt/unbound/etc/unbound/
   exporter:
     container_name: exporter
-    image: ekofr/pihole-exporter:v1.0.1
+    image: ekofr/pihole-exporter:v1.2.0
     ports:
       - 9617:9617
     environment:
