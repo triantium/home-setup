@@ -90,7 +90,7 @@ services:
       - "--chromium-allow-list=file:///tmp/.*"
 
   tika:
-    image: docker.io/apache/tika:3.2.1.0
+    image: docker.io/apache/tika:3.2.2.0
     restart: unless-stopped
   exporter:
     image: ghcr.io/hansmi/prometheus-paperless-exporter:v0.0.8
