@@ -6,7 +6,7 @@ volumes:
 
 services:
   postgres:
-    image: 'postgres:17.5'
+    image: 'postgres:17.6'
     volumes:
       - keycloak-db:/var/lib/postgresql/data
     restart: 'always'
