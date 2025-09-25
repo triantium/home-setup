@@ -20,7 +20,7 @@ services:
 
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.3.4
+    image: quay.io/keycloak/keycloak:26.3.5
     ports:
        - 8080:8080
        - 8443:8443
