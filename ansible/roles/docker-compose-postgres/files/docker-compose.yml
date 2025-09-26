@@ -32,7 +32,7 @@ services:
     networks:
       postgres:
   pgbackups:
-    image: prodrigestivill/postgres-backup-local:17-alpine
+    image: prodrigestivill/postgres-backup-local:18-alpine
     restart: always
    # user: postgres:postgres # Optional: see below
     volumes:
