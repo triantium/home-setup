@@ -2,7 +2,7 @@
 services:
   pihole:
     container_name: pihole
-    image: pihole/pihole:2025.10.2
+    image: pihole/pihole:2025.10.3
     ports:
       # DNS Ports
       - "53:53/tcp"
