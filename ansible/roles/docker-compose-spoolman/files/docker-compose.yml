@@ -3,7 +3,7 @@ networks:
     external: true
 services:
   spoolman:
-    image: ghcr.io/donkie/spoolman:0.23.0
+    image: ghcr.io/donkie/spoolman:0.23.1
     # // TODO more secure options
     security_opt:
       - seccomp=unconfined  # Add this to allow proper time operations
