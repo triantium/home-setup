@@ -2,7 +2,7 @@
 
 services:
   octoprint:
-    image: octoprint/octoprint:1.10.3
+    image: octoprint/octoprint:1.11.7
     restart: unless-stopped
     ports:
       - "5000:5000"
