@@ -1,7 +1,7 @@
-- name: Install tools via apt
-  apt:
-    pkg:
-      - python3-pyserial
+#- name: Install tools via apt
+#  apt:
+#    pkg:
+#      - python3-pyserial
 
 - name: Create a directory for the octopi service
   ansible.builtin.file:
@@ -40,10 +40,10 @@
     dest: /opt/octopi/docker-compose.yml
   register: docker_compose_yaml
 
-- name: Start the octopi service with Docker Compose
-  ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: /opt/octopi
+#- name: Start the octopi service with Docker Compose
+#  ansible.builtin.command:
+#    cmd: docker compose up -d
+#    chdir: /opt/octopi
 
 - name: Pull on change
   when: docker_compose_yaml.changed
@@ -51,8 +51,8 @@
     chdir: /opt/octopi
     cmd: docker compose pull
 
-- name: Restart on change
-  when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/octopi
-    cmd: docker compose restart
+#- name: Restart on change
+#  when: docker_compose_yaml.changed
+#  command:
+#    chdir: /opt/octopi
+#    cmd: docker compose restart

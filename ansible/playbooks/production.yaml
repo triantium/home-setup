@@ -16,9 +16,9 @@
 #    - role: common-setup
 #    - role: divera
 
-- hosts: octopi
+- hosts: octoprint
   roles:
 #    - role: common-setup
 #    - role: geerlingguy.pip
 #    - role: geerlingguy.docker
-    - role: docker-compose-spoolman
+    - role: octoprint

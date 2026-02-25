@@ -18,3 +18,9 @@ divera:
       ansible_host: display-02.taila24d4b.ts.net
       ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/display-01/login') }}"
       ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/display-01/login', subkey='login') }}"
+octoprint:
+  hosts:
+    octopi:
+      ansible_host: octopi.taila24d4b.ts.net
+      ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/octopi/login') }}"
+      ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/octopi/login', subkey='login') }}"

@@ -2,19 +2,18 @@
 
 services:
   octoprint:
-    image: octoprint/octoprint:1.11.7
+    image: octoprint/octoprint:1.10.3
     restart: unless-stopped
     ports:
-      - "5000:80"
+      - "5000:5000"
     volumes:
       - ./octoprint:/octoprint
-    devices: [ ]
-##      - /dev/ttyUSB0:/dev/ttyUSB0
-##      - /dev/ttyACM0:/dev/ttyACM0
-#      - /dev/video0:/dev/video0
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+      - /dev/video0:/dev/video0
     environment:
       - TZ=Europe/Berlin
-      - ENABLE_MJPG_STREAMER=true
+      - ENABLE_MJPG_STREAMER=false
       - CAMERA_DEV=/dev/video0
   spoolman:
     image: ghcr.io/donkie/spoolman:0.23.1
@@ -28,7 +27,7 @@ services:
         target: /home/app/.local/share/spoolman # Do NOT modify this line
     ports:
       # Map the host machine's port 7912 to the container's port 8000
-      - "7912:8000"
+      - "7913:8000"
     environment:
       - TZ=Europe/Berlin # Optional, defaults to UTC
       - SPOOLMAN_METRICS_ENABLED=true
