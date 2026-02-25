@@ -1,15 +1,21 @@
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
 
 services:
-  octopi:
-    image: octoprint/octoprint:latest
+  octoprint:
+    image: octoprint/octoprint:1.11.7
     restart: always
     ports:
       - "5000:5000"
     volumes:
-      - ./octopi:/octoprint
+      - ./octoprint:/octoprint
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+      - /dev/ttyACM0:/dev/ttyACM0
+      - /dev/video0:/dev/video0
     environment:
       - TZ=Europe/Berlin
+      - ENABLE_MJPG_STREAMER=true
+      - CAMERA_DEV=/dev/video0
   spoolman:
     image: ghcr.io/donkie/spoolman:0.22.1
     restart: always
@@ -36,6 +42,7 @@ services:
       - RESTIC_HOST=${RESTIC_HOST}
     volumes:
       - ./autorestic/config.yml:/etc/autorestic/config.yml
-      - ./octopi:/backups
+      - ./spoolman:/backups/spoolman
+      - ./octoprint:/backups/octoprint
       - ./autorestic/cron:/etc/cron/
     entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
