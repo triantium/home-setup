@@ -1,3 +1,8 @@
+- name: Install tools via apt
+  apt:
+    pkg:
+      - python3-pyserial
+
 - name: Create a directory for the octopi service
   ansible.builtin.file:
     path: /opt/octopi
@@ -8,8 +13,8 @@
     path: "/opt/octopi/{{item}}"
     state: directory
   loop:
-    - octopi
-    - octopi/etc
+    - octoprint
+    - spoolman
     - autorestic
     - autorestic/cron
 
@@ -17,11 +22,6 @@
   ansible.builtin.template:
     src: env.j2
     dest: /opt/octopi/.env
-
-- name: Copy dnsmasq
-  ansible.builtin.copy:
-    src: etc/dnsmasq.d/01-octopi.conf
-    dest: /opt/octopi/octopi/etc
 
 - name: Copy cron definition
   ansible.builtin.copy:
@@ -56,65 +56,3 @@
   command:
     chdir: /opt/octopi
     cmd: docker compose restart
-- name: Wait for DNS-Port
-  ansible.builtin.wait_for:
-    port: 53
-    sleep: 5
-- name: Wait for http-Port
-  ansible.builtin.wait_for:
-    port: 80
-    sleep: 5
-- name: Wait for https-Port
-  ansible.builtin.wait_for:
-    port: 443
-    sleep: 5
-- name: Wait for exporter-Port
-  ansible.builtin.wait_for:
-    port: 9617
-    sleep: 5
-# // TODO
-#- name: Test DNS
-#  ansible.builtin.debug:
-#    msg: "Querying localhost for IPv4 address for triantium.de. produces {{ lookup('community.general.dig', 'triantium.de' , fail_on_error=true ) }}"
--
-#  https://docs.pi-hole.net/api/auth/
-- name: Get Session Token
-  uri:
-    url: "http://{{ansible_hostname}}/api/auth"
-    method: POST
-    body_format: json
-    body:
-      password: "{{ lookup('community.general.passwordstore', 'hosts/' + ansible_hostname +'/octopi') }}"
-  register: octopi_session
-- name: Debug Session Token
-  ansible.builtin.debug:
-    msg: "{{ octopi_session }}"
-
-- name: Check Blocking
-  uri:
-    url: "http://{{ansible_hostname}}/api/dns/blocking"
-    method: GET
-    headers:
-      X-FTL-SID: "{{ octopi_session.json.session.sid }}"
-# // TODO fetch Lists, check missing and update
-# https://ftl.pi-hole.net/master/docs/#put-/lists/-list-
-#  https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-#  https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/light.txt
-#- name: Add hagezi List
-#  uri:
-#    url: "http://{{ansible_hostname}}/api/lists"
-#    method: POST
-#    headers:
-#      X-FTL-SID: "{{ octopi_session.json.session.sid }}"
-#    body_format: json
-#    body:
-#      address: https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/light.txt
-#      type: block
-#      comment: "Added pi ansible"
-#      enabled: true
-- name: Update Gravity
-  uri:
-    url: "http://{{ansible_hostname}}/api/action/gravity"
-    method: POST
-    headers:
-      X-FTL-SID: "{{ octopi_session.json.session.sid }}"

@@ -3,7 +3,7 @@
 services:
   octoprint:
     image: octoprint/octoprint:1.11.7
-    restart: always
+    restart: unless-stopped
     ports:
       - "5000:80"
     volumes:
@@ -18,7 +18,7 @@ services:
       - CAMERA_DEV=/dev/video0
   spoolman:
     image: ghcr.io/donkie/spoolman:0.23.1
-    restart: always
+    restart: unless-stopped
     security_opt:
       - seccomp=unconfined  # Add this to allow proper time operations
     volumes:
@@ -34,7 +34,7 @@ services:
       - SPOOLMAN_METRICS_ENABLED=true
   autorestic:
     image: pascaliske/autorestic:latest
-    restart: always
+    restart: unless-stopped
     environment:
       - RESTIC_HOST=${RESTIC_HOST}
     volumes:
