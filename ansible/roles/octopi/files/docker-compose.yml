@@ -1,0 +1,41 @@
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+
+services:
+  octopi:
+    image: octoprint/octoprint:latest
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./octopi:/octoprint
+    environment:
+      - TZ=Europe/Berlin
+  spoolman:
+    image: ghcr.io/donkie/spoolman:0.22.1
+    restart: always
+    security_opt:
+
+      - seccomp=unconfined  # Add this to allow proper time operations
+    networks:
+      - spoolman
+    volumes:
+      # Mount the host machine's ./data directory into the container's /home/app/.local/share/spoolman directory
+      - type: bind
+        source: ./data # This is where the data will be stored locally. Could also be set to for example `source: /home/pi/printer_data/spoolman`.
+        target: /home/app/.local/share/spoolman # Do NOT modify this line
+    ports:
+      # Map the host machine's port 7912 to the container's port 8000
+      - "7912:8000"
+    environment:
+      - TZ=Europe/Berlin # Optional, defaults to UTC
+      - SPOOLMAN_METRICS_ENABLED=true
+  autorestic:
+    image: pascaliske/autorestic:latest
+    restart: always
+    environment:
+      - RESTIC_HOST=${RESTIC_HOST}
+    volumes:
+      - ./autorestic/config.yml:/etc/autorestic/config.yml
+      - ./octopi:/backups
+      - ./autorestic/cron:/etc/cron/
+    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
