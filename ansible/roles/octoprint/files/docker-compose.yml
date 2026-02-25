@@ -5,29 +5,26 @@ services:
     image: octoprint/octoprint:1.11.7
     restart: always
     ports:
-      - "5000:5000"
+      - "5000:80"
     volumes:
       - ./octoprint:/octoprint
-    devices:
-      - /dev/ttyUSB0:/dev/ttyUSB0
-      - /dev/ttyACM0:/dev/ttyACM0
-      - /dev/video0:/dev/video0
+    devices: [ ]
+##      - /dev/ttyUSB0:/dev/ttyUSB0
+##      - /dev/ttyACM0:/dev/ttyACM0
+#      - /dev/video0:/dev/video0
     environment:
       - TZ=Europe/Berlin
       - ENABLE_MJPG_STREAMER=true
       - CAMERA_DEV=/dev/video0
   spoolman:
-    image: ghcr.io/donkie/spoolman:0.22.1
+    image: ghcr.io/donkie/spoolman:0.23.1
     restart: always
     security_opt:
-
       - seccomp=unconfined  # Add this to allow proper time operations
-    networks:
-      - spoolman
     volumes:
       # Mount the host machine's ./data directory into the container's /home/app/.local/share/spoolman directory
       - type: bind
-        source: ./data # This is where the data will be stored locally. Could also be set to for example `source: /home/pi/printer_data/spoolman`.
+        source: ./spoolman # This is where the data will be stored locally. Could also be set to for example `source: /home/pi/printer_data/spoolman`.
         target: /home/app/.local/share/spoolman # Do NOT modify this line
     ports:
       # Map the host machine's port 7912 to the container's port 8000
