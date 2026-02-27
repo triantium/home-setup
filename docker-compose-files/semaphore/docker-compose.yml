@@ -2,7 +2,7 @@ services:
 
   postgres:
     restart: unless-stopped
-    image: postgres:17.9
+    image: postgres:18.3
     hostname: postgres
     volumes:
       - semaphore-postgres:/var/lib/postgresql/data
