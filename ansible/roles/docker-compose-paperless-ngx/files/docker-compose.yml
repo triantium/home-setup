@@ -48,7 +48,7 @@ services:
       POSTGRES_PASSWORD: paperless
 
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.8
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.9
     restart: unless-stopped
     depends_on:
       - db
