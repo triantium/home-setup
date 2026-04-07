@@ -1,0 +1,20 @@
+# This is just an example! Please see available options to customize Navidrome for your needs at
+
+# https://www.navidrome.org/docs/usage/configuration/options/#available-options
+
+LogLevel = 'INFO'
+Scanner.Schedule = '@every 1h'
+TranscodingCacheSize = '200MiB'
+MusicFolder = './music/Metal'
+BaseUrl = '/navidrome'
+EnableSharing = 'false'
+
+Agents = 'listenbrainz,lastfm,deezer'
+
+LastFM.Enabled = 'true'
+LastFM.ApiKey = '{{lastfm_token_api_key}}'
+LastFM.Secret = '{{lastfm_token_api_shared_secret}}'
+
+Prometheus.Enabled = 'true'
+
+# Prometheus.Password = 'TODO'

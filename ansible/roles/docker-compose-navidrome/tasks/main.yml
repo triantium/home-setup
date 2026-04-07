@@ -1,27 +1,41 @@
-- name: Create a directory for the navidrome service
+- name: Create a directory for the databases
   ansible.builtin.file:
-    path: /opt//navidrome
+    path: "{{ item }}"
     state: directory
+  loop:
+    - "/opt/{{domain}}"
+    - "/opt/{{domain}}/navidrome"
+    - "/opt/{{domain}}/navidrome/data"
+    - "/opt/{{domain}}/navidrome/data/plugins"
+    - "{{data_dir}}/plugins"
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt//navidrome/docker-compose.yml
+    dest: '/opt/{{domain}}/navidrome/docker-compose.yml'
   register: docker_compose_yaml
 
-- name: Start the navidrome service with Docker Compose
-  ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: /opt//navidrome
+- name: Copy Templates to target host
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: "env.j2", dest: "/opt/{{domain}}/navidrome/.env" }
+    - { src: "navidrome.toml", dest: "{{ data_dir }}/navidrome.toml" }
+
+#- name: Start the navidrome service with Docker Compose
+#  ansible.builtin.command:
+#    cmd: docker compose up -d
+#    chdir: ''/opt/{{domain}}/navidrome'
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/monitoring-stack
+    chdir: '/opt/{{domain}}/navidrome'
     cmd: docker compose pull
 
-- name: Restart on change
-  when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
-    cmd: docker compose restart
+#- name: Restart on change
+#  when: docker_compose_yaml.changed
+#  command:
+#    chdir: '/opt/{{domain}}/navidrome'
+#    cmd: docker compose restart

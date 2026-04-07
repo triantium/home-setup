@@ -1,3 +1,4 @@
 roles:
 - geerlingguy.pip
 - geerlingguy.docker
+- arensb.qpkg # Manage QNAP QTS

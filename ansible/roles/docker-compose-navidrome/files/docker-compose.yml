@@ -1,4 +1,3 @@
-version: "3"
 services:
   navidrome:
     image: deluan/navidrome:0.61.1
@@ -7,17 +6,8 @@ services:
       - "4533:4533"
     restart: unless-stopped
     environment:
-      # Optional: put your config options customization here. Examples:
-      ND_SCANSCHEDULE: 1h
-      ND_LOGLEVEL: info
-      ND_SESSIONTIMEOUT: 24h
-      ND_BASEURL: "/navidrome"
-      ND_LASTFM_ENABLED: true
-      ND_LASTFM_APIKEY: "${ND_LASTFM_APIKEY}"
-      ND_LASTFM_SECRET: "${ND_LASTFM_SECRET}"
-      ND_SPOTIFY_ID: "${ND_SPOTIFY_ID}"
-      ND_SPOTIFY_SECRET: "${ND_SPOTIFY_SECRET}"
-      ND_PROMETHEUS_ENABLED: true
+      ND_CONFIGFILE: "/data/navidrome.toml"
+      ND_MUSICFOLDER: "/music/Metal"
     volumes:
-      - "/share/homes/pi/navidrome/data:/data"
-      - "/share/homes/pi/musik:/music:ro"
+      - "${DATA_DIR}:/data"
+      - "${MUSIC_DIR}:/music:ro"

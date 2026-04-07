@@ -1,0 +1,5 @@
+
+
+- hosts: qnap
+  roles:
+    - role: docker-compose-navidrome

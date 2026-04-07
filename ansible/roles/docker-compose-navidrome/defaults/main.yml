@@ -1,2 +1,7 @@
 service_name: navidrome
-uri: navidrome.triantium.de
+domain: 'triantium.ddns.net'
+data_dir: '/share/homes/pi/navidrome/data'
+music_dir: '/share/homes/pi/musik'
+lastfm_token_location: "api/last.fm"
+lastfm_token_api_key: "{{ lookup('community.general.passwordstore', lastfm_token_location, missing='error') }}"
+lastfm_token_api_shared_secret: "{{ lookup('community.general.passwordstore', lastfm_token_location,subkey='shared secret' ,missing='error') }}"
