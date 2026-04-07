@@ -7,7 +7,13 @@ Scanner.Schedule = '@every 1h'
 TranscodingCacheSize = '200MiB'
 MusicFolder = './music/Metal'
 BaseUrl = '/navidrome'
+
+# Sharing
 EnableSharing = 'false'
+DefaultShareExpiration = "8760h"
+
+# Plugins
+Plugins.Enabled = 'true'
 
 Agents = 'listenbrainz,lastfm,deezer'
 

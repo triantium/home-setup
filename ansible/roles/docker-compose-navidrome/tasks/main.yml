@@ -22,20 +22,62 @@
   loop:
     - { src: "env.j2", dest: "/opt/{{domain}}/navidrome/.env" }
     - { src: "navidrome.toml", dest: "{{ data_dir }}/navidrome.toml" }
+  register: templates_copy_result
 
-#- name: Start the navidrome service with Docker Compose
-#  ansible.builtin.command:
-#    cmd: docker compose up -d
-#    chdir: ''/opt/{{domain}}/navidrome'
+- name: Download plugins and verify checksum
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ data_dir }}/plugins/{{ item.dest }}"
+    mode: "0644"
+    owner: "1001"
+    group: "1000"
+    checksum: "{{ item.checksum }}"
+  loop: # // TODO Update with renovate (github releases datasource)
+    - { url: "https://github.com/NeptuneHub/AudioMuse-AI-NV-plugin/releases/download/v7/audiomuseai.ndp",
+        dest: "audiomuseai.ndp" , checksum: "sha256:fab7c283c3eb9df0e107be50fc7344d657c51bc9f4b01041fb2fdc38cbda43f8"}
+    - { url: "https://github.com/kgarner7/navidrome-listenbrainz-daily-playlist/releases/download/v5.0.2/listenbrainz-daily-playlist.ndp",
+        dest: "listenbrainz-daily-playlist.ndp" , checksum: "sha256:3f5941d7c1a3aa383aa766ad9fe3ea41170cd14d63482b465aa9190cd590dcf9" }
+  register: plugins_download_result
 
-- name: Pull on change
+- name: Detect Docker CLI path
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/docker
+    - /usr/local/bin/docker
+    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
+  register: docker_cli_candidates
+
+- name: Set Docker CLI path
+  ansible.builtin.set_fact:
+    docker_cli: >-
+      {{
+        (docker_cli_candidates.results
+          | selectattr('stat.exists', 'equalto', true)
+          | map(attribute='stat.path')
+          | list
+          | first)
+        | default('')
+      }}
+
+- name: Fail if Docker CLI was not found
+  ansible.builtin.fail:
+    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
+  when: docker_cli | length == 0
+
+- name: Pull the Images
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: '/opt/{{domain}}/navidrome'
   when: docker_compose_yaml.changed
+
+- name: Start the navidrome service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: '/opt/{{domain}}/navidrome'
+
+- name: Restart on change
+  # when: docker_compose_yaml.changed or templates_copy_result.changed or plugins_download_result.changed
   command:
     chdir: '/opt/{{domain}}/navidrome'
-    cmd: docker compose pull
-
-#- name: Restart on change
-#  when: docker_compose_yaml.changed
-#  command:
-#    chdir: '/opt/{{domain}}/navidrome'
-#    cmd: docker compose restart
+    cmd: "{{ docker_cli }} compose restart"
