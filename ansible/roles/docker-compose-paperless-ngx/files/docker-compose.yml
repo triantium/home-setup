@@ -38,7 +38,7 @@ services:
       - redisdata:/data
 
   db:
-    image: docker.io/library/postgres:18.3
+    image: docker.io/library/postgres:16.4 # 16.4
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -46,6 +46,42 @@ services:
       POSTGRES_DB: paperless
       POSTGRES_USER: paperless
       POSTGRES_PASSWORD: paperless
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local:18-alpine
+    restart: always
+    # user: postgres:postgres # Optional: see below
+    volumes:
+      - paperless_pgbackups:/backups
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_CLUSTER=true
+      - POSTGRES_DB=paperless
+      - POSTGRES_USER=paperless
+      - POSTGRES_PASSWORD=paperless
+      - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
+      - SCHEDULE=@daily
+      - TZ=Europe/Berlin
+      - BACKUP_ON_START=TRUE
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+#  autorestic:
+#    image: pascaliske/autorestic:latest
+#    restart: always
+#    environment:
+#      - RESTIC_HOST=postgres
+#    volumes:
+#      - ./autorestic/config.yml:/etc/autorestic/config.yml
+#      - ./autorestic/cron:/etc/cron/
+#      - pgbackups:/backups/paperless_pgbackups
+#      - pgdata:/backups/paperless_pgdata
+#      - data:/backups/paperless_data
+#      - media:/backups/paperless_media
+#      - export:/backups/paperless_export
+#    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
 
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
@@ -113,3 +149,4 @@ volumes:
   redisdata:
   export:
   consume:
+  paperless_pgbackups:

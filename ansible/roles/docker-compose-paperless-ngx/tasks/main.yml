@@ -1,27 +1,65 @@
-- name: Create a directory for the paperless-ngx service
+- name: Create a directory for the databases
   ansible.builtin.file:
-    path: /opt//paperless-ngx
+    path: "{{ item }}"
     state: directory
+  loop:
+    - "/opt/{{domain}}"
+    - "/opt/{{domain}}/paperless"
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt//paperless-ngx/docker-compose.yml
+    dest: '/opt/{{domain}}/paperless/docker-compose.yml'
   register: docker_compose_yaml
 
-- name: Start the paperless-ngx service with Docker Compose
+- name: Copy Templates to target host
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: "env.j2", dest: "/opt/{{domain}}/paperless/.env" }
+  register: templates_copy_result
+
+
+- name: Detect Docker CLI path
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/docker
+    - /usr/local/bin/docker
+    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
+  register: docker_cli_candidates
+
+- name: Set Docker CLI path
+  ansible.builtin.set_fact:
+    docker_cli: >-
+      {{
+        (docker_cli_candidates.results
+          | selectattr('stat.exists', 'equalto', true)
+          | map(attribute='stat.path')
+          | list
+          | first)
+        | default('')
+      }}
+
+- name: Fail if Docker CLI was not found
+  ansible.builtin.fail:
+    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
+  when: docker_cli | length == 0
+
+- name: Pull the Images
   ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: /opt//paperless-ngx
-
-- name: Pull on change
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: '/opt/{{domain}}/paperless'
   when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
-    cmd: docker compose pull
 
-- name: Restart on change
-  when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
-    cmd: docker compose restart
+#- name: Start the navidrome service with Docker Compose
+#  ansible.builtin.command:
+#    cmd: "{{ docker_cli }} compose up -d"
+#    chdir: '/opt/{{domain}}/paperless'
+#
+#- name: Restart on change
+#  # when: docker_compose_yaml.changed or templates_copy_result.changed or plugins_download_result.changed
+#  command:
+#    chdir: '/opt/{{domain}}/paperless'
+#    cmd: "{{ docker_cli }} compose restart"
