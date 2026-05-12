@@ -1,0 +1,5 @@
+- hosts: qnap
+  roles:
+    - role: docker-compose-postgres
+    - role: docker-compose-navidrome
+    - role: docker-compose-paperless-ngx
