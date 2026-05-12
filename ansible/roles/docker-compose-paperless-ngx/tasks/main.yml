@@ -5,6 +5,8 @@
   loop:
     - "/opt/{{domain}}"
     - "/opt/{{domain}}/paperless"
+    - "/opt/{{domain}}/paperless/autorestic"
+    - "/opt/{{domain}}/paperless/autorestic/cron"
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
@@ -12,12 +14,18 @@
     dest: '/opt/{{domain}}/paperless/docker-compose.yml'
   register: docker_compose_yaml
 
+- name: Copy cron definition
+  ansible.builtin.copy:
+    src: cron
+    dest: /opt/{{domain}}/paperless/autorestic
+
 - name: Copy Templates to target host
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
   loop:
     - { src: "env.j2", dest: "/opt/{{domain}}/paperless/.env" }
+    - { src: "config.yml.j2", dest: "/opt/{{domain}}/paperless/autorestic/config.yml" }
   register: templates_copy_result
 
 
