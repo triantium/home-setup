@@ -6,7 +6,7 @@ backends:
     key: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' ) }}
     # requireKey: true
 locations:
-  postgres-backups:
+  paperless-backups:
     cron: '17 3 * * *'
     from: /backups
     to:

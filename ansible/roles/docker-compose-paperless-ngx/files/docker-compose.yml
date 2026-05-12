@@ -67,6 +67,7 @@ services:
       - POSTGRES_USER=paperless
       - POSTGRES_PASSWORD=paperless
       - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
+      - BACKUP_ON_START=TRUE
       - SCHEDULE=@daily
       - TZ=Europe/Berlin
       - BACKUP_ON_START=TRUE
@@ -78,7 +79,7 @@ services:
     image: pascaliske/autorestic:latest
     restart: always
     environment:
-      - RESTIC_HOST=postgres
+      - RESTIC_HOST=paperless
     volumes:
       - ./autorestic/config.yml:/etc/autorestic/config.yml
       - ./autorestic/cron:/etc/cron/
