@@ -1,2 +1,17 @@
 service_name: paperless-ngx
-uri: paperless-ngx.triantium.de
+domain: triantium.ddns.net
+paperless_url: https://{{ domain }}
+
+admin_password_location: "services/paperless/{{ domain }}/admin"
+
+paperless_admin_password: "{{ lookup('community.general.passwordstore', admin_password_location, missing='error') }}"
+paperless_admin_user: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='login' ,missing='error') }}"
+paperless_admin_mail: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='email' ,missing='error') }}"
+
+exporter_password_location: "services/paperless/{{ domain }}/exporter"
+
+paperless_exporter_password: "{{ lookup('community.general.passwordstore', exporter_password_location, missing='error') }}"
+paperless_exporter_user: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='login' ,missing='error') }}"
+
+paperless_email_task_cron: '42 1 * * *'
+paperless_ocr_language: 'deu'
