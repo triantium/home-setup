@@ -8,16 +8,14 @@
     - "/opt/{{domain}}/paperless/autorestic"
     - "/opt/{{domain}}/paperless/autorestic/cron"
 
-- name: Copy docker-compose.yml to target host
+- name: Copy static files to target host
   ansible.builtin.copy:
-    src: docker-compose.yml
-    dest: '/opt/{{domain}}/paperless/docker-compose.yml'
-  register: docker_compose_yaml
-
-- name: Copy cron definition
-  ansible.builtin.copy:
-    src: cron
-    dest: /opt/{{domain}}/paperless/autorestic
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: "docker-compose.yml", dest: "/opt/{{domain}}/paperless/docker-compose.yml" }
+    - { src: "cron", dest: "/opt/{{domain}}/paperless/autorestic" }
+  register: static_files_copy_result
 
 - name: Copy Templates to target host
   ansible.builtin.template:
@@ -59,15 +57,15 @@
   ansible.builtin.command:
     cmd: "{{ docker_cli }} compose pull"
     chdir: '/opt/{{domain}}/paperless'
-  when: docker_compose_yaml.changed
+  when: static_files_copy_result.changed
 
-#- name: Start the navidrome service with Docker Compose
-#  ansible.builtin.command:
-#    cmd: "{{ docker_cli }} compose up -d"
-#    chdir: '/opt/{{domain}}/paperless'
-#
-#- name: Restart on change
-#  # when: docker_compose_yaml.changed or templates_copy_result.changed or plugins_download_result.changed
-#  command:
-#    chdir: '/opt/{{domain}}/paperless'
-#    cmd: "{{ docker_cli }} compose restart"
+- name: Start the paperless service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: '/opt/{{domain}}/paperless'
+
+- name: Restart on change
+  when: static_files_copy_result.changed or templates_copy_result.changed
+  command:
+    chdir: '/opt/{{domain}}/paperless'
+    cmd: "{{ docker_cli }} compose restart"
