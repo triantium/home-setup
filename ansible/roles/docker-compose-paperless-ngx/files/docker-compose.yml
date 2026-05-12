@@ -38,14 +38,19 @@ services:
       - redisdata:/data
 
   db:
-    image: docker.io/library/postgres:16.4 # 16.4
+    image: docker.io/library/postgres:18.3 # 16.4
     restart: unless-stopped
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     environment:
       POSTGRES_DB: paperless
       POSTGRES_USER: paperless
       POSTGRES_PASSWORD: paperless
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   pgbackups:
     image: prodrigestivill/postgres-backup-local:18-alpine
     restart: always
@@ -87,10 +92,14 @@ services:
     image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
     restart: unless-stopped
     depends_on:
-      - db
-      - broker
-      - gotenberg
-      - tika
+      db:
+        - condition: service_healthy
+      broker:
+        - condition: service_healthy
+      gotenberg:
+        - condition: service_healthy
+      tika:
+        - condition: service_healthy
     ports:
       - "8085:8000"
     volumes:
