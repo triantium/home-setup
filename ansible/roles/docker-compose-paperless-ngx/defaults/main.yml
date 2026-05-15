@@ -13,5 +13,5 @@ exporter_password_location: "services/paperless/{{ domain }}/exporter"
 paperless_exporter_password: "{{ lookup('community.general.passwordstore', exporter_password_location, missing='error') }}"
 paperless_exporter_user: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='login' ,missing='error') }}"
 
-paperless_email_task_cron: '42 1 * * *'
+paperless_email_task_cron: '31 * * * *'
 paperless_ocr_language: 'deu'
