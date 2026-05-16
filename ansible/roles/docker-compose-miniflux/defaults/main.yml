@@ -1,2 +1,11 @@
 service_name: miniflux
 uri: miniflux.triantium.de
+
+domain: triantium.ddns.net
+miniflux_url: https://{{ domain }}
+
+admin_password_location: "services/miniflux/{{ domain }}/admin"
+
+miniflux_admin_password: "{{ lookup('community.general.passwordstore', admin_password_location, missing='error') }}"
+miniflux_admin_user: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='login' ,missing='error') }}"
+miniflux_admin_mail: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='email' ,missing='error') }}"

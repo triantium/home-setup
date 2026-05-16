@@ -3,3 +3,4 @@
     - role: docker-compose-postgres
     - role: docker-compose-navidrome
     - role: docker-compose-paperless-ngx
+    - role: docker-compose-miniflux
