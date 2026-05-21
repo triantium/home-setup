@@ -5,8 +5,10 @@ domain: triantium.ddns.net
 postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
 postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='error') }}"
 
-semaphore_password_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}"
-semaphore_db_password: "{{ lookup('community.general.passwordstore', semaphore_password_location, missing='create') }}"
-semaphore_admin_user: "{{ lookup('community.general.passwordstore', semaphore_password_location, subkey='login', missing='error') }}"
-semaphore_admin_password: "{{ lookup('community.general.passwordstore', semaphore_password_location, subkey='admin', missing='error') }}"
+semaphore_password_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/admin"
+semaphore_db_password_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/db"
+
+semaphore_db_password: "{{ lookup('community.general.passwordstore', semaphore_db_password_location,  missing='create') }}"
+semaphore_admin_password: "{{ lookup('community.general.passwordstore', semaphore_password_location,  missing='create') }}"
+semaphore_admin_user: "admin"
 semaphore_admin_email: "{{ lookup('community.general.passwordstore', semaphore_password_location, subkey='email', missing='error') }}"

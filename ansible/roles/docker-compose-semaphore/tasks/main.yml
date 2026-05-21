@@ -47,7 +47,7 @@
       {{ docker_cli }} run --rm --network postgres-net
       -e PGPASSWORD={{ postgres_password }}
       postgres:18 psql -h postgres -U postgres
-      -c "CREATE USER IF NOT EXISTS semaphore WITH PASSWORD '{{ semaphore_db_password }}';"
+      -c "CREATE USER semaphore WITH PASSWORD '{{ semaphore_db_password }}';"
       -c "CREATE DATABASE semaphore WITH OWNER semaphore;"
       -c "GRANT ALL PRIVILEGES ON DATABASE semaphore TO semaphore;"
   register: db_init
