@@ -1,0 +1,29 @@
+services:
+  semaphore:
+    image: semaphore-custom:latest
+    restart: unless-stopped
+    ports:
+      - 3001:3000
+    environment:
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: ${SEMAPHORE_DB_PASSWORD}
+      SEMAPHORE_DB_HOST: postgres
+      SEMAPHORE_DB_PORT: 5432
+      SEMAPHORE_DB_DIALECT: postgres
+      SEMAPHORE_DB: semaphore
+      SEMAPHORE_PLAYBOOK_PATH: /tmp/semaphore/
+      SEMAPHORE_ADMIN_PASSWORD: ${SEMAPHORE_ADMIN_PASSWORD}
+      SEMAPHORE_ADMIN_NAME: ${SEMAPHORE_ADMIN_USER}
+      SEMAPHORE_ADMIN_EMAIL: ${SEMAPHORE_ADMIN_EMAIL}
+      SEMAPHORE_ADMIN: ${SEMAPHORE_ADMIN_USER}
+      SEMAPHORE_LDAP_ACTIVATED: 'no'
+      PASSWORD_STORE_DIR: /home/semaphore/.password-store
+    volumes:
+      - {{ semaphore_pass_store_path }}:/home/semaphore/.password-store:ro
+      - {{ semaphore_gpg_dir }}/semaphore-private.key:/etc/semaphore/gpg/semaphore-private.key:ro
+    networks:
+      postgres-net:
+
+networks:
+  postgres-net:
+    external: true
