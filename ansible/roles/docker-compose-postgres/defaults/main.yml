@@ -1,2 +1,8 @@
 service_name: postgres
 uri: postgres.triantium.de
+domain: triantium.ddns.net
+postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
+pgadmin_password_location: "hosts/{{ansible_hostname}}/services/pgadmin/{{ domain }}"
+postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='create') }}"
+pgadmin_password: "{{ lookup('community.general.passwordstore', pgadmin_password_location , missing='create') }}"
+pgadmin_email: "{{ lookup('community.general.passwordstore', pgadmin_password_location ,subkey='email' ,missing='error') }}"

@@ -1,11 +1,11 @@
 - name: Create a directory for the postgres service
   ansible.builtin.file:
-    path: /opt/postgres
+    path: "/opt/{{domain}}/postgres"
     state: directory
 
 - name: Create a directory for the postgres service
   ansible.builtin.file:
-    path: "/opt/postgres/{{item}}"
+    path: "/opt/{{domain}}/postgres/{{item}}"
     state: directory
   loop:
     - pgadmin4
@@ -15,44 +15,75 @@
 - name: Templating Environment
   ansible.builtin.template:
     src: env.j2
-    dest: /opt/postgres/.env
+    dest: "/opt/{{domain}}/postgres/.env"
 
 - name: Template pgAdmin
   ansible.builtin.template:
     src: servers.json.j2
-    dest: /opt/postgres/pgadmin4/servers.json
+    dest: "/opt/{{domain}}/postgres/pgadmin4/servers.json"
 
 - name: Copy cron definition
   ansible.builtin.copy:
     src: cron
-    dest: /opt/postgres/autorestic/
+    dest: "/opt/{{domain}}/postgres/autorestic/"
 
 - name: Template Autorestic Config
   ansible.builtin.template:
     src: config.yml.j2
-    dest: /opt/postgres/autorestic/config.yml
+    dest: "/opt/{{domain}}/postgres/autorestic/config.yml"
 
+- name: Detect Docker CLI path
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/docker
+    - /usr/local/bin/docker
+    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
+  register: docker_cli_candidates
 
+- name: Set Docker CLI path
+  ansible.builtin.set_fact:
+    docker_cli: >-
+      {{
+        (docker_cli_candidates.results
+          | selectattr('stat.exists', 'equalto', true)
+          | map(attribute='stat.path')
+          | list
+          | first)
+        | default('')
+      }}
+
+- name: Fail if Docker CLI was not found
+  ansible.builtin.fail:
+    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
+  when: docker_cli | length == 0
+
+- name: Create external Docker network
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} network create postgres-net"
+  register: network_create
+  changed_when: network_create.rc == 0
+  failed_when: network_create.rc != 0 and 'already exists' not in network_create.stderr
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt/postgres/docker-compose.yml
+    dest: "/opt/{{domain}}/postgres/docker-compose.yml"
   register: docker_compose_yaml
 
 - name: Start the postgres service with Docker Compose
   ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: /opt/postgres
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "/opt/{{domain}}/postgres"
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/postgres
-    cmd: docker compose pull
+    chdir: "/opt/{{domain}}/postgres"
+    cmd: "{{ docker_cli }} compose pull"
 
 - name: Restart on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/postgres
-    cmd: docker compose restart
+    chdir: "/opt/{{domain}}/postgres"
+    cmd: "{{ docker_cli }} compose restart"
