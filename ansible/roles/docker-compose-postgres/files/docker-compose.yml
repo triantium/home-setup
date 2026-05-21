@@ -36,7 +36,7 @@ services:
       postgres-internal:
 
   pgbackups:
-    image: prodrigestivill/postgres-backup-local:17-alpine
+    image: prodrigestivill/postgres-backup-local:18-alpine
     restart: always
     volumes:
       - postgres_pgbackups:/backups

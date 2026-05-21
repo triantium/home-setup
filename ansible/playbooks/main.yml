@@ -2,8 +2,8 @@
   become: yes
   roles:
     - role: docker-compose-traefik
-    - role: docker-compose-semaphore
     - role: docker-compose-postgres
+    - role: docker-compose-semaphore
     - role: docker-compose-portainer-agent
     - role: docker-compose-portainer
     - role: docker-compose-paperless-ngx

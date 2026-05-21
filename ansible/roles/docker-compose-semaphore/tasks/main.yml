@@ -3,6 +3,57 @@
     path: "/opt/{{domain}}/semaphore"
     state: directory
 
+- name: Templating Environment
+  ansible.builtin.template:
+    src: env.j2
+    dest: "/opt/{{domain}}/semaphore/.env"
+
+- name: Detect Docker CLI path
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/docker
+    - /usr/local/bin/docker
+    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
+  register: docker_cli_candidates
+
+- name: Set Docker CLI path
+  ansible.builtin.set_fact:
+    docker_cli: >-
+      {{
+        (docker_cli_candidates.results
+          | selectattr('stat.exists', 'equalto', true)
+          | map(attribute='stat.path')
+          | list
+          | first)
+        | default('')
+      }}
+
+- name: Fail if Docker CLI was not found
+  ansible.builtin.fail:
+    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
+  when: docker_cli | length == 0
+
+- name: Create external Docker network
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} network create postgres-net"
+  register: network_create
+  changed_when: network_create.rc == 0
+  failed_when: network_create.rc != 0 and 'already exists' not in network_create.stderr
+
+- name: Ensure semaphore database and user exist
+  ansible.builtin.shell:
+    cmd: >
+      {{ docker_cli }} run --rm --network postgres-net
+      -e PGPASSWORD={{ postgres_password }}
+      postgres:18 psql -h postgres -U postgres
+      -c "CREATE USER IF NOT EXISTS semaphore WITH PASSWORD '{{ semaphore_db_password }}';"
+      -c "CREATE DATABASE semaphore WITH OWNER semaphore;"
+      -c "GRANT ALL PRIVILEGES ON DATABASE semaphore TO semaphore;"
+  register: db_init
+  failed_when: false
+  changed_when: db_init.rc == 0
+
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
@@ -11,17 +62,17 @@
 
 - name: Start the semaphore service with Docker Compose
   ansible.builtin.command:
-    cmd: docker compose up -d
+    cmd: "{{ docker_cli }} compose up -d"
     chdir: "/opt/{{domain}}/semaphore"
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
     chdir: "/opt/{{domain}}/semaphore"
-    cmd: docker compose pull
+    cmd: "{{ docker_cli }} compose pull"
 
 - name: Restart on change
   when: docker_compose_yaml.changed
   command:
     chdir: "/opt/{{domain}}/semaphore"
-    cmd: docker compose restart
+    cmd: "{{ docker_cli }} compose restart"
