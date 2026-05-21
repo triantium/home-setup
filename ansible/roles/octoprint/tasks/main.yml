@@ -30,7 +30,7 @@
 
 - name: Template Autorestic Config
   ansible.builtin.template:
-    src: config.yml.j2
+    src: "{{ playbook_dir }}/../templates/autorestic/config.yml.j2"
     dest: /opt/octopi/autorestic/config.yml
 
 

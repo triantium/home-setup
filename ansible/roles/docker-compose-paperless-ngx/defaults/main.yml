@@ -15,3 +15,6 @@ paperless_exporter_user: "{{ lookup('community.general.passwordstore', admin_pas
 
 paperless_email_task_cron: '31 * * * *'
 paperless_ocr_language: 'deu'
+
+autorestic_location_name: paperless-backups
+autorestic_cron: '17 3 * * *'

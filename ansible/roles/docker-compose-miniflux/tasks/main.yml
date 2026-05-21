@@ -17,14 +17,17 @@
     - { src: "cron", dest: "/opt/{{domain}}/miniflux/autorestic" }
   register: static_files_copy_result
 
-- name: Copy Templates to target host
+- name: Template Env
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  loop:
-    - { src: "env.j2", dest: "/opt/{{domain}}/miniflux/.env" }
-    - { src: "config.yml.j2", dest: "/opt/{{domain}}/miniflux/autorestic/config.yml" }
-  register: templates_copy_result
+    src: env.j2
+    dest: "/opt/{{domain}}/miniflux/.env"
+  register: env_template
+
+- name: Template Autorestic Config
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/config.yml.j2"
+    dest: "/opt/{{domain}}/miniflux/autorestic/config.yml"
+  register: autorestic_template
 
 
 - name: Detect Docker CLI path
@@ -65,7 +68,7 @@
     chdir: '/opt/{{domain}}/miniflux'
 
 - name: Restart on change
-  when: static_files_copy_result.changed or templates_copy_result.changed
+  when: static_files_copy_result.changed or env_template.changed or autorestic_template.changed
   command:
     chdir: '/opt/{{domain}}/miniflux'
     cmd: "{{ docker_cli }} compose restart"

@@ -1,2 +1,8 @@
 service_name: pihole
 uri: pihole.triantium.de
+
+autorestic_location_name: '{{ ansible_hostname }}-backups'
+autorestic_cron: '* * * * *'
+autorestic_from: /var/lib/docker/volumes
+autorestic_exclude:
+  - restic/**

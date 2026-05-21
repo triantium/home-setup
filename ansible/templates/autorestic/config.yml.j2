@@ -4,14 +4,17 @@ backends:
     type: rest
     path: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' , subkey='location') }}
     key: {{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' ) }}
-    # requireKey: true
 locations:
-  {{ansible-hostname}}-backups:
-    cron: '* * * * *'
-    from: /var/lib/docker/volumes
+  {{ autorestic_location_name }}:
+    cron: '{{ autorestic_cron }}'
+    from: {{ autorestic_from | default('/backups') }}
     to:
       - borgbase
+{% if autorestic_exclude is defined %}
     options:
       backup:
         exclude:
-          - 'restic/**'
+{% for pattern in autorestic_exclude %}
+          - '{{ pattern }}'
+{% endfor %}
+{% endif %}
