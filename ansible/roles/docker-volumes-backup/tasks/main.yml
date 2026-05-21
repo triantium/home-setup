@@ -17,10 +17,15 @@
     dest: /opt/docker-backup/.env
 
 
-- name: Copy cron definition
-  ansible.builtin.copy:
-    src: cron
-    dest: /opt/docker-backup/autorestic/
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/crontab.j2"
+    dest: /opt/docker-backup/autorestic/cron/crontab
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/start_cron.sh"
+    dest: /opt/docker-backup/autorestic/cron/start_cron.sh
 
 - name: Template Autorestic Config
   ansible.builtin.template:

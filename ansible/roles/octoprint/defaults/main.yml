@@ -2,4 +2,6 @@ service_name: octoprint
 uri: octoprint.taila24d4b.ts.net
 
 autorestic_location_name: octopi-backups
-autorestic_cron: '{{ 60 | random(seed=inventory_hostname) }} 3 * * *'
+autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
+autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"
+autorestic_cron: "{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * *"

@@ -22,10 +22,15 @@
     src: servers.json.j2
     dest: "/opt/{{domain}}/postgres/pgadmin4/servers.json"
 
-- name: Copy cron definition
-  ansible.builtin.copy:
-    src: cron
-    dest: "/opt/{{domain}}/postgres/autorestic/"
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/crontab.j2"
+    dest: "/opt/{{domain}}/postgres/autorestic/cron/crontab"
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/start_cron.sh"
+    dest: "/opt/{{domain}}/postgres/autorestic/cron/start_cron.sh"
 
 - name: Template Autorestic Config
   ansible.builtin.template:

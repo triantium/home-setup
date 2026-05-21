@@ -23,10 +23,15 @@
     src: etc/dnsmasq.d/01-pihole.conf
     dest: /opt/pihole/pihole/etc
 
-- name: Copy cron definition
-  ansible.builtin.copy:
-    src: cron
-    dest: /opt/pihole/autorestic/
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/crontab.j2"
+    dest: /opt/pihole/autorestic/cron/crontab
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/start_cron.sh"
+    dest: /opt/pihole/autorestic/cron/start_cron.sh
 
 - name: Template Autorestic Config
   ansible.builtin.template:
