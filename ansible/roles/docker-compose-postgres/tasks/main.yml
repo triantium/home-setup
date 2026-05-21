@@ -9,9 +9,6 @@
     state: directory
   loop:
     - pgadmin4
-    - pgbackups
-    - pgadmin-data
-    - postgres-data
     - autorestic
     - autorestic/cron
 
