@@ -9,19 +9,7 @@
     dest: "/opt/{{domain}}/semaphore/docker-compose.yml"
   register: docker_compose_yaml
 
-- name: Start the semaphore service with Docker Compose
+- name: Start the semaphore service with Docker Compose (build if missing)
   ansible.builtin.command:
-    cmd: "{{ docker_cli }} compose up -d"
+    cmd: "{{ docker_cli }} compose up -d --build"
     chdir: "/opt/{{domain}}/semaphore"
-
-- name: Pull on change
-  when: docker_compose_yaml.changed
-  command:
-    chdir: "/opt/{{domain}}/semaphore"
-    cmd: "{{ docker_cli }} compose pull"
-
-- name: Restart on change
-  when: docker_compose_yaml.changed
-  command:
-    chdir: "/opt/{{domain}}/semaphore"
-    cmd: "{{ docker_cli }} compose restart"

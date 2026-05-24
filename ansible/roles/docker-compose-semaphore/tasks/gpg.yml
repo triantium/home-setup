@@ -113,7 +113,7 @@
   ansible.builtin.copy:
     src: /tmp/semaphore-private.key
     dest: "{{ semaphore_gpg_dir }}/semaphore-private.key"
-    mode: '0400'
+    mode: '0444'
 
 - name: Copy GPG public key to target
   ansible.builtin.copy:
