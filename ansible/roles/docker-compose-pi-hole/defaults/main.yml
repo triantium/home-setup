@@ -1,2 +1,7 @@
 service_name: pi-hole
 uri: pihole.triantium.de
+
+autorestic_location_name: pihole-backups
+autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
+autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"
+autorestic_cron: "{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * *"

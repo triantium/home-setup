@@ -1,0 +1,2 @@
+PATH="/usr/local/bin:/usr/bin:/bin"
+{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * * autorestic -c /etc/autorestic/config.yml --ci cron

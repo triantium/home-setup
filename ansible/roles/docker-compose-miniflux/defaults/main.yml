@@ -9,3 +9,8 @@ admin_password_location: "services/miniflux/{{ domain }}/admin"
 miniflux_admin_password: "{{ lookup('community.general.passwordstore', admin_password_location, missing='error') }}"
 miniflux_admin_user: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='login' ,missing='error') }}"
 miniflux_admin_mail: "{{ lookup('community.general.passwordstore', admin_password_location,subkey='email' ,missing='error') }}"
+
+autorestic_location_name: miniflux-backups
+autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
+autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"
+autorestic_cron: "{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * *"

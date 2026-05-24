@@ -1,2 +1,0 @@
-PATH="/usr/local/bin:/usr/bin:/bin"
-42 */6 * * * autorestic -c /etc/autorestic/config.yml --ci cron

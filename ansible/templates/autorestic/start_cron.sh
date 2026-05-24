@@ -2,7 +2,6 @@
 
 crontab /etc/cron/crontab
 
-# Repo Version 2
 restic self-update
 
 autorestic upgrade

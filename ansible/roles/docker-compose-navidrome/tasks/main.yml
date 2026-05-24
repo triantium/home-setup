@@ -6,6 +6,7 @@
     - "/opt/{{domain}}"
     - "/opt/{{domain}}/navidrome"
     - "/opt/{{domain}}/navidrome/data"
+    - "/opt/{{domain}}/navidrome/backup"
     - "/opt/{{domain}}/navidrome/data/plugins"
     - "{{data_dir}}/plugins"
 

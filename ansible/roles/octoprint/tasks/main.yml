@@ -23,14 +23,19 @@
     src: env.j2
     dest: /opt/octopi/.env
 
-- name: Copy cron definition
-  ansible.builtin.copy:
-    src: cron
-    dest: /opt/octopi/autorestic/
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/crontab.j2"
+    dest: /opt/octopi/autorestic/cron/crontab
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/start_cron.sh"
+    dest: /opt/octopi/autorestic/cron/start_cron.sh
 
 - name: Template Autorestic Config
   ansible.builtin.template:
-    src: config.yml.j2
+    src: "{{ playbook_dir }}/../templates/autorestic/config.yml.j2"
     dest: /opt/octopi/autorestic/config.yml
 
 
