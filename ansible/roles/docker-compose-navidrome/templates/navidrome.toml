@@ -3,10 +3,14 @@
 # https://www.navidrome.org/docs/usage/configuration/options/#available-options
 
 LogLevel = 'INFO'
-Scanner.Schedule = '@every 1h'
 TranscodingCacheSize = '200MiB'
 MusicFolder = './music/Metal'
 BaseUrl = '/navidrome'
+
+# Scanner
+Scanner.Schedule = '@every 3h'
+# Scanner.PurgeMissing = "always"
+Scanner.ScanOnStartup = "false"
 
 # Sharing
 EnableSharing = 'false'
@@ -24,3 +28,8 @@ LastFM.Secret = '{{lastfm_token_api_shared_secret}}'
 Prometheus.Enabled = 'true'
 
 # Prometheus.Password = 'TODO'
+
+[Backup]
+Path = "/backup"
+Count = 7
+Schedule =  "45 0 * * *"

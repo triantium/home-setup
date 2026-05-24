@@ -10,4 +10,5 @@ services:
       ND_MUSICFOLDER: "/music/Metal"
     volumes:
       - "${DATA_DIR}:/data"
+      - "./backup:/backup"
       - "${MUSIC_DIR}:/music:ro"
