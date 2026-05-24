@@ -1,0 +1,64 @@
+- name: Setup semaphore GPG key in local password store
+  delegate_to: localhost
+  run_once: true
+  block:
+    - name: Check if semaphore GPG key exists locally
+      ansible.builtin.command:
+        cmd: gpg --list-keys "{{ semaphore_gpg_key_email }}"
+      register: gpg_key_check
+      failed_when: false
+      changed_when: false
+
+    - name: Generate semaphore GPG key
+      when: gpg_key_check.rc != 0
+      ansible.builtin.command:
+        cmd: >
+          gpg --batch --passphrase '' --quick-gen-key
+          "{{ semaphore_gpg_key_name }} <{{ semaphore_gpg_key_email }}>"
+          RSA@4096 default 0
+
+    - name: Export semaphore GPG private key
+      ansible.builtin.shell:
+        cmd: gpg --batch --armor --export-secret-key "{{ semaphore_gpg_key_email }}" > /tmp/semaphore-private.key
+      changed_when: false
+
+    - name: Get semaphore GPG key ID
+      ansible.builtin.shell:
+        cmd: >
+          gpg --list-keys --with-colons "{{ semaphore_gpg_key_email }}"
+          | awk -F: '/^pub:/ {print $5; exit}'
+      register: gpg_key_id_result
+      changed_when: false
+
+    - name: Set semaphore GPG key ID fact
+      ansible.builtin.set_fact:
+        semaphore_gpg_key_id: "{{ gpg_key_id_result.stdout }}"
+
+    - name: Get current password store GPG recipients
+      ansible.builtin.shell:
+        cmd: cat ~/.password-store/.gpg-id
+      register: current_gpg_ids
+      changed_when: false
+
+    - name: Add semaphore GPG key to password store
+      when: semaphore_gpg_key_id not in current_gpg_ids.stdout_lines
+      ansible.builtin.shell:
+        cmd: pass init $(cat ~/.password-store/.gpg-id) "{{ semaphore_gpg_key_id }}"
+
+    - name: Push password store git changes
+      ansible.builtin.shell:
+        cmd: pass git push
+      changed_when: false
+      failed_when: false
+
+- name: Create semaphore GPG directory on target
+  ansible.builtin.file:
+    path: "{{ semaphore_gpg_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy GPG private key to target
+  ansible.builtin.copy:
+    src: /tmp/semaphore-private.key
+    dest: "{{ semaphore_gpg_dir }}/semaphore-private.key"
+    mode: '0400'

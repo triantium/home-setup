@@ -1,0 +1,27 @@
+- name: Templating Environment
+  ansible.builtin.template:
+    src: env.j2
+    dest: "/opt/{{domain}}/semaphore/.env"
+
+- name: Template docker-compose.yml to target host
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "/opt/{{domain}}/semaphore/docker-compose.yml"
+  register: docker_compose_yaml
+
+- name: Start the semaphore service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "/opt/{{domain}}/semaphore"
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: "/opt/{{domain}}/semaphore"
+    cmd: "{{ docker_cli }} compose pull"
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: "/opt/{{domain}}/semaphore"
+    cmd: "{{ docker_cli }} compose restart"

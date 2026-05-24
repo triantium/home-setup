@@ -15,5 +15,6 @@ semaphore_admin_email: "{{ lookup('community.general.passwordstore', semaphore_p
 
 semaphore_gpg_key_name: "Semaphore Passwordstore Key"
 semaphore_gpg_key_email: "semaphore@{{ uri }}"
+semaphore_pass_store_repo: "git@git.geekinbusiness.de:manuel.mueller.geekadmin/password.git"
 semaphore_pass_store_path: "/opt/{{domain}}/semaphore/.password-store"
 semaphore_gpg_dir: "/opt/{{domain}}/semaphore/gpg"
