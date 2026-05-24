@@ -1,5 +1,7 @@
 - name: Setup semaphore GPG key via password store
-  delegate_to: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: '/usr/bin/python3'
   run_once: true
   block:
     - name: Check if semaphore GPG private key exists in password store
@@ -10,42 +12,54 @@
       changed_when: false
       no_log: true
 
-    - name: Generate and store semaphore GPG key pair
+    - name: Generate semaphore GPG key pair
+      vars:
+        ansible_become: no
       when: pass_gpg_key_check.rc != 0
-      block:
-        - name: Generate semaphore GPG key pair
-          ansible.builtin.command:
-            cmd: >
-              gpg --batch --passphrase '' --quick-gen-key
-              "{{ semaphore_gpg_key_name }} <{{ semaphore_gpg_key_email }}>"
-              RSA@4096 default 0
+      ansible.builtin.command:
+        cmd: >
+          gpg --batch --passphrase '' --quick-gen-key
+          "{{ semaphore_gpg_key_name }} <{{ semaphore_gpg_key_email }}>"
+          rsa4096 default 0
 
-        - name: Store GPG private key in password store
-          ansible.builtin.shell:
-            cmd: >
-              gpg --batch --armor --export-secret-key
-              "{{ semaphore_gpg_key_email }}"
-              | pass insert --multiline "{{ semaphore_gpg_key_private_password_store_location }}"
+    - name: Store GPG private key in password store
+      vars:
+        ansible_become: no
+      when: pass_gpg_key_check.rc != 0
+      ansible.builtin.shell:
+        cmd: >
+          gpg --batch --armor --export-secret-key
+          "{{ semaphore_gpg_key_email }}"
+          | pass insert --multiline "{{ semaphore_gpg_key_private_password_store_location }}"
 
-        - name: Store GPG public key in password store
-          ansible.builtin.shell:
-            cmd: >
-              gpg --batch --armor --export
-              "{{ semaphore_gpg_key_email }}"
-              | pass insert --multiline "{{ semaphore_gpg_key_public_password_store_location }}"
+    - name: Store GPG public key in password store
+      vars:
+        ansible_become: no
+      when: pass_gpg_key_check.rc != 0
+      ansible.builtin.shell:
+        cmd: >
+          gpg --batch --armor --export
+          "{{ semaphore_gpg_key_email }}"
+          | pass insert --multiline "{{ semaphore_gpg_key_public_password_store_location }}"
 
     - name: Retrieve GPG private key from password store
+      vars:
+        ansible_become: no
       ansible.builtin.shell:
         cmd: pass show "{{ semaphore_gpg_key_private_password_store_location }}" > /tmp/semaphore-private.key
       changed_when: false
 
     - name: Retrieve GPG public key from password store
+      vars:
+        ansible_become: no
       ansible.builtin.shell:
         cmd: pass show "{{ semaphore_gpg_key_public_password_store_location }}" > /tmp/semaphore-public.key
       changed_when: false
       ignore_errors: true
 
     - name: Import GPG key into local keychain if not present
+      vars:
+        ansible_become: no
       ansible.builtin.command:
         cmd: gpg --batch --import /tmp/semaphore-private.key
       register: gpg_import_result
@@ -53,6 +67,8 @@
       changed_when: gpg_import_result.rc == 0
 
     - name: Get semaphore GPG key ID
+      vars:
+        ansible_become: no
       ansible.builtin.shell:
         cmd: >
           gpg --list-keys --with-colons "{{ semaphore_gpg_key_email }}"
@@ -65,17 +81,23 @@
         semaphore_gpg_key_id: "{{ gpg_key_id_result.stdout }}"
 
     - name: Get current password store GPG recipients
+      vars:
+        ansible_become: no
       ansible.builtin.shell:
         cmd: cat ~/.password-store/.gpg-id
       register: current_gpg_ids
       changed_when: false
 
     - name: Add semaphore GPG key to password store recipients
+      vars:
+        ansible_become: no
       when: semaphore_gpg_key_id not in current_gpg_ids.stdout_lines
       ansible.builtin.shell:
         cmd: pass init $(cat ~/.password-store/.gpg-id) "{{ semaphore_gpg_key_id }}"
 
     - name: Push password store git changes
+      vars:
+        ansible_become: no
       ansible.builtin.shell:
         cmd: pass git push
       changed_when: false
