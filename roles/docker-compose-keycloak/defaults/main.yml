@@ -1,2 +1,10 @@
 service_name: keycloak
 uri: keycloak.triantium.de
+
+domain: triantium.ddns.net
+
+postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
+postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='error') }}"
+
+keycloak_db_password_location: "hosts/{{ansible_hostname}}/services/keycloak/{{ domain }}/db"
+keycloak_db_password: "{{ lookup('community.general.passwordstore', keycloak_db_password_location, missing='create') }}"

@@ -1,0 +1,19 @@
+- name: Create external Docker network
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} network create postgres-net"
+  register: network_create
+  changed_when: network_create.rc == 0
+  failed_when: network_create.rc != 0 and 'already exists' not in network_create.stderr
+
+- name: Ensure miniflux database and user exist on central postgres
+  ansible.builtin.shell:
+    cmd: >
+      {{ docker_cli }} run --rm --network postgres-net
+      -e PGPASSWORD={{ postgres_password }}
+      postgres:18 psql -h postgres -U postgres
+      -c "CREATE USER miniflux WITH PASSWORD '{{ miniflux_db_password }}';"
+      -c "CREATE DATABASE miniflux WITH OWNER miniflux;"
+      -c "GRANT ALL PRIVILEGES ON DATABASE miniflux TO miniflux;"
+  register: db_init
+  failed_when: false
+  changed_when: db_init.rc == 0

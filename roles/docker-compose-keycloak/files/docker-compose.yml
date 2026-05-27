@@ -2,64 +2,8 @@ version: '3'
 
 volumes:
   keycloak-data:
-  keycloak-db:
-  keycloak_pgbackups:
 
 services:
-  postgres-internal:
-    image: 'postgres:17.10'
-    volumes:
-      - keycloak-db:/var/lib/postgresql/data
-    restart: 'always'
-    # ports:
-    #   - 5432:5432
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
-      POSTGRES_DB: keycloak
-      POSTGRES_HOST: postgres-internal
-
-  pgbackups:
-    image: prodrigestivill/postgres-backup-local:17-alpine
-    restart: always
-    volumes:
-      - keycloak_pgbackups:/backups
-    depends_on:
-      postgres-internal:
-        condition: service_healthy
-    environment:
-      - POSTGRES_HOST=postgres-internal
-      - POSTGRES_CLUSTER=true
-      - POSTGRES_DB=keycloak
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=keycloak
-      - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
-      - BACKUP_ON_START=TRUE
-      - SCHEDULE=@daily
-      - TZ=Europe/Berlin
-      - BACKUP_KEEP_DAYS=7
-      - BACKUP_KEEP_WEEKS=4
-      - BACKUP_KEEP_MONTHS=6
-      - HEALTHCHECK_PORT=8080
-
-  autorestic:
-    image: pascaliske/autorestic:latest
-    restart: always
-    environment:
-      - RESTIC_HOST=keycloak
-    volumes:
-      - ./autorestic/config.yml:/etc/autorestic/config.yml
-      - ./autorestic/cron:/etc/cron/
-      - keycloak-db:/backups/keycloak-db
-      - keycloak_pgbackups:/backups/keycloak_pgbackups
-      - keycloak-data:/backups/keycloak_data
-    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
-
   keycloak:
     image: quay.io/keycloak/keycloak:26.6.2
     ports:
@@ -70,13 +14,13 @@ services:
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
       KC_DB: postgres
-      KC_DB_URL_HOST: postgres-internal
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_PORT: 5432
       KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_HOSTNAME: localhost
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      #KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/server.keystore
     entrypoint:
      - '/opt/keycloak/bin/kc.sh'
      - 'start'
@@ -84,58 +28,10 @@ services:
      - '--https-certificate-key-file=/opt/keycloak/certs/key.pem'
     volumes:
       - ./certs:/opt/keycloak/certs/
-    depends_on:
-      - postgres-internal
-#  openldap:
-#    image: osixia/openldap:1.5.0
-#    container_name: openldap
-#    environment:
-#      LDAP_LOG_LEVEL: "256"
-#      LDAP_ORGANISATION: "Example Inc."
-#      LDAP_DOMAIN: "example.org"
-#      LDAP_BASE_DN: ""
-#      LDAP_ADMIN_PASSWORD: "admin"
-#      LDAP_CONFIG_PASSWORD: "config"
-#      LDAP_READONLY_USER: "false"
-#      #LDAP_READONLY_USER_USERNAME: "readonly"
-#      LDAP_RFC2307BIS_SCHEMA: "false" #gitleaks:allow
-#      LDAP_BACKEND: "mdb"
-#      LDAP_TLS: "true"
-#      LDAP_TLS_CRT_FILENAME: "ldap.crt"
-#      LDAP_TLS_KEY_FILENAME: "ldap.key"
-#      LDAP_TLS_DH_PARAM_FILENAME: "dhparam.pem"
-#      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
-#      LDAP_TLS_ENFORCE: "false"
-#      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
-#      LDAP_TLS_VERIFY_CLIENT: "demand"
-#      LDAP_REPLICATION: "false"
-#      #LDAP_REPLICATION_CONFIG_SYNCPROV: 'binddn="cn=admin,cn=config" bindmethod=simple credentials="$$LDAP_CONFIG_PASSWORD" searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical'
-#      #LDAP_REPLICATION_DB_SYNCPROV: 'binddn="cn=admin,$$LDAP_BASE_DN" bindmethod=simple credentials="$$LDAP_ADMIN_PASSWORD" searchbase="$$LDAP_BASE_DN" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=1 starttls=critical'
-#      #LDAP_REPLICATION_HOSTS: "#PYTHON2BASH:['ldap://ldap.example.org','ldap://ldap2.example.org']"
-#      KEEP_EXISTING_CONFIG: "false"
-#      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
-#      LDAP_SSL_HELPER_PREFIX: "ldap"
-#    tty: true
-#    stdin_open: true
-#    volumes:
-#      - /var/lib/ldap
-#      - /etc/ldap/slapd.d
-#      - /container/service/slapd/assets/certs/
-#    ports:
-#      - "389:389"
-#      - "636:636"
-#    # For replication to work correctly, domainname and hostname must be
-#    # set correctly so that "hostname"."domainname" equates to the
-#    # fully-qualified domain name for the host.
-#    domainname: "example.org"
-#    hostname: "ldap-server"
-#  phpldapadmin:
-#    image: osixia/phpldapadmin:latest
-#    container_name: phpldapadmin
-#    environment:
-#      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
-#      PHPLDAPADMIN_HTTPS: "false"
-#    ports:
-#      - "8081:80"
-#    depends_on:
-#      - openldap
+      - keycloak-data:/opt/keycloak/data
+    networks:
+      postgres-net:
+
+networks:
+  postgres-net:
+    external: true

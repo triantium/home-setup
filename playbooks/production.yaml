@@ -4,6 +4,7 @@
     - role: docker-compose-navidrome
     - role: docker-compose-paperless-ngx
     - role: docker-compose-miniflux
+    - role: docker-compose-gitea
 
 #- hosts: heimdall
 #  tasks:
