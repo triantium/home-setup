@@ -5,6 +5,7 @@
     - role: docker-compose-paperless-ngx
     - role: docker-compose-miniflux
     - role: docker-compose-gitea
+    - role: docker-compose-home-assistant
 
 #- hosts: heimdall
 #  tasks:

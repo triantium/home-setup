@@ -1,13 +1,16 @@
-- name: Create a directory for the databases
+- name: Create directories for the databases
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    owner: "1001"
+    group: "1000"
   loop:
     - "/opt/{{domain}}"
     - "/opt/{{domain}}/navidrome"
     - "/opt/{{domain}}/navidrome/data"
     - "/opt/{{domain}}/navidrome/backup"
     - "/opt/{{domain}}/navidrome/data/plugins"
+    - "{{data_dir}}"
     - "{{data_dir}}/plugins"
 
 - name: Copy docker-compose.yml to target host
@@ -20,6 +23,9 @@
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    mode: "0666"
+    owner: "1001"
+    group: "1000"
   loop:
     - { src: "env.j2", dest: "/opt/{{domain}}/navidrome/.env" }
     - { src: "navidrome.toml", dest: "{{ data_dir }}/navidrome.toml" }
