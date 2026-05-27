@@ -5,16 +5,16 @@
     - role: docker-compose-paperless-ngx
     - role: docker-compose-miniflux
 
-- hosts: heimdall
-  tasks:
-    - command: whoami
-      register: whoami
-    - debug:
-        var: whoami.stdout
-  roles:
-    - role: geerlingguy.pip
-    - role: geerlingguy.docker
-    - role: docker-compose-pi-hole
+#- hosts: heimdall
+#  tasks:
+#    - command: whoami
+#      register: whoami
+#    - debug:
+#        var: whoami.stdout
+#  roles:
+#    - role: geerlingguy.pip
+#    - role: geerlingguy.docker
+#    - role: docker-compose-pi-hole
 
 #- hosts: divera
 #  roles: []
