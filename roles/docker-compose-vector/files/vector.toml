@@ -1,0 +1,14 @@
+data_dir = "/var/lib/vector"
+
+[api]
+enabled = true
+address = "0.0.0.0:8686"
+
+[sources.docker]
+type = "docker_logs"
+
+[sinks.console]
+inputs = ["docker"]
+type = "console"
+target = "stdout"
+encoding.codec = "json"

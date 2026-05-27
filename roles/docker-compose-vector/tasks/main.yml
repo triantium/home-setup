@@ -1,0 +1,59 @@
+- name: Create a directory for the vector service
+  ansible.builtin.file:
+    path: "/opt/{{domain}}/vector"
+    state: directory
+
+- name: Copy vector.toml to target host
+  ansible.builtin.copy:
+    src: vector.toml
+    dest: "/opt/{{domain}}/vector/vector.toml"
+  register: vector_config
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: "/opt/{{domain}}/vector/docker-compose.yml"
+  register: docker_compose_yaml
+
+- name: Detect Docker CLI path
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/docker
+    - /usr/local/bin/docker
+    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
+  register: docker_cli_candidates
+
+- name: Set Docker CLI path
+  ansible.builtin.set_fact:
+    docker_cli: >-
+      {{
+        (docker_cli_candidates.results
+          | selectattr('stat.exists', 'equalto', true)
+          | map(attribute='stat.path')
+          | list
+          | first)
+        | default('')
+      }}
+
+- name: Fail if Docker CLI was not found
+  ansible.builtin.fail:
+    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
+  when: docker_cli | length == 0
+
+- name: Pull the Images
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: "/opt/{{domain}}/vector"
+  when: docker_compose_yaml.changed
+
+- name: Start the vector service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "/opt/{{domain}}/vector"
+
+- name: Restart on change
+  when: docker_compose_yaml.changed or vector_config.changed
+  ansible.builtin.command:
+    chdir: "/opt/{{domain}}/vector"
+    cmd: "{{ docker_cli }} compose restart"

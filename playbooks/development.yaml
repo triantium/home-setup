@@ -10,4 +10,5 @@
     #- role: geerlingguy.docker
     - role: docker-compose-traefik
     - role: docker-compose-keycloak
+    - role: docker-compose-vector
 #    - role: docker-compose-semaphore
