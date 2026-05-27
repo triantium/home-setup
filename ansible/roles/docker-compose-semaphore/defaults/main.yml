@@ -1,5 +1,5 @@
 service_name: semaphore
-uri: semaphore.triantium.de
+uri: triantium.de
 domain: triantium.ddns.net
 
 postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
