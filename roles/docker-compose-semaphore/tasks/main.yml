@@ -7,8 +7,12 @@
 
 - ansible.builtin.import_tasks: password-store.yml
 
+- ansible.builtin.import_tasks: ssh-key.yml
+
 - ansible.builtin.import_tasks: docker.yml
 
 - ansible.builtin.import_tasks: database.yml
 
 - ansible.builtin.import_tasks: deploy.yml
+
+- ansible.builtin.import_tasks: api-key.yml

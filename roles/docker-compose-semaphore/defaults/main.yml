@@ -1,5 +1,5 @@
 service_name: semaphore
-uri: semaphore.triantium.de
+uri: triantium.de
 domain: triantium.ddns.net
 
 postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
@@ -20,3 +20,15 @@ semaphore_gpg_key_public_password_store_location: "hosts/{{ansible_hostname}}/se
 semaphore_pass_store_repo: "git@git.geekinbusiness.de:manuel.mueller.geekadmin/password.git"
 semaphore_pass_store_path: "/opt/{{domain}}/semaphore/.password-store"
 semaphore_gpg_dir: "/opt/{{domain}}/semaphore/gpg"
+
+semaphore_ssh_key_name: "Semaphore SSH Key"
+semaphore_ssh_key_comment: "semaphore@{{ uri }}"
+semaphore_ssh_key_password_store_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/ssh-private-key"
+semaphore_ssh_key_public_password_store_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/ssh-public-key"
+semaphore_ssh_key_dir: "/opt/{{domain}}/semaphore/ssh"
+semaphore_ssh_private_key_path: "/opt/{{domain}}/semaphore/ssh/semaphore-key"
+semaphore_api_url: "http://localhost:3001/api"
+semaphore_project_name: "Home Setup"
+semaphore_repo_name: "Home Setup"
+semaphore_repo_url: "git@github.com:triantium/home-setup.git"
+semaphore_repo_branch: "master"
