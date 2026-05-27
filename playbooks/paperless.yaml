@@ -1,3 +1,0 @@
-- hosts: qnap
-  roles:
-    - role: docker-compose-paperless-ngx

@@ -1,13 +1,20 @@
-#- hosts: heimdall
-#  tasks:
-#    - command: whoami
-#      register: whoami
-#    - debug:
-#        var: whoami.stdout
-#  roles:
-#    - role: geerlingguy.pip
-#    - role: geerlingguy.docker
-#    - role: docker-compose-pi-hole
+- hosts: qnap
+  roles:
+    - role: docker-compose-postgres
+    - role: docker-compose-navidrome
+    - role: docker-compose-paperless-ngx
+    - role: docker-compose-miniflux
+
+- hosts: heimdall
+  tasks:
+    - command: whoami
+      register: whoami
+    - debug:
+        var: whoami.stdout
+  roles:
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker
+    - role: docker-compose-pi-hole
 
 #- hosts: divera
 #  roles: []
@@ -16,9 +23,9 @@
 #    - role: common-setup
 #    - role: divera
 
-- hosts: octoprint
-  roles:
-#    - role: common-setup
-#    - role: geerlingguy.pip
-#    - role: geerlingguy.docker
-    - role: octoprint
+#- hosts: octoprint
+#  roles:
+##    - role: common-setup
+##    - role: geerlingguy.pip
+##    - role: geerlingguy.docker
+#    - role: octoprint
