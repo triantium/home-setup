@@ -1,7 +1,29 @@
-- name: Create a directory for the home-assistant service
+- name: Create directories for the home-assistant service
   ansible.builtin.file:
-    path: "/opt/{{domain}}/home-assistant"
+    path: "{{ item }}"
     state: directory
+  loop:
+    - "/opt/{{domain}}/home-assistant"
+    - "/opt/{{domain}}/home-assistant/autorestic"
+    - "/opt/{{domain}}/home-assistant/autorestic/cron"
+
+- name: Template Autorestic Config
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/config.yml.j2"
+    dest: "/opt/{{domain}}/home-assistant/autorestic/config.yml"
+  register: autorestic_template
+
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/crontab.j2"
+    dest: "/opt/{{domain}}/home-assistant/autorestic/cron/crontab"
+  register: autorestic_crontab_template
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/autorestic/start_cron.sh"
+    dest: "/opt/{{domain}}/home-assistant/autorestic/cron/start_cron.sh"
+  register: autorestic_start_cron_template
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
@@ -9,19 +31,45 @@
     dest: "/opt/{{domain}}/home-assistant/docker-compose.yml"
   register: docker_compose_yaml
 
-- name: Start the home-assistant service with Docker Compose
-  ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: "/opt/{{domain}}/home-assistant"
+- name: Detect Docker CLI path
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/docker
+    - /usr/local/bin/docker
+    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
+  register: docker_cli_candidates
+
+- name: Set Docker CLI path
+  ansible.builtin.set_fact:
+    docker_cli: >-
+      {{
+        (docker_cli_candidates.results
+          | selectattr('stat.exists', 'equalto', true)
+          | map(attribute='stat.path')
+          | list
+          | first)
+        | default('')
+      }}
+
+- name: Fail if Docker CLI was not found
+  ansible.builtin.fail:
+    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
+  when: docker_cli | length == 0
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   ansible.builtin.command:
     chdir: "/opt/{{domain}}/home-assistant"
-    cmd: docker compose pull
+    cmd: "{{ docker_cli }} compose pull"
+
+- name: Start the home-assistant service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "/opt/{{domain}}/home-assistant"
 
 - name: Restart on change
-  when: docker_compose_yaml.changed
+  when: docker_compose_yaml.changed or autorestic_template.changed or autorestic_crontab_template.changed or autorestic_start_cron_template.changed
   ansible.builtin.command:
     chdir: "/opt/{{domain}}/home-assistant"
-    cmd: docker compose restart
+    cmd: "{{ docker_cli }} compose restart"
