@@ -37,7 +37,7 @@ services:
     volumes:
       - redisdata:/data
 
-  db:
+  postgres-internal:
     image: docker.io/library/postgres:18.4 # 16.4
     restart: unless-stopped
     volumes:
@@ -58,10 +58,10 @@ services:
     volumes:
       - paperless_pgbackups:/backups
     depends_on:
-      db:
+      postgres-internal:
         condition: service_healthy
     environment:
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=postgres-internal
       - POSTGRES_CLUSTER=true
       - POSTGRES_DB=paperless
       - POSTGRES_USER=paperless
@@ -93,7 +93,7 @@ services:
     image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
     restart: unless-stopped
     depends_on:
-      db:
+      postgres-internal:
         condition: service_healthy
       broker:
         condition: service_started
@@ -111,7 +111,7 @@ services:
     # env_file: docker-compose.env
     environment:
       PAPERLESS_REDIS: redis://broker:6379
-      PAPERLESS_DBHOST: db
+      PAPERLESS_DBHOST: postgres-internal
       PAPERLESS_FORCE_SCRIPT_NAME: /paperless
       PAPERLESS_URL: ${PAPERLESS_URL}
       PAPERLESS_TIKA_ENABLED: 1

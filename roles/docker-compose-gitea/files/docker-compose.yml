@@ -14,7 +14,7 @@ services:
       - GITEA__server__SSH_PORT=222
       - GITEA__server__LISTEN_PORT=22
       - GITEA__database__DB_TYPE=postgres
-      - GITEA__database__HOST=db:5432
+      - GITEA__database__HOST=postgres-internal:5432
       - GITEA__database__NAME=gitea
       - GITEA__database__USER=gitea
       - GITEA__database__PASSWD=gitea
@@ -36,10 +36,15 @@ services:
       - "3000:3000"
       - "222:22"
     depends_on:
-      - db
-  db:
+      - postgres-internal
+  postgres-internal:
     image: postgres:17.10
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gitea -d gitea" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
         - POSTGRES_USER=gitea
         - POSTGRES_PASSWORD=gitea
@@ -48,7 +53,45 @@ services:
         - gitea
     volumes:
         - gitea-db:/var/lib/postgresql/data
+
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local:17-alpine
+    restart: always
+    volumes:
+      - gitea_pgbackups:/backups
+    depends_on:
+      postgres-internal:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=postgres-internal
+      - POSTGRES_CLUSTER=true
+      - POSTGRES_DB=gitea
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
+      - BACKUP_ON_START=TRUE
+      - SCHEDULE=@daily
+      - TZ=Europe/Berlin
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+
+  autorestic:
+    image: pascaliske/autorestic:latest
+    restart: always
+    environment:
+      - RESTIC_HOST=gitea
+    volumes:
+      - ./autorestic/config.yml:/etc/autorestic/config.yml
+      - ./autorestic/cron:/etc/cron/
+      - gitea-db:/backups/gitea-db
+      - gitea_pgbackups:/backups/gitea_pgbackups
+      - gitea-data:/backups/gitea_data
+    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
+
 volumes:
   gitea-data:
   gitea-db:
+  gitea_pgbackups:
   # TODO Backup

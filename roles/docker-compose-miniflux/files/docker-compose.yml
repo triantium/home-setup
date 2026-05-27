@@ -5,12 +5,12 @@ services:
     ports:
       - "8290:8080"
     depends_on:
-      db:
+      postgres-internal:
         condition: service_healthy
     environment:
       - LOG_LEVEL=info
       - LOG_DATE_TIME=1
-      - DATABASE_URL=postgres://miniflux:secret@db/miniflux?sslmode=disable
+      - DATABASE_URL=postgres://miniflux:secret@postgres-internal/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USER}
@@ -23,7 +23,7 @@ services:
       - POLLING_FREQUENCY=30
       - BATCH_SIZE=50
       - BASE_URL=${MINIFLUX_URL}/miniflux
-  db:
+  postgres-internal:
     image: postgres:18.4
     restart: always
     environment:
@@ -43,10 +43,10 @@ services:
     volumes:
       - miniflux_pgbackups:/backups
     depends_on:
-      db:
+      postgres-internal:
         condition: service_healthy
     environment:
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=postgres-internal
       - POSTGRES_CLUSTER=true
       - POSTGRES_DB=miniflux
       - POSTGRES_USER=miniflux
