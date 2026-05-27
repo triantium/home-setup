@@ -1,27 +1,27 @@
-- name: Create a directory for the home-assistent service
+- name: Create a directory for the home-assistant service
   ansible.builtin.file:
-    path: /opt//home-assistent
+    path: "/opt/{{domain}}/home-assistant"
     state: directory
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt//home-assistent/docker-compose.yml
+    dest: "/opt/{{domain}}/home-assistant/docker-compose.yml"
   register: docker_compose_yaml
 
-- name: Start the home-assistent service with Docker Compose
+- name: Start the home-assistant service with Docker Compose
   ansible.builtin.command:
     cmd: docker compose up -d
-    chdir: /opt//home-assistent
+    chdir: "/opt/{{domain}}/home-assistant"
 
 - name: Pull on change
   when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
+  ansible.builtin.command:
+    chdir: "/opt/{{domain}}/home-assistant"
     cmd: docker compose pull
 
 - name: Restart on change
   when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
+  ansible.builtin.command:
+    chdir: "/opt/{{domain}}/home-assistant"
     cmd: docker compose restart

@@ -1,0 +1,3 @@
+service_name: home-assistant
+uri: home-assistant.triantium.de
+domain: triantium.ddns.net
