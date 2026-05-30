@@ -1,6 +1,6 @@
 services:
   miniflux:
-    image: miniflux/miniflux:2.3.0
+    image: miniflux/miniflux:2.3.1
     restart: always
     ports:
       - "8290:8080"
