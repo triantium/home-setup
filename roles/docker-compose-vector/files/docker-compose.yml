@@ -1,6 +1,6 @@
 services:
   vector:
-    image: timberio/vector:0.55.0-alpine
+    image: timberio/vector:0.56.0-alpine
     container_name: vector
     restart: unless-stopped
     volumes:
