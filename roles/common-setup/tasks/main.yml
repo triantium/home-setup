@@ -1,10 +1,10 @@
-#- name:               Upgrade all repositories
-#  apt:
-#    upgrade:          yes
-#    update_cache:     yes
-#    cache_valid_time: 3600
-#    autoclean:        yes
-#    autoremove:       yes
+- name:               Upgrade all repositories
+  apt:
+    upgrade:          yes
+    update_cache:     yes
+    cache_valid_time: 3600
+    autoclean:        yes
+    autoremove:       yes
 
 - name: Install tools via apt
   apt:

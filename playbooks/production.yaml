@@ -3,23 +3,23 @@
    - divera
   roles:
     - role: common-setup
-#    - role: geerlingguy.pip
-#    - role: geerlingguy.docker
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker
 
-#- hosts: qnap
-#  roles:
-#    - role: docker-compose-postgres
-#    - role: docker-compose-navidrome
-#    - role: docker-compose-paperless-ngx
-#    - role: docker-compose-miniflux
-#    - role: docker-compose-gitea
-#    - role: docker-compose-home-assistant
-#
-#- hosts: heimdall
-#  tasks:
-#    - command: whoami
-#      register: whoami
-#    - debug:
-#        var: whoami.stdout
-#  roles:
-#    - role: docker-compose-pi-hole
+- hosts: qnap
+  roles:
+    - role: docker-compose-postgres
+    - role: docker-compose-navidrome
+    - role: docker-compose-paperless-ngx
+    - role: docker-compose-miniflux
+    - role: docker-compose-gitea
+    - role: docker-compose-home-assistant
+
+- hosts: heimdall
+  tasks:
+    - command: whoami
+      register: whoami
+    - debug:
+        var: whoami.stdout
+  roles:
+    - role: docker-compose-pi-hole
