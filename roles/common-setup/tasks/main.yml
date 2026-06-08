@@ -1,10 +1,10 @@
-- name:               Upgrade all repositories
-  apt:
-    upgrade:          yes
-    update_cache:     yes
-    cache_valid_time: 3600
-    autoclean:        yes
-    autoremove:       yes
+#- name:               Upgrade all repositories
+#  apt:
+#    upgrade:          yes
+#    update_cache:     yes
+#    cache_valid_time: 3600
+#    autoclean:        yes
+#    autoremove:       yes
 
 - name: Install tools via apt
   apt:
@@ -46,6 +46,25 @@
     user: triantium
     state: present
     key: https://github.com/triantium.keys
+- name: Set authorized keys for semaphore deployments
+  ansible.posix.authorized_key:
+    user: triantium
+    state: present
+    key: "{{ semaphore_ssh_key }}"
+- name: Add the user for semaphore
+  ansible.builtin.user:
+    name: semaphore
+    shell: /usr/bin/zsh
+    append: true
+    state: present
+    groups:
+      - docker
+      - wheel
+- name: Set authorized keys for semaphore deployments
+  ansible.posix.authorized_key:
+    user: semaphore
+    state: present
+    key: "{{ semaphore_ssh_key }}"
 
 # // MAYBE chezmoi
 # sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply $GITHUB_USERNAME

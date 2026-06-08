@@ -1,0 +1,2 @@
+semaphore_ssh_key_public_password_store_location: "hosts/nas/services/semaphore/triantium.ddns.net/ssh-public-key"
+semaphore_ssh_key: "{{ lookup('community.general.passwordstore', semaphore_ssh_key_public_password_store_location , missing='error') }}"
