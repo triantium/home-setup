@@ -3,6 +3,11 @@
     path: "/opt/{{domain}}/semaphore"
     state: directory
 
+- name: Create a directory for the semaphore service
+  ansible.builtin.file:
+    path: "/opt/{{domain}}/semaphore/tailscale-state"
+    state: directory
+
 - ansible.builtin.import_tasks: gpg.yml
 
 - ansible.builtin.import_tasks: password-store.yml

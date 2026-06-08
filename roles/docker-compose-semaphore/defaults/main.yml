@@ -2,6 +2,9 @@ service_name: semaphore
 uri: triantium.de
 domain: triantium.ddns.net
 
+tailscale_authkey_location: "token/tailscale.com/auth-key/sempahore"
+tailscale_authkey: "{{ lookup('community.general.passwordstore', tailscale_authkey_location , missing='error') }}"
+
 postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
 postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='error') }}"
 
@@ -32,3 +35,9 @@ semaphore_project_name: "Home Setup"
 semaphore_repo_name: "Home Setup"
 semaphore_repo_url: "git@github.com:triantium/home-setup.git"
 semaphore_repo_branch: "master"
+
+email_settings_location: "accounts/mailbox.org"
+semaphore_email_host: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error', subkey='smtp') | split(':') | first }}"
+semaphore_email_port: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error' , subkey='smtp' ) | split(':') | last }}"
+semaphore_email_username: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error', subkey='login') }}"
+semaphore_email_password: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error') }}"

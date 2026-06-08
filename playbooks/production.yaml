@@ -1,3 +1,11 @@
+- hosts:
+   - pi
+   - divera
+  roles:
+    - role: common-setup
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker
+
 - hosts: qnap
   roles:
     - role: docker-compose-postgres
@@ -7,27 +15,11 @@
     - role: docker-compose-gitea
     - role: docker-compose-home-assistant
 
-#- hosts: heimdall
-#  tasks:
-#    - command: whoami
-#      register: whoami
-#    - debug:
-#        var: whoami.stdout
-#  roles:
-#    - role: geerlingguy.pip
-#    - role: geerlingguy.docker
-#    - role: docker-compose-pi-hole
-
-#- hosts: divera
-#  roles: []
-#    - role: geerlingguy.pip
-#    - role: geerlingguy.docker
-#    - role: common-setup
-#    - role: divera
-
-#- hosts: octoprint
-#  roles:
-##    - role: common-setup
-##    - role: geerlingguy.pip
-##    - role: geerlingguy.docker
-#    - role: octoprint
+- hosts: heimdall
+  tasks:
+    - command: whoami
+      register: whoami
+    - debug:
+        var: whoami.stdout
+  roles:
+    - role: docker-compose-pi-hole

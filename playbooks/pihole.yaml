@@ -1,6 +1,0 @@
-- hosts: heimdall
-  roles:
-    #- role: common-setup
-    #- role: geerlingguy.pip
-    #- role: geerlingguy.docker
-    - role: docker-compose-pi-hole

@@ -1,17 +1,20 @@
 all:
   vars:
     ansible_become: True
-production:
+pi:
   hosts:
-    nas:
-      ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/nas/login') }}"
-      ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/nas/login', subkey='login') }}"
     heimdall:
+      ansible_host: heimdall.taila24d4b.ts.net
       ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/heimdall/login') }}"
       ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/heimdall/login', subkey='login') }}"
-    octopi:
-      ansible_become_password: "{{ lookup('community.general.passwordstore', ' hosts/octopi/login') }}"
-      ansible_user: "{{ lookup('community.general.passwordstore', ' hosts/octopi/login', subkey='login') }}"
+    gloin:
+      ansible_host: gloin.taila24d4b.ts.net
+      ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/gloin/login') }}"
+      ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/gloin/login', subkey='login') }}"
+#    inkycal:
+#      ansible_host: inkycal.taila24d4b.ts.net
+#      ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/inkycal/login') }}"
+#      ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/inkycal/login', subkey='login') }}"
 divera:
   hosts:
     display-02:
@@ -27,8 +30,9 @@ octoprint:
 qnap:
   hosts:
     nas.fritz.box:
+      pass_alias: 'nas'
       ansible_python_interpreter: /opt/QPython312/bin/python3
-      ansible_host: nas.fritz.box
+      ansible_host: nas.taila24d4b.ts.net
       ansible_become: False
       ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/nas/login') }}"
       ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/nas/login', subkey='login') }}"

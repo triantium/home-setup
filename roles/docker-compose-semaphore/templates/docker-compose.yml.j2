@@ -4,6 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    dns:
+      - 100.100.100.100
+      - 192.168.19.1
+      - 192.168.19.2
+      - 9.9.9.9
     healthcheck:
       test: ["CMD-SHELL", "wget -q http://localhost:3000/ -O /dev/null"]
       interval: 30s
@@ -31,7 +36,21 @@ services:
       - {{ semaphore_gpg_dir }}/semaphore-private.key:/etc/semaphore/gpg/semaphore-private.key:ro
     networks:
       postgres-net:
-
+    depends_on:
+      - tailscale
+  tailscale:
+    image: tailscale/tailscale:v1.98.4
+    container_name: tailscale
+    hostname: tailscale-sempahore
+    environment:
+      - TS_AUTHKEY={{ tailscale_authkey }}
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - ./tailscale-state:/var/lib/tailscale
+    cap_add:
+      - net_admin
+      - net_raw
+    restart: unless-stopped
 networks:
   postgres-net:
     external: true
