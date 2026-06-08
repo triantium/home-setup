@@ -8,13 +8,13 @@
 
 - hosts: qnap
   roles:
-    - role: docker-compose-node-exporter
-    - role: docker-compose-postgres
-    - role: docker-compose-navidrome
-    - role: docker-compose-paperless-ngx
-    - role: docker-compose-miniflux
-    - role: docker-compose-gitea
-    - role: docker-compose-home-assistant
+    - role: docker-compose/docker-compose-node-exporter
+    - role: docker-compose/docker-compose-postgres
+    - role: docker-compose/docker-compose-navidrome
+    - role: docker-compose/docker-compose-paperless-ngx
+    - role: docker-compose/docker-compose-miniflux
+    - role: docker-compose/docker-compose-gitea
+    - role: docker-compose/docker-compose-home-assistant
 
 - hosts: heimdall
   roles:
@@ -22,4 +22,4 @@
 
 - hosts: gloin
   roles:
-    - role: docker-compose-monitoring-stack
+    - role: docker-compose/docker-compose-monitoring-stack
