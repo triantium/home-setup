@@ -8,6 +8,7 @@
 
 - hosts: qnap
   roles:
+    - role: docker-compose-node-exporter
     - role: docker-compose-postgres
     - role: docker-compose-navidrome
     - role: docker-compose-paperless-ngx

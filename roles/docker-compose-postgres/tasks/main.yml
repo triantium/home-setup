@@ -37,32 +37,6 @@
     src: "{{ playbook_dir }}/../templates/autorestic/config.yml.j2"
     dest: "/opt/{{domain}}/postgres/autorestic/config.yml"
 
-- name: Detect Docker CLI path
-  ansible.builtin.stat:
-    path: "{{ item }}"
-  loop:
-    - /usr/bin/docker
-    - /usr/local/bin/docker
-    - /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
-  register: docker_cli_candidates
-
-- name: Set Docker CLI path
-  ansible.builtin.set_fact:
-    docker_cli: >-
-      {{
-        (docker_cli_candidates.results
-          | selectattr('stat.exists', 'equalto', true)
-          | map(attribute='stat.path')
-          | list
-          | first)
-        | default('')
-      }}
-
-- name: Fail if Docker CLI was not found
-  ansible.builtin.fail:
-    msg: "Docker CLI not found on the target host. Expected it in /usr/bin/docker or /usr/local/bin/docker."
-  when: docker_cli | length == 0
-
 - name: Create external Docker network
   ansible.builtin.command:
     cmd: "{{ docker_cli }} network create postgres-net"

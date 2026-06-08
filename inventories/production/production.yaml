@@ -1,6 +1,7 @@
 all:
   vars:
     ansible_become: True
+    docker_cli: /usr/bin/docker
 pi:
   hosts:
     heimdall:
@@ -34,5 +35,6 @@ qnap:
       ansible_python_interpreter: /opt/QPython312/bin/python3
       ansible_host: nas.taila24d4b.ts.net
       ansible_become: False
+      docker_cli: /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
       ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/nas/login') }}"
       ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/nas/login', subkey='login') }}"
