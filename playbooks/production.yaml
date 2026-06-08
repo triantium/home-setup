@@ -8,19 +8,18 @@
 
 - hosts: qnap
   roles:
-    - role: docker-compose-node-exporter
-    - role: docker-compose-postgres
-    - role: docker-compose-navidrome
-    - role: docker-compose-paperless-ngx
-    - role: docker-compose-miniflux
-    - role: docker-compose-gitea
-    - role: docker-compose-home-assistant
+    - role: docker-compose/node-exporter
+    - role: docker-compose/postgres
+    - role: docker-compose/navidrome
+    - role: docker-compose/paperless-ngx
+    - role: docker-compose/miniflux
+    - role: docker-compose/gitea
+    - role: docker-compose/home-assistant
 
 - hosts: heimdall
-  tasks:
-    - command: whoami
-      register: whoami
-    - debug:
-        var: whoami.stdout
   roles:
-    - role: docker-compose-pi-hole
+    - role: docker-compose/pi-hole
+
+- hosts: gloin
+  roles:
+    - role: docker-compose/monitoring-stack

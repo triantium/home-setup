@@ -8,6 +8,4 @@
     #- role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
-    - role: docker-compose-keycloak
-    - role: docker-compose-vector
-#    - role: docker-compose-semaphore
+    - role: docker-compose/monitoring-stack
