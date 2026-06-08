@@ -1,0 +1,188 @@
+modules:
+  default:
+    metrics:
+      # Airtime metrics
+      - name: airtime_channel_utilization
+        path: '{.data.airtime.channel_utilization}'
+        help: Channel utilization value
+
+      - name: airtime_periods_to_log
+        path: '{.data.airtime.periods_to_log}'
+        help: Number of periods to log
+
+      - name: airtime_rx_all_log_0
+        path: '{.data.airtime.rx_all_log[0]}'
+        help: RX all log value index 0
+
+      - name: airtime_rx_all_log_1
+        path: '{.data.airtime.rx_all_log[1]}'
+        help: RX all log value index 1
+
+      - name: airtime_rx_all_log_2
+        path: '{.data.airtime.rx_all_log[2]}'
+        help: RX all log value index 2
+
+      - name: airtime_rx_all_log_3
+        path: '{.data.airtime.rx_all_log[3]}'
+        help: RX all log value index 3
+
+      - name: airtime_rx_all_log_4
+        path: '{.data.airtime.rx_all_log[4]}'
+        help: RX all log value index 4
+
+      - name: airtime_rx_all_log_5
+        path: '{.data.airtime.rx_all_log[5]}'
+        help: RX all log value index 5
+
+      - name: airtime_rx_all_log_6
+        path: '{.data.airtime.rx_all_log[6]}'
+        help: RX all log value index 6
+
+      - name: airtime_rx_all_log_7
+        path: '{.data.airtime.rx_all_log[7]}'
+        help: RX all log value index 7
+
+      - name: airtime_rx_log_0
+        path: '{.data.airtime.rx_log[0]}'
+        help: RX log value index 0
+
+      - name: airtime_rx_log_1
+        path: '{.data.airtime.rx_log[1]}'
+        help: RX log value index 1
+
+      - name: airtime_rx_log_2
+        path: '{.data.airtime.rx_log[2]}'
+        help: RX log value index 2
+
+      - name: airtime_rx_log_3
+        path: '{.data.airtime.rx_log[3]}'
+        help: RX log value index 3
+
+      - name: airtime_rx_log_4
+        path: '{.data.airtime.rx_log[4]}'
+        help: RX log value index 4
+
+      - name: airtime_rx_log_5
+        path: '{.data.airtime.rx_log[5]}'
+        help: RX log value index 5
+
+      - name: airtime_rx_log_6
+        path: '{.data.airtime.rx_log[6]}'
+        help: RX log value index 6
+
+      - name: airtime_rx_log_7
+        path: '{.data.airtime.rx_log[7]}'
+        help: RX log value index 7
+
+      - name: airtime_seconds_per_period
+        path: '{.data.airtime.seconds_per_period}'
+        help: Seconds per period
+
+      - name: airtime_seconds_since_boot
+        path: '{.data.airtime.seconds_since_boot}'
+        help: Seconds since boot
+
+      - name: airtime_tx_log_0
+        path: '{.data.airtime.tx_log[0]}'
+        help: TX log value index 0
+
+      - name: airtime_tx_log_1
+        path: '{.data.airtime.tx_log[1]}'
+        help: TX log value index 1
+
+      - name: airtime_tx_log_2
+        path: '{.data.airtime.tx_log[2]}'
+        help: TX log value index 2
+
+      - name: airtime_tx_log_3
+        path: '{.data.airtime.tx_log[3]}'
+        help: TX log value index 3
+
+      - name: airtime_tx_log_4
+        path: '{.data.airtime.tx_log[4]}'
+        help: TX log value index 4
+
+      - name: airtime_tx_log_5
+        path: '{.data.airtime.tx_log[5]}'
+        help: TX log value index 5
+
+      - name: airtime_tx_log_6
+        path: '{.data.airtime.tx_log[6]}'
+        help: TX log value index 6
+
+      - name: airtime_tx_log_7
+        path: '{.data.airtime.tx_log[7]}'
+        help: TX log value index 7
+
+      - name: airtime_utilization_tx
+        path: '{.data.airtime.utilization_tx}'
+        help: TX utilization
+
+      # Device metrics
+      - name: device_reboot_counter
+        path: '{.data.device.reboot_counter}'
+        help: Device reboot counter
+
+      # Memory metrics
+      - name: memory_fs_free
+        path: '{.data.memory.fs_free}'
+        help: Filesystem free space
+
+      - name: memory_fs_total
+        path: '{.data.memory.fs_total}'
+        help: Filesystem total space
+
+      - name: memory_fs_used
+        path: '{.data.memory.fs_used}'
+        help: Filesystem used space
+
+      - name: memory_heap_free
+        path: '{.data.memory.heap_free}'
+        help: Heap free memory
+
+      - name: memory_heap_total
+        path: '{.data.memory.heap_total}'
+        help: Heap total memory
+
+      - name: memory_psram_free
+        path: '{.data.memory.psram_free}'
+        help: PSRAM free memory
+
+      - name: memory_psram_total
+        path: '{.data.memory.psram_total}'
+        help: PSRAM total memory
+
+      # Power metrics
+      - name: power_battery_percent
+        path: '{.data.power.battery_percent}'
+        help: Battery percentage
+
+      - name: power_battery_voltage_mv
+        path: '{.data.power.battery_voltage_mv}'
+        help: Battery voltage in millivolts
+
+      - name: power_has_battery
+        path: '{.data.power.has_battery}'
+        help: Whether device has a battery
+
+      - name: power_has_usb
+        path: '{.data.power.has_usb}'
+        help: Whether device has USB connected
+
+      - name: power_is_charging
+        path: '{.data.power.is_charging}'
+        help: Whether device is charging
+
+      # Radio metrics
+      - name: radio_frequency
+        path: '{.data.radio.frequency}'
+        help: Radio frequency
+
+      - name: radio_lora_channel
+        path: '{.data.radio.lora_channel}'
+        help: LoRa channel
+
+      # WiFi metrics
+      - name: wifi_rssi
+        path: '{.data.wifi.rssi}'
+        help: WiFi RSSI value

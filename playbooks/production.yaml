@@ -17,10 +17,9 @@
     - role: docker-compose-home-assistant
 
 - hosts: heimdall
-  tasks:
-    - command: whoami
-      register: whoami
-    - debug:
-        var: whoami.stdout
   roles:
     - role: docker-compose-pi-hole
+
+- hosts: gloin
+  roles:
+    - role: docker-compose-monitoring-stack

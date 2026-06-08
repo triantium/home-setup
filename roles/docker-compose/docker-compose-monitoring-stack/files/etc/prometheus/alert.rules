@@ -1,0 +1,83 @@
+groups:
+- name: example
+  rules:
+  - alert: site_down
+    expr: probe_success < 1
+    for: 30m
+    labels:
+      severity: page
+    annotations:
+      summary: "Site Down: {{$labels.instance}}"
+      description: "Site Down: {{$labels.instance}} for more than 30 seconds"
+- name: restic
+  rules:
+  - alert: ResticCheckFailed
+    expr: restic_check_success == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: Restic check failed (instance {{ $labels.instance }})
+      description: Restic check failed\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}
+
+  - alert: ResticOutdatedBackup
+    # 1209600 = 15 days
+    expr: time() - restic_backup_timestamp > 1209600
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: Restic {{ $labels.client_hostname }} / {{ $labels.client_username }} backup is outdated
+      description: Restic backup is outdated\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}
+- name: octoprint
+  rules:
+  - alert: OctoprintPrintingTempoeratur
+    expr: (abs(octoprint_temperatures_target - octoprint_temperatures_actual )) * (clamp_max(octoprint_temperatures_target,1)) > 5
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: Restic check failed (instance {{ $labels.instance }})
+      description: Restic check failed\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}
+- name: usp
+  rules:
+  - alert: USP Load High
+    expr: network_ups_tools_ups_load > 50
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: USP Load High on instance {{ $labels.instance }}
+      description: USP Load High on instance {{ $value }} {{ $labels }}
+  - alert: USP Load High
+    expr: network_ups_tools_ups_load > 75
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+       summary: USP Load High on instance {{ $labels.instance }}
+       description: USP Load High on instance {{ $value }} {{ $labels }}
+  - alert: USP Load Too High to allow for an Save shutdown
+    expr: network_ups_tools_ups_load > 90
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: USP way to high Load High on instance {{ $labels.instance }}
+      description: USP Load High on instance {{ $value }} {{ $labels }}
+  - alert: USP Battery needs replacing
+    expr: network_ups_tools_ups_status{flag='RB'} == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: USP Battery needs replacing {{ $labels.instance }}
+      description: USP Battery needs replacing {{ $value }} {{ $labels }}
+  - alert: USP is disconected from Main
+    expr: network_ups_tools_ups_status{flag='OB'} == 1
+    for: 10s
+    labels:
+      severity: critical
+    annotations:
+      summary: USP is disconected from Main {{ $labels.instance }}
+      description: USP is disconected from Main{{ $value }} {{ $labels }}

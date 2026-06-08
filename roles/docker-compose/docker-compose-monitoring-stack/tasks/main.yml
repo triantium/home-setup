@@ -1,0 +1,55 @@
+- name: Create workdirs
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+  loop:
+    - path: /opt/monitoring-stack
+    - path: /opt/monitoring-stack/etc
+    - path: /opt/monitoring-stack/var/lib/grafana
+      owner: 472
+      group: 472
+
+- name: Copy static stack files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: docker-compose.yaml
+      dest: /opt/monitoring-stack/
+    - src: etc/
+      dest: /opt/monitoring-stack/etc/
+    - src: dashboards/
+      dest: /opt/monitoring-stack/dashboards/
+  register: stack_files
+
+- name: Template config files with secrets
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: etc/prometheus/prometheus.yml.j2
+      dest: /opt/monitoring-stack/etc/prometheus/prometheus.yml
+    - src: etc/prometheus/alertmanager.yml.j2
+      dest: /opt/monitoring-stack/etc/prometheus/alertmanager.yml
+    - src: etc/blackbox/blackbox.yml.j2
+      dest: /opt/monitoring-stack/etc/blackbox/blackbox.yml
+  register: templated_files
+
+- name: Create and Start Stack
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: "{{ docker_cli }} compose up -d"
+
+- name: Pull on change
+  when: stack_files.changed or templated_files.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: "{{ docker_cli }} compose pull"
+
+- name: Restart on change
+  when: stack_files.changed or templated_files.changed
+  command:
+    chdir: /opt/monitoring-stack
+    cmd: "{{ docker_cli }} compose restart"

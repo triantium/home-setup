@@ -1,0 +1,61 @@
+networks:
+  loki:
+services:
+  prometheus:
+    image:        prom/prometheus
+    #pull_policy: always
+    volumes:
+      - ./etc/prometheus:/etc/prometheus
+      - ./data/prometheus:/data
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data'
+    ports:
+      - 9999:9090
+    restart:      always
+#    networks:
+#      - promnet
+
+  alertmanager:
+    image:        prom/alertmanager
+    #pull_policy: always
+    depends_on:
+      - prometheus
+    volumes:
+      - ./etc/prometheus:/etc/prometheus
+      - ./data/alertmanager:/data
+    command:
+      - '--config.file=/etc/prometheus/alertmanager.yml'
+      - '--storage.path=/data'
+    restart:      always
+    ports:
+      - 9093:9093
+  grafana:
+    ports:
+      - "3333:3000"
+    depends_on:
+      - prometheus
+    volumes:
+        - "./etc/grafana:/etc/grafana"
+        - "./var/lib/grafana:/var/lib/grafana"
+        - "./dashboards:/var/lib/grafana/dashboards"
+        - "./var/log/grafana:/var/log/grafana"
+    restart:      always
+    image:        grafana/grafana
+
+  blackbox:
+    image:        prom/blackbox-exporter:master
+    #pull_policy: always
+    volumes:
+      - ./etc/blackbox:/etc/blackbox
+    command:
+      - '--config.file=/etc/blackbox/blackbox.yml'
+    ports:
+      - 9115:9115
+    restart:      always
+  json-exporter:
+    image: quay.io/prometheuscommunity/json-exporter
+    volumes:
+      - ./etc/json_exporter/config.yml:/config.yml
+    command:
+      - '--config.file=/config.yml'
