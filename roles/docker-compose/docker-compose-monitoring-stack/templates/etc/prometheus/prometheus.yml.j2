@@ -1,0 +1,289 @@
+# my global config
+global:
+  scrape_interval:     120s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 360s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+# Alertmanager configuration
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  - 'alert.rules'
+  # - "first.rules"
+  # - "second.rules"
+
+# alert
+alerting:
+  alertmanagers:
+  - scheme:            http
+    static_configs:
+    - targets:
+      - "alertmanager:9093"
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name:          'prometheus'
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+    - targets:         ['localhost:9090']
+  - job_name:          'tmp-nodes'
+    scrape_interval: 20s
+    static_configs:
+    - targets:
+      - 'dori.fritz.box:9100'
+      - 'jormundgar.fritz.box:9100'
+      - 'berserker.fritz.box:9100'
+      - 'octopi.fritz.box:9100'
+  - job_name: 'fw-nodes'
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+          - 'display-02.taila24d4b.ts.net:9100'
+  - job_name:          'perm-nodes'
+    scrape_interval: 10s
+    static_configs:
+    - targets:
+      - 'gloin.fritz.box:9100'
+      - 'inkycal.fritz.box:9100'
+      - 'nas.fritz.box:9100'
+      - 'heimdall.fritz.box:9100'
+      - 'display-02.taila24d4b.ts.net:9100'
+  - job_name: 'tmp-windows'
+    scrape_interval: 45s
+    static_configs:
+      - targets:
+          - 'odin.fritz.box:9182'
+  - job_name:          'fritzbox'
+    scrape_interval:   120s
+    static_configs:
+    - targets:
+       - 'gloin.fritz.box:9042'
+  - job_name: 'jellyfin'
+    metrics_path:      '/jellyfin/metrics'
+    scrape_interval: 120s
+    static_configs:
+      - targets:
+          - 'nas.fritz.box:8096'
+  - job_name:          'navidrome'
+    scheme:            'https'
+    #basic_auth:
+    #    username:     'admin'
+    #    password:     'xxx'
+    metrics_path:      '/navidrome/metrics'
+    static_configs:
+    - targets:         ['triantium.ddns.net']
+      labels:
+        app:           'navidrome'
+  - job_name:          'miniflux'
+    scheme:            'https'
+    #basic_auth:
+    #    username:     'admin'
+    #    password:     'xxx'
+    metrics_path:      '/miniflux/metrics'
+    static_configs:
+    - targets:         ['triantium.ddns.net']
+      labels:
+        app:           'miniflux'
+  - job_name:          'grafana'
+    scheme:            'http'
+    metrics_path:      '/metrics'
+    static_configs:
+    - targets:         ['grafana:3000']
+      labels:
+        app:           'grafana'
+  - job_name:          'influxdb'
+    scheme:            'http'
+    metrics_path:      '/metrics'
+    static_configs:
+    - targets:         ['nas.fritz.box:8086']
+      labels:
+        app:           'influxdb'
+  - job_name: 'paperless'
+    scheme: 'http'
+    metrics_path: '/metrics'
+    scrape_interval: 360s
+    static_configs:
+      - targets: [ 'nas.fritz.box:8084' ]
+        labels:
+          app: 'paperless'
+  - job_name: 'mosquitto'
+    scheme: 'http'
+    metrics_path: '/metrics'
+    scrape_interval: 50s
+    static_configs:
+      - targets: [ 'nas.fritz.box:9234' ]
+        labels:
+          app: 'mosquitto'
+  - job_name:          'gitea'
+    scheme:            'https'
+    metrics_path:      '/metrics'
+    static_configs:
+    - targets:         ['git.geekinbusiness.de']
+      labels:
+        app:           'gitea'
+  - job_name:          'alertmanager'
+    scheme:            'http'
+    metrics_path:      '/metrics'
+    static_configs:
+    - targets:         ['alertmanager:9093']
+      labels:
+        app:           'alertmanager'
+  # - job_name:        'fritzbox_exporter'
+  #   scrape_interval: 2m
+  #   scheme:          'http'
+  #   metrics_path:    '/metrics'
+  #   static_configs:
+  #   - targets:       ['dori.fritz.box:9998']
+  #     labels:
+  #       app:         'alertmanager'
+  - job_name: 'spoolman'
+    scrape_interval: 30s
+    metrics_path: 'metrics'
+    static_configs:
+      - targets: [ 'octopi.fritz.box:7912' ]
+  - job_name:          'blackbox'
+    metrics_path:      /probe
+    params:
+      module:          [http_2xx]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        - https://triantium.ddns.net
+        - https://triantium.ddns.net/miniflux/
+        - https://triantium.ddns.net/navidrome/app
+        - https://geekinbusiness.de
+        - https://git.geekinbusiness.de
+        - https://owncloud.geekinbusiness.de
+        - https://nexus.geekinbusiness.de
+        - https://jenkins.geekinbusiness.de/login
+        - https://geekinbusiness.de:10000
+        - https://mail.geekinbusiness.de:20000
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label:  __param_target
+      - source_labels: [__param_target]
+        target_label:  instance
+      - target_label:  __address__
+        replacement:   blackbox:9115
+  - job_name:          'tls-blackbox'
+    metrics_path:      /probe
+    params:
+      module:          [tcp_connect_tls]
+    static_configs:
+      - targets:
+        - imap.geekinbusiness.de:993
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label:  __param_target
+      - source_labels: [__param_target]
+        target_label:  instance
+      - target_label:  __address__
+        replacement:   blackbox:9115
+#  - job_name:          'imap-blackbox'
+#    metrics_path:      /probe
+#    params:
+#      module:          [imap_starttls]
+#    static_configs:
+#      - targets:
+#        - imap.fablab-donautal.de:143
+#    relabel_configs:
+#      - source_labels: [__address__]
+#        target_label:  __param_target
+#      - source_labels: [__param_target]
+#        target_label:  instance
+#      - target_label:  __address__
+#        replacement:   blackbox:9115 - job_name:          'imap-blackbox'
+#    metrics_path:      /probe
+#    params:
+#      module:          [imap_starttls]
+#    static_configs:
+#      - targets:
+#        - imap.fablab-donautal.de:143
+#    relabel_configs:
+#      - source_labels: [__address__]
+#        target_label:  __param_target
+#      - source_labels: [__param_target]
+#        target_label:  instance
+#      - target_label:  __address__
+#        replacement:   blackbox:9115
+  - job_name:          'smtp-blackbox'
+    metrics_path:      /probe
+    params:
+      module:          [smtp_starttls]
+    static_configs:
+      - targets:
+        - smtp.geekinbusiness.de:587
+        #- smtp.fablab-donautal.de:587
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label:  __param_target
+      - source_labels: [__param_target]
+        target_label:  instance
+      - target_label:  __address__
+        replacement:   blackbox:9115
+  - job_name:          'ssh-blackbox'
+    metrics_path:      /probe
+    params:
+      module:          [ssh_banner]
+    static_configs:
+      - targets:
+        #- triantium.ddns.net:22
+        - geekinbusiness.de:22
+        - 195.201.242.34:22
+        - 138.201.17.10:22
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label:  __param_target
+      - source_labels: [__param_target]
+        target_label:  instance
+      - target_label:  __address__
+        replacement:   blackbox:9115
+  - job_name:          'blackbox-external'
+    metrics_path:      /probe
+    params:
+      module:          [http_2xx]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        - https://github.com/
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label:  __param_target
+      - source_labels: [__param_target]
+        target_label:  instance
+      - target_label:  __address__
+        replacement:   blackbox:9115
+  - job_name: nut-primary
+    metrics_path: /ups_metrics
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['gloin.fritz.box:9199']
+        labels:
+          ups:  "eaton"
+  - job_name: nut-generic
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['gloin.fritz.box:9199']
+  ## gather the metrics of json_exporter application itself
+  - job_name: json_exporter
+    # scrape_interval:   30s
+    static_configs:
+      - targets:
+          ## Location of the json exporter's real <hostname>:<port>
+          - json-exporter:7979 # equivalent to "localhost:7979"
+
+    ## gather the metrics from third party json sources, via the json exporter
+  - job_name: json
+    metrics_path: /probe
+    scrape_interval:   30s
+    params:
+      module: [ default ]
+    static_configs:
+      - targets:
+          - http://meshtastic.fritz.box/json/report
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        target_label: __param_target
+      - source_labels: [ __param_target ]
+        target_label: instance
+      - target_label: __address__
+        ## Location of the json exporter's real <hostname>:<port>
+        replacement: json-exporter:7979 # equivalent to "localhost:7979"
