@@ -1,4 +1,4 @@
-- hosts: v2202210185501204536.quicksrv.de
+- hosts: gloin
   tasks:
     - command: whoami
       register: whoami
@@ -8,7 +8,6 @@
     #- role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
-    - role: docker-compose-traefik
     - role: docker-compose-keycloak
     - role: docker-compose-vector
 #    - role: docker-compose-semaphore
