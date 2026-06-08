@@ -51,7 +51,7 @@ ansible-playbook playbooks/production.yaml
 ├── roles/                       # Ansible roles
 │   ├── common-setup/            #   Base server provisioning
 │   ├── docker-setup/            #   Docker engine installation
-│   ├── docker-compose-*/        #   Service-specific Docker Compose deployments
+│   ├── docker-compose/          #   Service-specific Docker Compose directories
 │   ├── docker-volumes-backup/   #   restic/autorestic backup of Docker volumes
 │   ├── divera/                  #   Divera 247 emergency alert monitor
 │   └── octoprint/               #   OctoPrint 3D printer management
@@ -85,30 +85,30 @@ Host credentials and become passwords are stored in `pass` and looked up via the
 
 ### Docker Compose Services
 
-Each `docker-compose-*` role deploys a Docker Compose stack under `/opt/<domain>/<service>/`
+Each role under `docker-compose/` deploys a Docker Compose stack under `/opt/<domain>/<service>/`
 (or `/opt/<service>/` for standalone services). All include a `docker-compose.yml` and
 `.env` template with secrets sourced from the password store.
 
 | Role | Service | Description |
 |------|---------|-------------|
-| **docker-compose-postgres** | PostgreSQL + pgAdmin | Central database server on shared `postgres-net` network. Other services connect to this for their database backend. Includes autorestic backups. |
-| **docker-compose-traefik** | Traefik + whoami | Reverse proxy with Let's Encrypt ACME TLS certificates. |
-| **docker-compose-gitea** | Gitea | Git service with PostgreSQL backend on central Postgres. Includes DB initialization and autorestic backups. |
-| **docker-compose-keycloak** | Keycloak | Identity and access management with central PostgreSQL, SSL certificate mounts, health/metrics endpoints. |
-| **docker-compose-home-assistant** | Home Assistant | Home automation platform using host networking for Bluetooth/Zigbee. |
-| **docker-compose-pi-hole** | Pi-hole + Unbound | DNS ad-blocker with recursive DNS resolver and Prometheus exporter. Configured via API (session auth, gravity updates). |
-| **docker-compose-paperless-ngx** | Paperless-ngx | Document management with Redis, Tika/Gotenberg document processing, internal PostgreSQL, Prometheus exporter, autorestic backups. |
-| **docker-compose-jellyfin** | Jellyfin | Media server. |
-| **docker-compose-navidrome** | Navidrome | Music streaming server with AI/ListenBrainz plugin downloads and Last.fm integration. |
-| **docker-compose-minio** | MinIO | S3-compatible object storage. |
-| **docker-compose-miniflux** | Miniflux | RSS reader with central PostgreSQL, autorestic backups. |
-| **docker-compose-influxdb** | InfluxDB + Chronograf | Time-series monitoring stack (InfluxDB 2.x). |
-| **docker-compose-mosquitto** | Mosquitto | MQTT broker with Prometheus exporter. |
-| **docker-compose-moodle** | Moodle | LMS (Bitnami image) with MariaDB. |
-| **docker-compose-minecraft** | Minecraft | Paper server (v1.21.1, hard difficulty). |
-| **docker-compose-node-exporter** | Node Exporter | Prometheus system metrics collector. |
-| **docker-compose-vector** | Vector | Log aggregator for Docker container logs. |
-| **docker-compose-semaphore** | Semaphore | Ansible web UI with custom Docker image including pass/gnupg for password store integration. Includes GPG key generation, SSH key setup, Tailscale sidecar, and API-based project configuration. |
+| **postgres** | PostgreSQL + pgAdmin | Central database server on shared `postgres-net` network. Other services connect to this for their database backend. Includes autorestic backups. |
+| **traefik** | Traefik + whoami | Reverse proxy with Let's Encrypt ACME TLS certificates. |
+| **gitea** | Gitea | Git service with PostgreSQL backend on central Postgres. Includes DB initialization and autorestic backups. |
+| **keycloak** | Keycloak | Identity and access management with central PostgreSQL, SSL certificate mounts, health/metrics endpoints. |
+| **home-assistant** | Home Assistant | Home automation platform using host networking for Bluetooth/Zigbee. |
+| **pi-hole** | Pi-hole + Unbound | DNS ad-blocker with recursive DNS resolver and Prometheus exporter. Configured via API (session auth, gravity updates). |
+| **paperless-ngx** | Paperless-ngx | Document management with Redis, Tika/Gotenberg document processing, internal PostgreSQL, Prometheus exporter, autorestic backups. |
+| **jellyfin** | Jellyfin | Media server. |
+| **navidrome** | Navidrome | Music streaming server with AI/ListenBrainz plugin downloads and Last.fm integration. |
+| **minio** | MinIO | S3-compatible object storage. |
+| **miniflux** | Miniflux | RSS reader with central PostgreSQL, autorestic backups. |
+| **influxdb** | InfluxDB + Chronograf | Time-series monitoring stack (InfluxDB 2.x). |
+| **mosquitto** | Mosquitto | MQTT broker with Prometheus exporter. |
+| **moodle** | Moodle | LMS (Bitnami image) with MariaDB. |
+| **minecraft** | Minecraft | Paper server (v1.21.1, hard difficulty). |
+| **node-exporter** | Node Exporter | Prometheus system metrics collector. |
+| **vector** | Vector | Log aggregator for Docker container logs. |
+| **semaphore** | Semaphore | Ansible web UI with custom Docker image including pass/gnupg for password store integration. Includes GPG key generation, SSH key setup, Tailscale sidecar, and API-based project configuration. |
 
 ### Specialty Roles
 
@@ -147,7 +147,7 @@ are stored in a **pass** password store and referenced via the
 ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/heimdall/login') }}"
 ```
 
-The `docker-compose-semaphore` role extends this by including `pass` and `gnupg`
+The `semaphore` role extends this by including `pass` and `gnupg`
 inside the Semaphore container, allowing playbook runs from the web UI to
 seamlessly resolve password store lookups.
 
