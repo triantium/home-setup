@@ -1,19 +1,16 @@
 #- include_role:
 #    name:          docker-compose
-- name:             create workdir
-  file:
-    path:           /opt/homer
-    state:          directory
-- name:             create workdir
-  file:
-    path:           /opt/homer/etc/homer
-    state:          directory
-- name:             create workdir
-  file:
-    path:           /opt/homer/etc/homer
-    state:          directory
-    group:          '472'
-    owner:          '472'
+- name: Create homer directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+  loop:
+    - path: /opt/homer
+    - path: /opt/homer/etc/homer
+      owner: '472'
+      group: '472'
 
 - name:  Write homer config via Template
   ansible.builtin.template:
@@ -21,6 +18,7 @@
     dest: "/opt/homer/etc/homer/{{item.path}}"
   with_filetree: templates/etc/homer/
   when: item.state == 'file'
+  register: config_template
 
 - name:             Copy docker-compose configuration
   copy:
@@ -29,23 +27,25 @@
 
   register: docker_compose_yaml
 
+- ansible.builtin.import_tasks: dashboard-icons.yml
+
 
 - name: Create and Start Stack
   command:
     chdir: /opt/homer
-    cmd: docker compose up -d
+    cmd: "{{ docker_cli }} compose up -d"
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
     chdir: /opt/homer
-    cmd: docker compose pull
+    cmd: "{{ docker_cli }} compose pull"
 
 - name: Restart on change
   when: docker_compose_yaml.changed
   command:
     chdir: /opt/homer
-    cmd: docker compose restart
+    cmd: "{{ docker_cli }} compose restart"
 # Dauert Ewig und wird eh interaktiv geladen
 - name:             Copy service-configuration configuration
   copy:

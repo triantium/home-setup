@@ -1,0 +1,8 @@
+- name: Clone dashboard icons from git remote on target
+  block:
+    - name: Clone dashboard icons repository
+      ansible.builtin.git:
+        repo: "https://github.com/homarr-labs/dashboard-icons.git"
+        dest: "/opt/homer/dashboard-icons"
+        accept_hostkey: true
+        force: yes
