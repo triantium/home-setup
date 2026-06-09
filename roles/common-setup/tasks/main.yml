@@ -17,6 +17,18 @@
       - prometheus-node-exporter
     state: present
 
+- name: Install chezmoi globally
+  ansible.builtin.shell: |
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+  args:
+    creates: /usr/local/bin/chezmoi
+
+- name: Install starship globally
+  ansible.builtin.shell: |
+    curl -fsSL https://starship.rs/install.sh | sh -s -- --yes --bin-dir /usr/local/bin
+  args:
+    creates: /usr/local/bin/starship
+
 - name: Make sure we have all expected groups present
   group:
     name: "{{ item }}"
@@ -52,6 +64,46 @@
     user: triantium
     state: present
     key: "{{ semaphore_ssh_key }}"
+- name: Initialize and apply chezmoi dotfiles for triantium
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/chezmoi
+      - init
+      - --apply
+      - --promptString
+      - firstname={{ chezmoi_firstname }}
+      - --promptString
+      - familyname={{ chezmoi_familyname }}
+      - --promptString
+      - email={{ chezmoi_email }}
+      - --promptString
+      - fwemail={{ chezmoi_fwemail }}
+      - --promptString
+      - workemail={{ chezmoi_workemail }}
+      - --promptString
+      - fwtitle={{ chezmoi_fwtitle }}
+      - --promptString
+      - worktitle={{ chezmoi_worktitle }}
+      - --promptString
+      - fwcompany={{ chezmoi_fwcompany }}
+      - --promptString
+      - workcompany={{ chezmoi_workcompany }}
+      - --promptString
+      - fwaddress={{ chezmoi_fwaddress }}
+      - --promptString
+      - workaddress={{ chezmoi_workaddress }}
+      - --promptChoice
+      - Keyboard Layout?={{ chezmoi_keyboard_layout }}
+      - --promptChoice
+      - Keyboard Variant?={{ chezmoi_keyboard_variant }}
+      - https://github.com/triantium/dotfiles.git
+    creates: /home/triantium/.local/share/chezmoi
+  become: true
+  become_user: triantium
+  environment:
+    HOME: /home/triantium
+    USER: triantium
+
 - name: Add the user for semaphore
   ansible.builtin.user:
     name: semaphore

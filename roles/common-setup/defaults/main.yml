@@ -1,2 +1,21 @@
 semaphore_ssh_key_public_password_store_location: "hosts/nas/services/semaphore/triantium.ddns.net/ssh-public-key"
 semaphore_ssh_key: "{{ lookup('community.general.passwordstore', semaphore_ssh_key_public_password_store_location , missing='error') }}"
+
+chezmoi_firstname: "triantium"
+chezmoi_familyname: ""
+chezmoi_email: ""
+
+chezmoi_fwemail: ""
+chezmoi_workemail: ""
+
+chezmoi_fwtitle: ""
+chezmoi_worktitle: ""
+
+chezmoi_fwcompany: ""
+chezmoi_workcompany: ""
+
+chezmoi_fwaddress: ""
+chezmoi_workaddress: ""
+
+chezmoi_keyboard_layout: "us"
+chezmoi_keyboard_variant: "altgr-intl"

@@ -5,7 +5,6 @@
     - debug:
         var: whoami.stdout
   roles:
-    #- role: common-setup
+    - role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
-    - role: docker-compose/homer
