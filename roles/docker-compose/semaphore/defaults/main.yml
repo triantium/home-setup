@@ -44,3 +44,8 @@ semaphore_email_host: "{{ lookup('community.general.passwordstore', email_settin
 semaphore_email_port: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error' , subkey='smtp' ) | split(':') | last }}"
 semaphore_email_username: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error', subkey='login') }}"
 semaphore_email_password: "{{ lookup('community.general.passwordstore', email_settings_location , missing='error') }}"
+
+
+semaphore_telegram_location: "token/telegram/firemessagebot"
+semaphore_telegram_chat: "{{ lookup('community.general.passwordstore', semaphore_telegram_location , missing='error', subkey='chat_id') }}"
+semaphore_telegram_token: "{{ lookup('community.general.passwordstore', semaphore_telegram_location , missing='error') }}"
