@@ -59,3 +59,9 @@ services:
       - ./etc/json_exporter/config.yml:/config.yml
     command:
       - '--config.file=/config.yml'
+
+  pushgateway:
+    image: prom/pushgateway
+    restart: always
+    ports:
+      - 9091:9091
