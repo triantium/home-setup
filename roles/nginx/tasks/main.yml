@@ -1,0 +1,6 @@
+#- name: Setup nginx
+#  ansible.builtin.include_tasks:
+#    file: install-nginx.yml
+- name: Setup domain
+  ansible.builtin.include_tasks:
+    file: setup-domain.yml

@@ -1,0 +1,78 @@
+- stat:
+    path: /etc/letsencrypt/renewal/{{domain_name}}.conf
+  register: renewal_present
+
+- block:
+    - name: Copy Site Configuration
+      copy:
+        src: "sites-available/{{item}}.conf"
+        dest: /etc/nginx/sites-available/{{item}}.conf
+        backup: yes
+      loop: "{{aliase}}"
+      register: copied_site_configs
+
+    - name: make site available
+      file:
+        src: /etc/nginx/sites-available/{{domain_name}}.conf
+        dest: /etc/nginx/sites-enabled/{{domain_name}}.conf
+        owner: www-data
+        group: www-data
+        state: link
+
+    - name: Comment out SSL related directives in configuration
+      command: sed -i -r 's/(listen .*443)/\1;#/g; s/(ssl_(certificate|certificate_key|trusted_certificate) )/#;#\1/g' /etc/nginx/sites-available/{{item}}.conf
+      when: renewal_present.stat.exists == False
+      loop: "{{aliase}}"
+
+    - name: Validate nginx configuration before reload
+      command: nginx -t
+      changed_when: false
+      when: renewal_present.stat.exists == False
+
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+        enabled: yes
+      when: renewal_present.stat.exists == False
+
+    - name: Obtain certificate
+      command: certbot certonly --webroot -d "{{domain_name}}" --email info@{{domain_name}} -w /var/www/_letsencrypt -n --agree-tos
+      when: renewal_present.stat.exists == False
+
+    - name: Uncomment out SSL related directives in configuration
+      command: sed -i -r 's/#?;#//g' /etc/nginx/sites-available/{{item}}.conf
+      when: renewal_present.stat.exists == False
+      loop: "{{aliase}}"
+
+    - name: Validate nginx configuration before final reload
+      command: nginx -t
+      changed_when: false
+
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+        enabled: yes
+
+  rescue:
+    - name: Restore previous nginx site configurations
+      copy:
+        src: "{{ item.backup_file }}"
+        dest: "{{ item.dest }}"
+        remote_src: yes
+      loop: "{{ copied_site_configs.results | default([]) }}"
+      when: item.backup_file is defined
+
+    - name: Remove enabled nginx site symlink
+      file:
+        path: /etc/nginx/sites-enabled/{{domain_name}}.conf
+        state: absent
+
+    - name: Validate nginx configuration after rollback
+      command: nginx -t
+      changed_when: false
+
+    - name: Fail because nginx configuration was invalid and changes were reverted
+      fail:
+        msg: "Invalid nginx configuration detected. Changes were reverted and nginx was not reloaded."

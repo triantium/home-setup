@@ -24,3 +24,4 @@
   roles:
     - role: docker-compose/monitoring-stack
     - role: docker-compose/homer
+    - role: nginx

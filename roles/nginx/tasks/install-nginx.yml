@@ -1,0 +1,43 @@
+- name: Install Nginx via apt
+  package:
+      name: "nginx"
+      state: present
+- name: Copy Main Configuration
+  copy:
+    src:  nginx.conf
+    dest: /etc/nginx/nginx.conf
+- name: Copy Configuration extension
+  copy:
+    src:  nginxconfig.io
+    dest: /etc/nginx/
+    backup: yes
+- name: Next is generating Diffie-Hellman parameters, might take a long time
+  ansible.builtin.debug:
+    msg: Next is generating Diffie-Hellman parameters, might take a long time
+- name: Generate Diffie-Hellman parameters with the default size (4096 bits)
+  openssl_dhparam:
+    path: /etc/nginx/dhparam.pem
+    backup: yes
+- name: create LetsEncrypt Directory
+  file:
+    state: directory
+    owner: "www-data"
+    path: /var/www/_letsencrypt
+- name: get Certbot
+  package:
+    name:
+      - "certbot"
+      - "python3-certbot-nginx"
+    state: "present"
+- name: Configure Certbot to reload NGINX after successfull renew
+  lineinfile:
+    path: /etc/letsencrypt/renewal-hooks/post/nginx-reload.sh
+    create: yes
+    mode: 755
+    line: nginx -t && systemctl reload nginx
+    state: present
+- name: Ensure NGINX service is started
+  service:
+    name: nginx
+    state: started
+    enabled: yes

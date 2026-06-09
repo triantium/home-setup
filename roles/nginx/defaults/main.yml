@@ -1,0 +1,9 @@
+domain_name:    triantium.ddns.net
+common_webroot: /var/www/
+webroot:        /var/www/{{domain_name}}/public
+aliase:
+  - triantium.ddns.net
+  - restic.triantium.ddns.net
+  - miniflux.triantium.ddns.net
+  - navidrome.triantium.ddns.net
+  - paperless.triantium.ddns.net
