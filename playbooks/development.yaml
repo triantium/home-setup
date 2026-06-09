@@ -8,4 +8,4 @@
     - role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
-    #- role: docker-compose/monitoring-stack
+    - role: docker-compose/monitoring-stack
