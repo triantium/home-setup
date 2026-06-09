@@ -1,0 +1,33 @@
+- name: Create restic exporter directory
+  ansible.builtin.file:
+    path: /opt/restic-exporter
+    state: directory
+
+- name: Copy docker-compose configuration
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /opt/restic-exporter/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Template Environment Variables
+  ansible.builtin.template:
+    src: .env.j2
+    dest: /opt/restic-exporter/.env
+  register: env_template
+
+- name: Pull the Images
+  when: docker_compose_yaml.changed
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: /opt/restic-exporter/
+
+- name: Start the containers
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: /opt/restic-exporter/
+
+- name: Restart on change
+  when: docker_compose_yaml.changed or env_template.changed
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose restart"
+    chdir: /opt/restic-exporter/

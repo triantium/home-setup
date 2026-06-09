@@ -26,3 +26,4 @@
     - role: docker-compose/homer
     - role: nginx
     - role: docker-compose/fritzbox-exporter
+    - role: docker-compose/restic-exporter

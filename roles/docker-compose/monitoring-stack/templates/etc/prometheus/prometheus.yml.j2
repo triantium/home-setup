@@ -59,12 +59,12 @@ scrape_configs:
     static_configs:
     - targets:
        - 'gloin.fritz.box:9042'
-  - job_name: 'jellyfin'
-    metrics_path:      '/jellyfin/metrics'
-    scrape_interval: 120s
-    static_configs:
+  - job_name: 'restic'
+      scrape_interval:   120s
+      scrape_timeout: 30s
+      static_configs:
       - targets:
-          - 'nas.fritz.box:8096'
+         - 'gloin.fritz.box:8001'
   - job_name:          'navidrome'
     scheme:            'https'
     #basic_auth:

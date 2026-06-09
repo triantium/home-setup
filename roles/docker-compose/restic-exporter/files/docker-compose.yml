@@ -1,0 +1,14 @@
+services:
+  restic-exporter:
+    image: ngosang/restic-exporter:2.0.2
+    # privileged: true # because of a python call to time.time(); WTF
+    # cap_add:
+    #  - SYS_TIME is not sufficient
+    environment:
+      - TZ=Europe/Berlin
+      - RESTIC_REPOSITORY=${RESTIC_REPOSITORY}
+      - RESTIC_PASSWORD=${RESTIC_PASSWORD}
+      - REFRESH_INTERVAL=3600 # 600 min # Takes at least 30min
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
