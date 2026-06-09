@@ -1,0 +1,80 @@
+# Homepage configuration
+# See https://fontawesome.com/v6/search for icons options
+
+# Services
+# First level array represent a group.
+# Leave only a "items" key if not using group (group name, icon & tagstyle are optional, section separation will not be displayed).
+services:
+  - name: "Anwendungen"
+    icon: "fas fa-cloud"
+    items:
+      - name: "Wiki"
+        logo: "assets/dashboard-icons/svg/xwiki.svg"
+        url: "https://wiki.geekinbusiness.de"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Gitea"
+        logo: "assets/dashboard-icons/svg/gitea.svg"
+        url: "https://git.geekinbusiness.de"
+        target: "_blank"
+      - name: "Jenkins"
+        logo: "assets/dashboard-icons/svg/jenkins.svg"
+        url: "https://jenkins.geekinbusiness.de"
+        target: "_blank"
+      - name: "Owncloud"
+        logo: "assets/dashboard-icons/svg/owncloud.svg"
+        url: "https://owncloud.geekinbusiness.de"
+        target: "_blank"
+      - name: "Jitsi"
+        logo: "assets/dashboard-icons/svg/jitsi.svg"
+        url: "https://jitsi.geekinbusiness.de"
+        target: "_blank"
+
+  - name: "Extern"
+    icon: "fas fa-brands fa-service"
+    items:
+      - name: "BA-Desktop"
+        logo: "https://web.arbeitsagentur.de/design/dpl/assets/favicons/favicon-32x32.png"
+        #subtitle: "RSS Feed Aggregator"
+        url: "https://ica.sdst.arbeitsagentur.de"
+        target: "_blank"
+      - name: "BA-VDI"
+        logo: "https://web.arbeitsagentur.de/design/dpl/assets/favicons/favicon-32x32.png"
+        #subtitle: "RSS Feed Aggregator"
+        url: "https://vdi.sdst.arbeitsagentur.de"
+        target: "_blank"
+      - name: "Datev"
+        logo: "https://apps.datev.de/ano/favicon.ico"
+        #subtitle: "RSS Feed Aggregator"
+        url: "https://apps.datev.de/ano/"
+        target: "_blank"
+      - name: "Slack"
+        logo: "assets/dashboard-icons/svg/slack.svg"
+        #subtitle: "RSS Feed Aggregator"
+        url: "https://geekinbusiness.slack.com/"
+        target: "_blank"
+      - name: "Mail"
+        logo: "assets/dashboard-icons/svg/mailcow.svg"
+        #subtitle: "RSS Feed Aggregator"
+        url: "https://mail.geekinbusiness.de"
+        target: "_blank"
+
+
+  - name: "Monitoring"
+    icon: "fas fa-brands fa-watchman-monitoring"
+    items:
+      - name: "Keycloak"
+        logo: "assets/dashboard-icons/svg/keycloak.svg"
+        #subtitle: "RSS Feed Aggregator"
+        url: "https://keycloak.geekinbusiness.de"
+        target: "_blank"
+      - name: "WebMin"
+        logo: "assets/dashboard-icons/svg/webmin.svg"
+        subtitle: ""
+        url: "https://mail.geekinbusiness.de:10000/"
+        target: "_blank"
+      - name: "Grafana"
+        logo: "assets/dashboard-icons/svg/grafana.svg"
+        subtitle: ""
+
+        url: "https://grafana.geekinbusiness.de/"
+        target: "_blank"

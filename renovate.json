@@ -4,6 +4,13 @@
     "config:base"
   ],
   "automerge": true,
+  "docker-compose": {
+    "managerFilePatterns": [
+      "/(^|/)docker-compose\\.ya?ml$/",
+      "/(^|/)compose\\.ya?ml$/",
+      "/\\.ya?ml\\.j2$/"
+    ]
+  },
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],

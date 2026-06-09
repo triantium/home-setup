@@ -1,0 +1,60 @@
+#- include_role:
+#    name:          docker-compose
+- name:             create workdir
+  file:
+    path:           /opt/homer
+    state:          directory
+- name:             create workdir
+  file:
+    path:           /opt/homer/etc/homer
+    state:          directory
+- name:             create workdir
+  file:
+    path:           /opt/homer/etc/homer
+    state:          directory
+    group:          '472'
+    owner:          '472'
+
+- name:  Write homer config via Template
+  ansible.builtin.template:
+    src: "{{item.src}}"
+    dest: "/opt/homer/etc/homer/{{item.path}}"
+  with_filetree: templates/etc/homer/
+  when: item.state == 'file'
+
+- name:             Copy docker-compose configuration
+  copy:
+    src:            docker-compose.yaml
+    dest:           /opt/homer/
+
+  register: docker_compose_yaml
+
+
+- name: Create and Start Stack
+  command:
+    chdir: /opt/homer
+    cmd: docker compose up -d
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/homer
+    cmd: docker compose pull
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/homer
+    cmd: docker compose restart
+# Dauert Ewig und wird eh interaktiv geladen
+- name:             Copy service-configuration configuration
+  copy:
+    src:            etc/
+    dest:           /opt/homer/etc/
+
+- name:  Write homer config via Template
+  ansible.builtin.template:
+    src: "{{item.src}}"
+    dest: "/opt/homer/etc/homer/{{item.path}}"
+  with_filetree: templates/etc/homer/
+  when: item.state == 'file'

@@ -1,0 +1,61 @@
+# Homepage configuration
+# See https://fontawesome.com/v6/search for icons options
+
+# Services
+# First level array represent a group.
+# Leave only a "items" key if not using group (group name, icon & tagstyle are optional, section separation will not be displayed).
+services:
+  - name: "Social"
+    icon: "fas fa-person"
+    items:
+      - name: "Instagram"
+        logo: "assets/dashboard-icons/svg/instagram.svg"
+        url: "https://www.instagram.com/"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Reddit"
+        logo: "assets/dashboard-icons/svg/reddit.svg"
+        url: "https://www.reddit.com/"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Homepage"
+        logo: "https://triantium.ddns.net/media/website/favicon.svg"
+        url: "https://triantium.ddns.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Steam"
+        logo: "assets/dashboard-icons/svg/steam.svg"
+        url: "https://store.steampowered.com"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Printables"
+        logo: "assets/dashboard-icons/svg/prusa-research.svg"
+        url: "https://www.printables.com/"
+        target: "_blank" # optional html a tag target attribute
+  - name: "Streaming"
+    icon: "fas fa-film"
+    items:
+      - name: "Youtube"
+        logo: "assets/dashboard-icons/svg/youtube.svg"
+        url: "https://www.youtube.com/"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Netflix"
+        logo: "assets/dashboard-icons/svg/netflix.svg"
+        url: "https://www.netflix.com/"
+        target: "_blank"
+      - name: "Prime Video"
+        logo: "assets/dashboard-icons/svg/prime-video.svg"
+        url: "https://www.amazon.de/gp/video/storefront"
+        target: "_blank"
+      - name: "Twitch"
+        logo: "assets/dashboard-icons/svg/twitch.svg"
+        url: "https://www.twitch.tv/"
+        target: "_blank"
+  - name: "Mail"
+    icon: "fas fa-envelope"
+    items:
+      - name: "Mailbox"
+        logo: "https://mailbox.org/files/layout/Favicon_transparent_32x32.ico"
+        url: "https://mailbox.org/de/"
+      - name: "Teams"
+        logo: "https://statics.teams.cdn.office.net/hashed/favicon/prod/favicon-f1722d9.ico"
+        url: "https://teams.microsoft.com/"
+      - name: "Discord"
+        logo: "assets/dashboard-icons/svg/discord.svg"
+        url: "https://discord.com/channels/@me"

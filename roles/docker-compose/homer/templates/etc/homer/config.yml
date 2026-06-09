@@ -1,0 +1,192 @@
+# Homepage configuration
+# See https://fontawesome.com/v6/search for icons options
+
+title: "Dashboard"
+subtitle: "triantium"
+logo: "https://triantium.ddns.net/media/website/favicon.svg"
+
+#icon: "fas fa-skull-crossbones" # Optional icon
+
+header: true
+footer: '<p>Created with <span class="has-text-danger">❤</span> with <a href="https://bulma.io/">bulma</a>, <a href="https://vuejs.org/">vuejs</a> & <a href="https://fontawesome.com/">font awesome</a> // Fork me on <a href="https://github.com/bastienwirtz/homer"><i class="fab fa-github-alt"></i></a></p>' # set false if you want to hide it.
+
+connectivityCheck: false # whether you want to display a message when the apps are not accessible anymore (VPN disconnected for example).
+# You should set it to true when using an authentication proxy, it also reloads the page when a redirection is detected when checking connectivity.
+
+stylesheet:
+  - "assets/custom.css"
+
+# Optional theme customization
+# theme: default
+
+# Optional theme customization (color overrrides)
+# overrrides can also be done using CSS vars
+colors:
+  light:
+    highlight-primary: "#fff5f2"
+    highlight-secondary: "#fff5f2"
+    highlight-hover: "#bebebe"
+    background: "#12152B"
+    card-background: "rgba(255, 245, 242, 0.8)"
+    text: "#ffffff"
+    text-header: "#fafafa"
+    text-title: "#000000"
+    text-subtitle: "#111111"
+    card-shadow: rgba(0, 0, 0, 0.5)
+    link: "#3273dc"
+    link-hover: "#2e4053"
+    background-image: "../assets/wallpaper-light.jpeg" # Change wallpaper.jpeg to the name of your own custom wallpaper!
+  dark:
+    highlight-primary: "#181C3A"
+    highlight-secondary: "#181C3A"
+    highlight-hover: "#1F2347"
+    background: "#12152B"
+    card-background: "rgba(24, 28, 58, 0.8)"
+    text: "#eaeaea"
+    text-header: "#7C71DD"
+    text-title: "#fafafa"
+    text-subtitle: "#8B8D9C"
+    card-shadow: rgba(0, 0, 0, 0.5)
+    link: "#c1c1c1"
+    link-hover: "#fafafa"
+    background-image: "../assets/wallpaper.jpeg"
+
+# Optional message
+
+# Optional navbar
+# links: [] # Allows for navbar (dark mode, layout, and search) without any links
+links:
+  - name: "Heimnetzwerk"
+    icon: "fas fa-home"
+    url: "#"
+  # this will link to a second homer page that will load config from page2.yml and keep default config values as in config.yml file
+  # see url field and assets/page.yml used in this example:
+  - name: "Weblinks"
+    icon: "fas fa-person"
+    url: "#personal"
+  - name: "Geek in Business"
+    icon: "fas fa-glasses"
+    url: "#geek"
+  - name: "Contribute"
+    icon: "fab fa-github"
+    url: "https://github.com/bastienwirtz/homer"
+    target: "_blank" # optional html a tag target attribute
+  # this will link to a second homer page that will load config from additional-page.yml and keep default config values as in config.yml file
+  # see url field and assets/additional-page.yml.dist used in this example:
+  #- name: "another page!"
+  #  icon: "fas fa-file-alt"
+  #  url: "#additional-page"
+
+# Services
+# First level array represent a group.
+# Leave only a "items" key if not using group (group name, icon & tagstyle are optional, section separation will not be displayed).
+services:
+  - name: "Anwendungen"
+    icon: "fas fa-social"
+    items:
+      - name: "Navidrome"
+
+        logo: "assets/dashboard-icons/svg/navidrome.svg"
+        subtitle: "Musik"
+        url: "https://triantium.ddns.net/navidrome"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Miniflux"
+
+        logo: "assets/dashboard-icons/svg/miniflux.svg"
+        subtitle: "RSS Feed Aggregator"
+
+        url: "https://triantium.ddns.net/miniflux"
+        target: "_blank"
+      - name: "Jellyfin"
+
+        logo: "assets/dashboard-icons/svg/jellyfin.svg"
+        subtitle: "Medienstreaming"
+
+        url: "https://triantium.ddns.net/jellyfin"
+        target: "_blank"
+      - name: "Home Assistent"
+
+        logo: "assets/dashboard-icons/svg/home-assistant.svg"
+        subtitle: "Smart Home"
+        url: "https://triantium.ddns.net:8123"
+        target: "_blank"
+      - name: "Paperless"
+        url: "https://triantium.ddns.net/paperless/"
+        logo: "assets/dashboard-icons/svg/paperless-ngx.svg"
+        type: "PaperlessNG"
+        apikey: "{{lookup( 'community.general.passwordstore', 'token/triantium.ddns.net/paperless' )}}"
+        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://nas.fritz.box:8085/paperless"
+
+  - name: "Netwerk"
+    icon: "fas fa-network-wired"
+    items:
+      - name: "Fritz Box"
+        logo: "assets/dashboard-icons/svg/avmfritzbox.svg"
+        subtitle: "Fritz Box Router"
+        tag: "device"
+        url: "http://192.168.19.1"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Fritz Repeater 540E"
+        logo: "assets/dashboard-icons/svg/avmfritzbox.svg"
+        subtitle: "Fritz Box Router"
+        tag: "device"
+        url: "http://192.168.19.5/"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Fritz Repeater"
+        logo: "assets/dashboard-icons/svg/avmfritzbox.svg"
+        subtitle: "Fritz Box Router"
+        tag: "device"
+        url: "http://192.168.19.6/"
+        target: "_blank" # optional html a tag target attribute
+      - name: OctoPrint"
+
+        logo: "assets/dashboard-icons/png/octoprint.png"
+        tag: "device"
+        url: "http://octopi.fritz.box"
+      - name: NAS"
+
+        logo: "assets/dashboard-icons/png/qnap.png"
+        tag: "device"
+        url: "http://nas.fritz.box"
+        # type: "OctoPrint"
+        target: "_blank" # optional html a tag target attribute
+
+  - name: "Monitoring"
+    icon: "fas fa-brands fa-watchman-monitoring"
+    items:
+      - name: "PiHole"
+        logo: "assets/dashboard-icons/svg/pi-hole.svg"
+        #subtitle: "RSS Feed Aggregator"
+        url: "http://heimdall.fritz.box/admin"
+        target: "_blank"
+        type: "PiHole"
+        apikey: "{{lookup( 'community.general.passwordstore', 'token/heimdall.fritz.box/pihole' )}}"
+        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://heimdall.fritz.box/admin"
+#      - name: "Portainer"
+#        logo: "assets/dashboard-icons/svg/portainer.svg"
+#        type: "Portainer"
+#        apikey: "{{lookup( 'community.general.passwordstore', 'token/nas.fritz.box/portainer' )}}"
+#        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://nas.fritz.box:9000"
+#        url: "http://nas.fritz.box:9000"
+#        target: "_blank"
+      - name: "Grafana"
+        logo: "assets/dashboard-icons/svg/grafana.svg"
+        subtitle: ""
+        url: "http://gloin.fritz.box:3333/"
+        target: "_blank"
+      - name: "Prometheus"
+        logo: "http://gloin.fritz.box:9999/favicon.ico"
+        subtitle: ""
+        url: "http://gloin.fritz.box:9999/graph?g0.expr=&g0.tab=1&g0.display_mode=lines&g0.show_exemplars=0&g0.range_input=1h"
+        target: "_blank"
+      - name: "Gitea"
+        logo: "assets/dashboard-icons/svg/gitea.svg"
+        subtitle: "Unfancy Git"
+        url: "http://nas.fritz.box:3000"
+        target: "_blank"
+      - name: "Meshtastic"
+
+        logo: "http://192.168.19.46/apple-touch-icon.png"
+        subtitle: "Private Messaging"
+        url: "http://192.168.19.46/"
+        target: "_blank"

@@ -1,0 +1,20 @@
+version:          "3.3"
+services:
+
+  homer:
+    image: b4bz/homer:v24.12.1
+    #pull_policy: always
+    volumes:
+      - ./etc/homer:/www/assets
+    environment:
+      - INIT_ASSETS=1
+      - SUBFOLDER=/homer
+    ports:
+      - 8080:8080
+    restart:      always
+  cors-container:
+    restart: always
+    ports:
+      - 8081:3000
+    container_name: cors-container
+    image: triantium/cors-container:arm64
