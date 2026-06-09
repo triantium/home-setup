@@ -13,6 +13,12 @@ services:
     ports:
       - 9999:9090
     restart:      always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9090/-/healthy -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 #    networks:
 #      - promnet
 
@@ -30,6 +36,12 @@ services:
     restart:      always
     ports:
       - 9093:9093
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9093/-/healthy -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   grafana:
     ports:
       - "3333:3000"
@@ -42,6 +54,12 @@ services:
         - "./var/log/grafana:/var/log/grafana"
     restart:      always
     image:        grafana/grafana
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:3000/api/health -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   blackbox:
     image:        prom/blackbox-exporter:master
@@ -53,15 +71,33 @@ services:
     ports:
       - 9115:9115
     restart:      always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9115/-/healthy -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   json-exporter:
     image: quay.io/prometheuscommunity/json-exporter
     volumes:
       - ./etc/json_exporter/config.yml:/config.yml
     command:
       - '--config.file=/config.yml'
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:7979/metrics -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   pushgateway:
     image: prom/pushgateway
     restart: always
     ports:
       - 9091:9091
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9091/-/healthy -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

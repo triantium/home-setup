@@ -22,6 +22,7 @@
 - hosts: gloin
   roles:
     - role: docker-compose/monitoring-stack
+    - role: docker-compose/meshtastic-web
     - role: docker-compose/homer
     - role: nginx
     - role: docker-compose/fritzbox-exporter

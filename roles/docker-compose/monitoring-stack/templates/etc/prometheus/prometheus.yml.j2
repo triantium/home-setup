@@ -7,8 +7,7 @@ global:
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
   - 'alert.rules'
-  # - "first.rules"
-  # - "second.rules"
+  - 'restic.rules'
 
 # alert
 alerting:
@@ -60,9 +59,10 @@ scrape_configs:
     - targets:
        - 'gloin.fritz.box:9042'
   - job_name: 'restic'
-      scrape_interval:   120s
-      scrape_timeout: 30s
-      static_configs:
+    metrics_path: "/"
+    scrape_interval:   360s
+    scrape_timeout: 30s
+    static_configs:
       - targets:
          - 'gloin.fritz.box:8001'
   - job_name:          'navidrome'

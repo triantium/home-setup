@@ -8,6 +8,7 @@
     #- role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
-    - role: docker-compose/restic-exporter
-    - role: docker-compose/fritzbox-exporter
-    - role: docker-compose/monitoring-stack
+    - role: docker-compose/meshtastic-web
+#    - role: docker-compose/restic-exporter
+#    - role: docker-compose/fritzbox-exporter
+#    - role: docker-compose/monitoring-stack

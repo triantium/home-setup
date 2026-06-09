@@ -53,3 +53,23 @@
   command:
     chdir: /opt/monitoring-stack
     cmd: "{{ docker_cli }} compose restart"
+
+- name: Wait for all services to become healthy
+  shell:
+    cmd: |
+      set -e
+      for c in $({{ docker_cli }} compose ps -q); do
+        name=$({{ docker_cli }} inspect --format='{% raw %}{{.Name}}{% endraw %}' "$c")
+        health=$({{ docker_cli }} inspect --format='{% raw %}{{with .State.Health}}{{.Status}}{{else}}none{{end}}{% endraw %}' "$c" 2>/dev/null || echo "none")
+        case "$health" in
+          healthy|none) echo "$name: $health" ;;
+          starting) echo "$name: $health (retrying)"; exit 1 ;;
+          *) echo "$name: $health"; exit 1 ;;
+        esac
+      done
+      echo "All services are up"
+    chdir: /opt/monitoring-stack
+  register: health_result
+  retries: 12
+  delay: 10
+  until: health_result is not failed

@@ -1,0 +1,27 @@
+- name: Create meshtastic-web directory
+  ansible.builtin.file:
+    path: /opt/meshtastic-web
+    state: directory
+
+- name: Copy docker-compose configuration
+  copy:
+    src: docker-compose.yaml
+    dest: /opt/meshtastic-web/
+  register: docker_compose_yaml
+
+- name: Create and Start Stack
+  command:
+    chdir: /opt/meshtastic-web
+    cmd: "{{ docker_cli }} compose up -d"
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/meshtastic-web
+    cmd: "{{ docker_cli }} compose pull"
+
+- name: Restart on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: /opt/meshtastic-web
+    cmd: "{{ docker_cli }} compose restart"
