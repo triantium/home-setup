@@ -16,12 +16,13 @@
     - role: docker-compose/gitea
     - role: docker-compose/home-assistant
 
-- hosts: heimdall
-  roles:
-    - role: docker-compose/pi-hole
+#- hosts: heimdall
+#  roles:
+#    - role: docker-compose/pi-hole
 
 - hosts: gloin
   roles:
     - role: docker-compose/monitoring-stack
     - role: docker-compose/homer
     - role: nginx
+    - role: docker-compose/fritzbox-exporter

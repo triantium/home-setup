@@ -1,0 +1,5 @@
+service_name: fritzbox-exporter
+
+fritzbox_exporter_password_location: "hosts/fritz.box/openhab"
+fritzbox_exporter_password: "{{ lookup('community.general.passwordstore', fritzbox_exporter_password_location, missing='error') }}"
+fritzbox_exporter_username: "{{ lookup('community.general.passwordstore', fritzbox_exporter_password_location, subkey='login',  missing='error') }}"

@@ -8,4 +8,5 @@
     #- role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
-    - role: nginx
+    - role: docker-compose/fritzbox-exporter
+    - role: docker-compose/monitoring-stack

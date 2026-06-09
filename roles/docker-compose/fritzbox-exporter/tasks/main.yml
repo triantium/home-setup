@@ -1,0 +1,47 @@
+- name:             create workdir
+  file:
+    path:           /opt/fritzbox-exporter
+    state:          directory
+- name:             Copy Dockerfile
+  copy:
+    src:            Dockerfile
+    dest:           /opt/fritzbox-exporter/Dockerfile
+  register: dockerfile
+- name:             Copy docker-compose configuration
+  copy:
+    src:            docker-compose.yml
+    dest:           /opt/fritzbox-exporter/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Template Enviroment Variables for Fritzbox exporter
+  ansible.builtin.template:
+    src: env.j2
+    dest: /opt/fritzbox-exporter/.env
+  register: env_template
+
+- name: Download metrics.json
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/dotWee/docker-fritzbox-prometheus-exporter/master/metrics.json
+    dest: /opt/fritzbox-exporter/metrics.json
+- name: Download metrics-lua.json
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/dotWee/docker-fritzbox-prometheus-exporter/master/metrics-lua.json
+    dest: /opt/fritzbox-exporter/metrics-lua.json
+
+- name: Pull the Images
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: /opt/fritzbox-exporter/
+  when: docker_compose_yaml.changed
+
+- name: Build the Images and start the containers
+  when: dockerfile.changed or docker_compose_yaml.changed
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d --build"
+    chdir: /opt/fritzbox-exporter/
+
+- name: Restart on change
+  when: dockerfile.changed or docker_compose_yaml.changed or env_template.changed
+  command:
+    chdir: /opt/fritzbox-exporter/
+    cmd: "{{ docker_cli }} compose restart"

@@ -1,0 +1,13 @@
+services:
+  fritzbox_exporter:
+    build:
+      context: .
+    ports:
+      - "9042:9042"
+    restart:         unless-stopped
+    environment:
+      GATEWAY_URL: http://192.168.19.1:49000
+      LISTEN_ADDRESS: 0.0.0.0:9042
+    volumes:
+      - ./metrics.json:/app/metrics.json
+      - ./metrics-lua.json:/app/metrics-lua.json
