@@ -469,7 +469,7 @@
       "pluginVersion": "8.3.3",
       "targets": [{
         "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-        "expr": "ansible_task_duration_seconds{playbook=~\"$playbook\"}",
+        "expr": "ansible_task_duration_seconds{playbook=~\"$playbook\", task=~\"$task\"}",
         "legendFormat": "{{ task }}",
         "refId": "A"
       }],
@@ -516,7 +516,7 @@
       "pluginVersion": "8.3.3",
       "targets": [{
         "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-        "expr": "ansible_role_duration_seconds{playbook=~\"$playbook\"}",
+        "expr": "ansible_role_duration_seconds{playbook=~\"$playbook\", role=~\"$role\"}",
         "legendFormat": "{{ role }}",
         "refId": "A"
       }],
@@ -568,7 +568,7 @@
       "pluginVersion": "8.3.3",
       "targets": [{
         "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-        "expr": "ansible_task_results_total{playbook=~\"$playbook\"}",
+        "expr": "ansible_task_results_total{playbook=~\"$playbook\", task=~\"$task\", role=~\"$role\"}",
         "format": "table",
         "instant": true,
         "legendFormat": "",
@@ -596,6 +596,42 @@
         "query": {
           "query": "label_values(ansible_playbook_duration_seconds, playbook)",
           "refId": "Prometheus-playbook-Variable-Query"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": true,
+        "label": "Task",
+        "multi": true,
+        "name": "task",
+        "options": [],
+        "query": {
+          "query": "label_values(ansible_task_duration_seconds{playbook=~\"$playbook\"}, task)",
+          "refId": "Prometheus-task-Variable-Query"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": true,
+        "label": "Role",
+        "multi": true,
+        "name": "role",
+        "options": [],
+        "query": {
+          "query": "label_values(ansible_role_duration_seconds{playbook=~\"$playbook\"}, role)",
+          "refId": "Prometheus-role-Variable-Query"
         },
         "refresh": 1,
         "regex": "",
