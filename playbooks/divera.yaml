@@ -1,0 +1,7 @@
+- hosts:
+    - divera
+  roles:
+    - role: common-setup
+    - role: geerlingguy.pip
+    - role: geerlingguy.docker
+    - role: divera

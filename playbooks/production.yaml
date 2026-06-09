@@ -1,6 +1,5 @@
 - hosts:
    - pi
-   - divera
   roles:
     - role: common-setup
     - role: geerlingguy.pip

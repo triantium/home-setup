@@ -1,4 +1,4 @@
 type: rest
 path: "{{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' , subkey='location') }}"
 password: "{{ lookup('community.general.passwordstore', 'accounts/borgbase.com/repos/docker' ) }}"
-repo_url: "{{type}}://{{path}}"
+repo_url: "{{type}}:{{path}}"
