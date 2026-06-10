@@ -1,0 +1,4 @@
+domain: triantium.ddns.net
+loki_endpoint: http://localhost:3100
+rsyslog_installed: false
+journald_installed: false

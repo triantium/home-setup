@@ -1,0 +1,105 @@
+- name: Install prerequisites
+  apt:
+    name:
+      - gnupg
+      - curl
+    state: present
+
+- name: Remove stale keyring from previous failed runs
+  file:
+    path: /usr/share/keyrings/datadog-archive-keyring.gpg
+    state: absent
+
+- name: Add Datadog APT keyring
+  shell:
+    cmd: curl -fsSL "https://keys.datadoghq.com/{{ item }}" | gpg --import --batch --no-default-keyring --keyring /usr/share/keyrings/datadog-archive-keyring.gpg
+  loop:
+    - DATADOG_APT_KEY_CURRENT.public
+    - DATADOG_APT_KEY_C0962C7D.public
+    - DATADOG_APT_KEY_F14F620E.public
+
+- name: Fix keyring permissions
+  file:
+    path: /usr/share/keyrings/datadog-archive-keyring.gpg
+    mode: '0644'
+
+- name: Add Vector apt repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/datadog-archive-keyring.gpg] https://apt.vector.dev/ stable vector-0"
+    state: present
+    update_cache: true
+
+- name: Install Vector
+  apt:
+    name: vector
+    state: present
+
+- name: Add vector user to docker group
+  user:
+    name: vector
+    groups: docker
+    append: true
+
+- name: Add vector user to systemd-journal
+  user:
+    name: vector
+    groups: systemd-journal
+    append: true
+
+- name: Fix Vector data directory ownership
+  file:
+    path: /var/lib/vector
+    state: directory
+    owner: vector
+    group: vector
+    recurse: true
+
+- name: Check if journalctl is available
+  stat:
+    path: /usr/bin/journalctl
+  register: journalctl_binary
+
+- name: Set journald_installed fact
+  set_fact:
+    journald_installed: "{{ journalctl_binary.stat.exists }}"
+
+- name: Check if rsyslog is installed
+  stat:
+    path: /lib/systemd/system/rsyslog.service
+  register: rsyslog_service
+
+- name: Set rsyslog_installed fact
+  set_fact:
+    rsyslog_installed: "{{ rsyslog_service.stat.exists }}"
+
+- name: Copy rsyslog forwarding config
+  copy:
+    src: rsyslog.d/90-vector.conf
+    dest: /etc/rsyslog.d/90-vector.conf
+  when: rsyslog_installed
+  register: rsyslog_config
+
+- name: Configure Vector
+  template:
+    src: vector.yaml.j2
+    dest: /etc/vector/vector.yaml
+  register: vector_config
+
+- name: Enable and start Vector
+  systemd:
+    name: vector
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Restart Vector on config change
+  when: vector_config.changed
+  systemd:
+    name: vector
+    state: restarted
+
+- name: Restart rsyslog on config change
+  when: rsyslog_installed and (rsyslog_config | default({})).changed
+  systemd:
+    name: rsyslog
+    state: restarted

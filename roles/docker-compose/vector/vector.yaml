@@ -8,19 +8,44 @@ sources:
     # defaults to docker socket
     type: docker_logs
 
-sinks:
-  out:
+transforms:
+  normalize_syslog:
+    type: remap
     inputs:
-      - "syslog"
-      - "docker"
-    type: "console"
-    encoding:
-      codec: "text"
-  loki:
+      - syslog
+    source: |
+      .source_type = "syslog"
+
+  normalize_docker:
+    type: remap
+    inputs:
+      - docker
+    source: |
+      .source_type = "docker"
+
+sinks:
+  loki_syslog:
     type: loki
     inputs:
-      - "syslog"
-      - "docker"
+      - normalize_syslog
     endpoint: http://gloin.taila24d4b.ts.net:3100
     encoding:
-      codec: "text"
+      codec: json
+    labels:
+      source: syslog
+      host: "{{ host }}"
+      severity: "{{ severity }}"
+      facility: "{{ facility }}"
+
+  loki_docker:
+    type: loki
+    inputs:
+      - normalize_docker
+    endpoint: http://gloin.taila24d4b.ts.net:3100
+    encoding:
+      codec: json
+    labels:
+      source: docker
+      host: "{{ host }}"
+      container: "{{ container_name }}"
+      image: "{{ image }}"

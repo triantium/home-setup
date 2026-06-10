@@ -1,0 +1,127 @@
+sources:
+{% if rsyslog_installed %}
+  syslog:
+    type: syslog
+    address: 0.0.0.0:9000
+    mode: tcp
+
+{% endif %}
+{% if journald_installed %}
+  journald:
+    type: journald
+
+{% endif %}
+  docker:
+    type: docker_logs
+
+transforms:
+{% if rsyslog_installed %}
+  normalize_syslog:
+    type: remap
+    inputs:
+      - syslog
+    source: |
+      .source_type = "syslog"
+
+{% endif %}
+{% if journald_installed %}
+  normalize_journald:
+    type: remap
+    inputs:
+      - journald
+    source: |
+      .source_type = "journald"
+      if !exists(.unit) {
+        .unit = "unknown"
+      }
+
+{% endif %}
+  normalize_docker:
+    type: remap
+    inputs:
+      - docker
+    source: |
+      .source_type = "docker"
+
+  filter_docker:
+    type: remap
+    inputs:
+      - normalize_docker
+    source: |
+      if contains(string!(.message), "/-/healthy") || contains(string!(.message), "/ready") || contains(string!(.message), "healthcheck") {
+        abort
+      }
+
+  throttle_docker:
+    type: throttle
+    inputs:
+      - filter_docker
+    threshold: 2000
+    window_secs: 1
+
+{% if rsyslog_installed %}
+  throttle_syslog:
+    type: throttle
+    inputs:
+      - normalize_syslog
+    threshold: 500
+    window_secs: 1
+
+{% endif %}
+{% if journald_installed %}
+  throttle_journald:
+    type: throttle
+    inputs:
+      - normalize_journald
+    threshold: 1000
+    window_secs: 1
+
+{% endif %}
+sinks:
+{% if rsyslog_installed %}
+  loki_syslog:
+    type: loki
+    inputs:
+      - throttle_syslog
+    endpoint: {{ loki_endpoint }}
+    encoding:
+      codec: json
+    labels:
+      source: syslog
+{% raw %}
+      host: "{{ host }}"
+      severity: "{{ severity }}"
+      facility: "{{ facility }}"
+{% endraw %}
+
+{% endif %}
+{% if journald_installed %}
+  loki_journald:
+    type: loki
+    inputs:
+      - throttle_journald
+    endpoint: {{ loki_endpoint }}
+    encoding:
+      codec: json
+    labels:
+      source: journald
+{% raw %}
+      host: "{{ host }}"
+      unit: "{{ unit }}"
+{% endraw %}
+
+{% endif %}
+  loki_docker:
+    type: loki
+    inputs:
+      - throttle_docker
+    endpoint: {{ loki_endpoint }}
+    encoding:
+      codec: json
+    labels:
+      source: docker
+{% raw %}
+      host: "{{ host }}"
+      container: "{{ container_name }}"
+      image: "{{ image }}"
+{% endraw %}

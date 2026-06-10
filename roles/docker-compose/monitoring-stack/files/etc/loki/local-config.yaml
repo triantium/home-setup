@@ -16,6 +16,12 @@ common:
     kvstore:
       store: inmemory
 
+ingester:
+  chunk_idle_period: 1h
+  chunk_retain_period: 30m
+  max_chunk_age: 2h
+  chunk_target_size: 2097152
+
 compactor:
   retention_enabled: true
   working_directory: /data/compactor
@@ -23,6 +29,8 @@ compactor:
 
 limits_config:
   retention_period: 336h
+  ingestion_rate_mb: 20
+  ingestion_burst_size_mb: 40
 
 schema_config:
   configs:

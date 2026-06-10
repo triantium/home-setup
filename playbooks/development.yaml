@@ -5,6 +5,7 @@
     - debug:
         var: whoami.stdout
   roles:
+    - vector
     #- role: common-setup
     #- role: geerlingguy.pip
     #- role: geerlingguy.docker
