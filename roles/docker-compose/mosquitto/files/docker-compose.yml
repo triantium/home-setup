@@ -9,6 +9,12 @@ services:
       - mosquitto-config:/mosquitto/config/
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep mosquitto || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   exporter:
     image: sapcc/mosquitto-exporter:0.8.0
     ports:
@@ -17,6 +23,12 @@ services:
       - BROKER_ENDPOINT=tcp://mosquitto:1883
       - MQTT_USER=${MQTT_EXPORTER_USER:-exporter}
       - MQTT_PASS=${MQTT_EXPORTER_PASS}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9234/metrics -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 volumes:
   mosquitto-data:
   mosquitto-log:

@@ -37,6 +37,12 @@ services:
       # Optional, if Pi-hole should get some more processing time
       - SYS_NICE
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost/admin/api.php?summary -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 #  unbound:
 #    container_name: unbound
 #    image: mvance/unbound:1.22.0
@@ -54,6 +60,12 @@ services:
     environment:
       PIHOLE_HOSTNAME: 'pihole'
       PIHOLE_PASSWORD: ${PIHOLE_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9617/metrics -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   autorestic:
     image: pascaliske/autorestic:latest
     restart: always

@@ -10,6 +10,12 @@ services:
       - INFLUXDB_DB=openhab
       - INFLUXDB_ADMIN_USER=openhab
       - INFLUXDB_ADMIN_PASSWORD=openhab1
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:8086/health -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   chronograf:
     image:            chronograf:1.11.3
     ports:
@@ -22,6 +28,12 @@ services:
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_USERNAME=openhab
       - INFLUXDB_PASSWORD=openhab1
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:8888/health -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 volumes:
   influxdb-storage:
   chronograf-storage:

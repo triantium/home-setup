@@ -36,6 +36,11 @@ services:
     restart: unless-stopped
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres-internal:
     image: docker.io/library/postgres:18.4 # 16.4
@@ -122,11 +127,22 @@ services:
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
       PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-deu}
       PAPERLESS_EMAIL_TASK_CRON: ${PAPERLESS_EMAIL_TASK_CRON:-42 1 * * *}
-
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:8000 -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   gotenberg:
     image: docker.io/gotenberg/gotenberg:8.33
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:3000/health -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
     # The gotenberg chromium route is used to convert .eml files. We do not
     # want to allow external content like tracking pixels or even javascript.
@@ -138,6 +154,12 @@ services:
   tika:
     image: docker.io/apache/tika:3.3.1.0
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:9998/ -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   exporter:
     image: ghcr.io/hansmi/prometheus-paperless-exporter:v0.0.9
     restart: on-failure
@@ -153,6 +175,12 @@ services:
       PAPERLESS_AUTH_PASSWORD: ${PAPERLESS_EXPORTER_PASSWORD}
       PAPERLESS_SERVER_TIMEZONE: Europe/Berlin
       PAPERLESS_CLIENT_DEBUG: ${PAPERLESS_CLIENT_DEBUG:-false}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:8081/metrics -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 volumes:
   data:
   media:

@@ -15,6 +15,12 @@ services:
       - TZ=Europe/Berlin
       - ENABLE_MJPG_STREAMER=false
       - CAMERA_DEV=/dev/video0
+#    healthcheck:
+#      test: ["CMD-SHELL", "wget -q http://localhost:5000 -O /dev/null"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 15s
   spoolman:
     image: ghcr.io/donkie/spoolman:0.23.1
     restart: unless-stopped
@@ -31,6 +37,12 @@ services:
     environment:
       - TZ=Europe/Berlin # Optional, defaults to UTC
       - SPOOLMAN_METRICS_ENABLED=true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:8000/health -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   autorestic:
     image: pascaliske/autorestic:latest
     restart: unless-stopped

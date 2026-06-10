@@ -31,6 +31,12 @@ services:
       - keycloak-data:/opt/keycloak/data
     networks:
       postgres-net:
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health/ready -o /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 networks:
   postgres-net:

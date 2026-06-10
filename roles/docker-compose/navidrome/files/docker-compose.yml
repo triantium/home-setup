@@ -12,3 +12,9 @@ services:
       - "${DATA_DIR}:/data"
       - "./backup:/backup"
       - "${MUSIC_DIR}:/music:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:4533/ping -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

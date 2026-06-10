@@ -34,6 +34,12 @@ services:
       - ./pgadmin4/servers.json:/pgadmin4/servers.json
     networks:
       postgres-internal:
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:80/misc/ping -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   pgbackups:
     image: prodrigestivill/postgres-backup-local:18-alpine
