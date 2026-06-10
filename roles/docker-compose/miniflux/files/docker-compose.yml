@@ -68,7 +68,7 @@ services:
     volumes:
       - ./autorestic/config.yml:/etc/autorestic/config.yml
       - ./autorestic/cron:/etc/cron/
-      - miniflux-db:/backups/miniflux-db
+      #- miniflux-db:/backups/miniflux-db
       - miniflux_pgbackups:/backups/miniflux_pgbackups
     entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
 volumes:

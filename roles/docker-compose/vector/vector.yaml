@@ -1,0 +1,26 @@
+sources:
+  syslog:
+    type: syslog
+    address: 0.0.0.0:9000
+    mode: tcp
+
+  docker:
+    # defaults to docker socket
+    type: docker_logs
+
+sinks:
+  out:
+    inputs:
+      - "syslog"
+      - "docker"
+    type: "console"
+    encoding:
+      codec: "text"
+  loki:
+    type: loki
+    inputs:
+      - "syslog"
+      - "docker"
+    endpoint: http://gloin.taila24d4b.ts.net:3100
+    encoding:
+      codec: "text"
