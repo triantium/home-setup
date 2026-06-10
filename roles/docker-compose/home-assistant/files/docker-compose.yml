@@ -9,6 +9,12 @@ services:
     restart: unless-stopped
     privileged: true
     network_mode: host
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q http://localhost:8123 -O /dev/null" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   autorestic:
     image: pascaliske/autorestic:latest
     restart: always
