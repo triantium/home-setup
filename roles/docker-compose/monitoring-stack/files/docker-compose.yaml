@@ -1,6 +1,21 @@
-networks:
-  loki:
 services:
+  loki:
+    image: grafana/loki:3.7.2
+    volumes:
+      - ./etc/loki:/etc/loki
+      - ./data/loki:/data
+    command:
+      - '--config.file=/etc/loki/local-config.yaml'
+    ports:
+      - 3100:3100
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:3100/ready -O /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   prometheus:
     image:        prom/prometheus
     #pull_policy: always

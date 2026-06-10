@@ -10,6 +10,18 @@
     - path: /opt/monitoring-stack/var/lib/grafana
       owner: 472
       group: 472
+    - path: /opt/monitoring-stack/data/loki
+      owner: 10001
+      group: 10001
+    - path: /opt/monitoring-stack/data/loki/rules
+      owner: 10001
+      group: 10001
+    - path: /opt/monitoring-stack/data/loki/chunks
+      owner: 10001
+      group: 10001
+    - path: /opt/monitoring-stack/data/loki/compactor
+      owner: 10001
+      group: 10001
 
 - name: Copy static stack files
   copy:
