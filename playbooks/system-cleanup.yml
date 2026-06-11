@@ -1,0 +1,124 @@
+- name: System cleanup
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    cleanup_docker: true
+    cleanup_journal: true
+    cleanup_tmp: true
+    journal_vacuum_time: "7d"
+    cleanup_usage_threshold: 80
+    cleanup_filesystem: "/"
+
+  tasks:
+    - name: Check filesystem usage
+      ansible.builtin.shell: |
+        set -o pipefail
+        df -P "{{ cleanup_filesystem }}" | awk 'NR == 2 { gsub("%", "", $5); print $5 }'
+      args:
+        executable: /bin/bash
+      register: filesystem_usage_check
+      changed_when: false
+
+    - name: Set filesystem usage fact
+      ansible.builtin.set_fact:
+        filesystem_usage_percent: "{{ filesystem_usage_check.stdout | int }}"
+
+    - name: Show cleanup decision
+      ansible.builtin.debug:
+        msg: >-
+          Filesystem {{ cleanup_filesystem }} usage is {{ filesystem_usage_percent }}%.
+          Cleanup threshold is {{ cleanup_usage_threshold }}%.
+          Cleanup will {{ 'run' if filesystem_usage_percent | int > cleanup_usage_threshold | int else 'be skipped' }}.
+
+    - name: Update APT package cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - ansible_facts.os_family == "Debian"
+
+    - name: Remove unused APT packages
+      ansible.builtin.apt:
+        autoremove: true
+        purge: true
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - ansible_facts.os_family == "Debian"
+
+    - name: Clean APT package cache
+      ansible.builtin.apt:
+        autoclean: true
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - ansible_facts.os_family == "Debian"
+
+    - name: Clean all downloaded APT package files
+      ansible.builtin.command:
+        cmd: apt-get clean
+      changed_when: false
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - ansible_facts.os_family == "Debian"
+
+    - name: Check whether Docker is installed
+      ansible.builtin.command:
+        cmd: docker --version
+      register: docker_check
+      changed_when: false
+      failed_when: false
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - cleanup_docker | bool
+
+    - name: Prune unused Docker data
+      ansible.builtin.command:
+        cmd: docker system prune --all --force --volumes
+      register: docker_prune
+      changed_when: "'Total reclaimed space' in docker_prune.stdout"
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - cleanup_docker | bool
+        - docker_check.rc == 0
+
+    - name: Vacuum systemd journal logs
+      ansible.builtin.command:
+        cmd: "journalctl --vacuum-time={{ journal_vacuum_time }}"
+      changed_when: false
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - cleanup_journal | bool
+        - ansible_facts.service_mgr == "systemd"
+
+    - name: Remove old temporary files from /tmp
+      ansible.builtin.find:
+        paths: /tmp
+        age: 7d
+        file_type: any
+        hidden: true
+      register: old_tmp_files
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - cleanup_tmp | bool
+
+    - name: Delete old temporary files from /tmp
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ old_tmp_files.files }}"
+      when:
+        - filesystem_usage_percent | int > cleanup_usage_threshold | int
+        - cleanup_tmp | bool
+        - old_tmp_files is defined
+
+    - name: Show disk usage after cleanup
+      ansible.builtin.command:
+        cmd: df -h
+      register: disk_usage
+      changed_when: false
+
+    - name: Print disk usage
+      ansible.builtin.debug:
+        var: disk_usage.stdout_lines
