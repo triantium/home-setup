@@ -135,7 +135,7 @@ services:
       start_period: 15s
 
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:8.33
+    image: docker.io/gotenberg/gotenberg:8.34
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q http://localhost:3000/health -O /dev/null"]
