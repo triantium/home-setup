@@ -3,10 +3,10 @@
     path: "/opt/{{domain}}/vector"
     state: directory
 
-- name: Copy vector.toml to target host
-  ansible.builtin.copy:
-    src: vector.toml
-    dest: "/opt/{{domain}}/vector/vector.toml"
+- name: Template vector config
+  ansible.builtin.template:
+    src: vector.yaml.j2
+    dest: "/opt/{{domain}}/vector/vector.yaml"
   register: vector_config
 
 - name: Copy docker-compose.yml to target host

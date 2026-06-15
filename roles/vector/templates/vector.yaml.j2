@@ -1,4 +1,7 @@
 sources:
+  internal_metrics:
+    type: internal_metrics
+
 {% if rsyslog_installed %}
   syslog:
     type: syslog
@@ -125,3 +128,9 @@ sinks:
       container: "{{ container_name }}"
       image: "{{ image }}"
 {% endraw %}
+
+  prometheus:
+    type: prometheus_exporter
+    inputs:
+      - internal_metrics
+    address: 0.0.0.0:9598

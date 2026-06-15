@@ -1,3 +1,4 @@
 service_name: vector
 uri: vector.quicksrv.de
 domain: triantium.ddns.net
+loki_endpoint: http://gloin.fritz.box:3100

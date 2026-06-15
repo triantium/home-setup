@@ -15,6 +15,7 @@
     #- role: docker-compose/miniflux
     - role: docker-compose/gitea
     - role: docker-compose/home-assistant
+    - role: docker-compose/vector
 
 #- hosts: heimdall
 #  roles:

@@ -1,0 +1,52 @@
+sources:
+  internal_metrics:
+    type: internal_metrics
+
+docker:
+  type: docker_logs
+
+transforms:
+normalize_docker:
+  type: remap
+  inputs:
+    - docker
+  source: |
+    .source_type = "docker"
+
+filter_docker:
+  type: remap
+  inputs:
+    - normalize_docker
+  source: |
+    if contains(string!(.message), "/-/healthy") || contains(string!(.message), "/ready") || contains(string!(.message), "healthcheck") {
+      abort
+    }
+
+throttle_docker:
+  type: throttle
+  inputs:
+    - filter_docker
+  threshold: 2000
+  window_secs: 1
+
+sinks:
+loki_docker:
+  type: loki
+  inputs:
+    - throttle_docker
+  endpoint: {{ loki_endpoint }}
+  encoding:
+    codec: json
+  labels:
+    source: docker
+  {% raw %}
+    host: "{{ host }}"
+    container: "{{ container_name }}"
+    image: "{{ image }}"
+  {% endraw %}
+
+  prometheus:
+    type: prometheus_exporter
+    inputs:
+      - internal_metrics
+    address: 0.0.0.0:9598

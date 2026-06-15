@@ -20,11 +20,20 @@ alerting:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name:          'prometheus'
+  - job_name: 'prometheus'
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
     static_configs:
     - targets:         ['localhost:9090']
+  - job_name: 'vector'
+    scrape_interval: 30s
+    static_configs:
+    - targets:
+      - 'gloin.fritz.box:9598'
+      - 'heimdall.fritz.box:9598'
+      - 'nas.fritz.box:9598'
+      labels:
+        app: 'vector'
   - job_name:          'tmp-nodes'
     scrape_interval: 20s
     static_configs:
