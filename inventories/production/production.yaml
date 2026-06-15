@@ -17,6 +17,8 @@ pi:
 #      ansible_become_password: "{{ lookup('community.general.passwordstore', 'hosts/inkycal/login') }}"
 #      ansible_user: "{{ lookup('community.general.passwordstore', 'hosts/inkycal/login', subkey='login') }}"
 divera:
+  vars:
+    loki_endpoint: http://gloin.taila24d4b.ts.net:3100
   hosts:
     display-02:
       ansible_host: display-02.taila24d4b.ts.net

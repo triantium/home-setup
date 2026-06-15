@@ -35,6 +35,8 @@ loki_docker:
   inputs:
     - throttle_docker
   endpoint: {{ loki_endpoint }}
+  healthcheck:
+    enabled: false
   encoding:
     codec: json
   labels:

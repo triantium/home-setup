@@ -87,6 +87,8 @@ sinks:
     inputs:
       - throttle_syslog
     endpoint: {{ loki_endpoint }}
+    healthcheck:
+      enabled: false
     encoding:
       codec: json
     labels:
@@ -104,6 +106,8 @@ sinks:
     inputs:
       - throttle_journald
     endpoint: {{ loki_endpoint }}
+    healthcheck:
+      enabled: false
     encoding:
       codec: json
     labels:
@@ -119,6 +123,8 @@ sinks:
     inputs:
       - throttle_docker
     endpoint: {{ loki_endpoint }}
+    healthcheck:
+      enabled: false
     encoding:
       codec: json
     labels:

@@ -4,4 +4,5 @@
     - role: common-setup
     - role: geerlingguy.pip
     - role: geerlingguy.docker
+    - role: vector
     - role: divera
