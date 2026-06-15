@@ -25,7 +25,7 @@
     dest: /opt/fritzbox-exporter/metrics.json
 - name: Create empty metrics-lua.json
   ansible.builtin.copy:
-    dest: "{{ project_dir }}/metrics-lua.json"
+    dest: "/opt/fritzbox-exporter/metrics-lua.json"
     content: "{}\n"
     mode: "0644"
 #- name: Download metrics-lua.json
