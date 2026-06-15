@@ -96,7 +96,7 @@
       ansible.builtin.find:
         paths: /tmp
         age: 7d
-        file_type: any
+        file_type: file
         hidden: true
       register: old_tmp_files
       when:
