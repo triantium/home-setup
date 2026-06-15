@@ -23,10 +23,15 @@
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/dotWee/docker-fritzbox-prometheus-exporter/master/metrics.json
     dest: /opt/fritzbox-exporter/metrics.json
-- name: Download metrics-lua.json
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/dotWee/docker-fritzbox-prometheus-exporter/master/metrics-lua.json
-    dest: /opt/fritzbox-exporter/metrics-lua.json
+- name: Create empty metrics-lua.json
+  ansible.builtin.copy:
+    dest: "{{ project_dir }}/metrics-lua.json"
+    content: "{}\n"
+    mode: "0644"
+#- name: Download metrics-lua.json
+#  ansible.builtin.get_url:
+#    url: https://raw.githubusercontent.com/dotWee/docker-fritzbox-prometheus-exporter/master/metrics-lua.json
+#    dest: /opt/fritzbox-exporter/metrics-lua.json
 
 - name: Pull the Images
   ansible.builtin.command:

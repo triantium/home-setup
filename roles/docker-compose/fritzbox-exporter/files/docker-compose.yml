@@ -10,7 +10,7 @@ services:
       LISTEN_ADDRESS: 0.0.0.0:9042
     volumes:
       - ./metrics.json:/app/metrics.json
-      #- ./metrics-lua.json:/app/metrics-lua.json
+      - ./metrics-lua.json:/app/metrics-lua.json
     healthcheck:
       test: ["CMD-SHELL", "wget -q http://localhost:9042/metrics -O /dev/null"]
       interval: 5m
