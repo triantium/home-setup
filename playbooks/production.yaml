@@ -12,7 +12,7 @@
     - role: docker-compose/postgres
     - role: docker-compose/navidrome
     - role: docker-compose/paperless-ngx
-    #- role: docker-compose/miniflux
+    - role: docker-compose/miniflux
     - role: docker-compose/gitea
     - role: docker-compose/home-assistant
     - role: docker-compose/vector

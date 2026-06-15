@@ -9,3 +9,10 @@ end_of_line = lf
 insert_final_newline = true
 tab_width = 4
 charset = utf-8
+
+[*.yaml]
+tab_width = 2
+
+
+[*.yaml.j2]
+tab_width = 2
