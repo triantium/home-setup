@@ -93,8 +93,8 @@ sinks:
       codec: json
     labels:
       source: syslog
+      host: "{{ ansible_hostname }}"
 {% raw %}
-      host: "{{ host }}"
       severity: "{{ severity }}"
       facility: "{{ facility }}"
 {% endraw %}
@@ -112,8 +112,8 @@ sinks:
       codec: json
     labels:
       source: journald
+      host: "{{ ansible_hostname }}"
 {% raw %}
-      host: "{{ host }}"
       unit: "{{ unit }}"
 {% endraw %}
 
@@ -129,8 +129,8 @@ sinks:
       codec: json
     labels:
       source: docker
+      host: "{{ ansible_hostname }}"
 {% raw %}
-      host: "{{ host }}"
       container: "{{ container_name }}"
       image: "{{ image }}"
 {% endraw %}

@@ -41,8 +41,8 @@ sinks:
       codec: json
     labels:
       source: docker
+      host: "{{ ansible_hostname }}"
 {% raw %}
-      host: "{{ host }}"
       container: "{{ container_name }}"
       image: "{{ image }}"
 {% endraw %}
