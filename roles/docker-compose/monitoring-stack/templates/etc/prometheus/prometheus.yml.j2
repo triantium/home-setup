@@ -129,14 +129,6 @@ scrape_configs:
     - targets:         ['alertmanager:9093']
       labels:
         app:           'alertmanager'
-  # - job_name:        'fritzbox_exporter'
-  #   scrape_interval: 2m
-  #   scheme:          'http'
-  #   metrics_path:    '/metrics'
-  #   static_configs:
-  #   - targets:       ['dori.fritz.box:9998']
-  #     labels:
-  #       app:         'alertmanager'
   - job_name: 'spoolman'
     scrape_interval: 30s
     metrics_path: 'metrics'
@@ -252,17 +244,6 @@ scrape_configs:
         target_label:  instance
       - target_label:  __address__
         replacement:   blackbox:9115
-  - job_name: nut-primary
-    metrics_path: /ups_metrics
-    scrape_interval: 30s
-    static_configs:
-      - targets: ['gloin.fritz.box:9199']
-        labels:
-          ups:  "eaton"
-  - job_name: nut-generic
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['gloin.fritz.box:9199']
   - job_name: 'pushgateway'
     honor_labels: true
     scrape_interval: 30s
