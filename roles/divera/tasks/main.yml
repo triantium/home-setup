@@ -1,6 +1,6 @@
-- name: Setup User for the Monitor
-  ansible.builtin.include_tasks:
-    file: user-setup.yml
+#- name: Setup User for the Monitor
+#  ansible.builtin.include_tasks:
+#    file: user-setup.yml
 
 - name:               Upgrade all repositories
   apt:
