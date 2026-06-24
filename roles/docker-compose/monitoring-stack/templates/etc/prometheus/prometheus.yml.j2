@@ -157,8 +157,6 @@ scrape_configs:
         - https://owncloud.geekinbusiness.de
         - https://nexus.geekinbusiness.de
         - https://jenkins.geekinbusiness.de/login
-        - https://geekinbusiness.de:10000
-        - https://mail.geekinbusiness.de:20000
     relabel_configs:
       - source_labels: [__address__]
         target_label:  __param_target
