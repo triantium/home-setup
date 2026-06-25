@@ -1,6 +1,6 @@
 services:
   restic-exporter:
-    image: ngosang/restic-exporter:2.0.2
+    image: ngosang/restic-exporter:2.1.1
     # privileged: true # because of a python call to time.time(); WTF
     # cap_add:
     #  - SYS_TIME is not sufficient
