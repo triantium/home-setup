@@ -16,6 +16,11 @@
     - role: docker-compose/gitea
     - role: docker-compose/home-assistant
     - role: docker-compose/vector
+    - role: docker-compose/restic-exporter
+      vars:
+        password: "{{ lookup('community.general.passwordstore', 'backup/restic' ) }}"
+        path: "{{ lookup('community.general.passwordstore', 'backup/restic' , subkey='local_location') }}"
+        type: 'rest'
 
 #- hosts: heimdall
 #  roles:
