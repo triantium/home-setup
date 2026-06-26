@@ -1,3 +1,29 @@
 - hosts: qnap
+  vars:
+    ansible_become: false
+    ansible_user: "{{ lookup('env', 'USER') }}"
+  pre_tasks:
+    - name: Update local password store from remote
+      ansible.builtin.command: pass git pull
+      become: false
+      register: pass_pull
+      changed_when: '"Already up to date" not in pass_pull.stdout'
+      delegate_to: localhost
+      run_once: true
   roles:
     - role: docker-compose/semaphore
+  post_tasks:
+    - name: Pull latest password store changes with rebase
+      ansible.builtin.command: pass git pull --rebase
+      become: false
+      register: pass_pull
+      changed_when: '"Already up to date" not in pass_pull.stdout'
+      delegate_to: localhost
+      run_once: true
+    - name: Push local password store changes to remote
+      ansible.builtin.command: pass git push
+      become: false
+      register: pass_push
+      changed_when: '"Everything up-to-date" not in pass_push.stderr'
+      delegate_to: localhost
+      run_once: true

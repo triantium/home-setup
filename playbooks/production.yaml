@@ -1,3 +1,16 @@
+- hosts: localhost
+  connection: local
+  become: false
+  vars:
+    ansible_become: false
+    ansible_user: "{{ lookup('env', 'USER') }}"
+  gather_facts: false
+  tasks:
+    - name: Update local password store from remote
+      ansible.builtin.command: pass git pull
+      register: pass_pull
+      changed_when: '"Already up to date" not in pass_pull.stdout'
+
 - hosts:
    - pi
   roles:
@@ -34,3 +47,20 @@
     - role: nginx
     - role: docker-compose/fritzbox-exporter
     - role: docker-compose/restic-exporter
+
+- hosts: localhost
+  connection: local
+  become: false
+  vars:
+    ansible_become: false
+    ansible_user: "{{ lookup('env', 'USER') }}"
+  gather_facts: false
+  tasks:
+    - name: Pull latest password store changes with rebase
+      ansible.builtin.command: pass git pull --rebase
+      register: pass_pull
+      changed_when: '"Already up to date" not in pass_pull.stdout'
+    - name: Push local password store changes to remote
+      ansible.builtin.command: pass git push
+      register: pass_push
+      changed_when: '"Everything up-to-date" not in pass_push.stderr'
