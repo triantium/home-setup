@@ -6,3 +6,7 @@ autorestic_location_name: home-assistant-backups
 autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
 autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"
 autorestic_cron: "{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * *"
+autorestic_exclude:
+  - "home-assistant_v2.db"
+  - "*.log"
+  - "*.log.*"
