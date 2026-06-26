@@ -5,14 +5,14 @@ domain: triantium.ddns.net
 tailscale_authkey_location: "token/tailscale.com/auth-key/sempahore"
 tailscale_authkey: "{{ lookup('community.general.passwordstore', tailscale_authkey_location , missing='error') }}"
 
-semaphore_access_key_encryption_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/access_key_encryption"
+semaphore_access_key_encryption_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/access_key_encryption'
 semaphore_access_key_encryption:  "{{ lookup('community.general.passwordstore', semaphore_access_key_encryption_location, missing='error') }}"
 
-postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
+postgres_password_location: 'hosts/{{ansible_facts.hostname}}/services/postgres/{{ domain }}'
 postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='error') }}"
 
-semaphore_password_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/admin"
-semaphore_db_password_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/db"
+semaphore_password_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/admin'
+semaphore_db_password_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/db'
 
 semaphore_db_password: "{{ lookup('community.general.passwordstore', semaphore_db_password_location,  missing='create') }}"
 semaphore_admin_password: "{{ lookup('community.general.passwordstore', semaphore_password_location,  missing='create') }}"
@@ -21,16 +21,16 @@ semaphore_admin_email: "{{ lookup('community.general.passwordstore', semaphore_p
 
 semaphore_gpg_key_name: "Semaphore Passwordstore Key"
 semaphore_gpg_key_email: "semaphore@{{ uri }}"
-semaphore_gpg_key_private_password_store_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/gpg-private-key"
-semaphore_gpg_key_public_password_store_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/gpg-public-key"
+semaphore_gpg_key_private_password_store_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/gpg-private-key'
+semaphore_gpg_key_public_password_store_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/gpg-public-key'
 semaphore_pass_store_repo: "git@git.geekinbusiness.de:manuel.mueller.geekadmin/password.git"
 semaphore_pass_store_path: "/opt/{{domain}}/semaphore/.password-store"
 semaphore_gpg_dir: "/opt/{{domain}}/semaphore/gpg"
 
 semaphore_ssh_key_name: "Semaphore SSH Key"
 semaphore_ssh_key_comment: "semaphore@{{ uri }}"
-semaphore_ssh_key_password_store_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/ssh-private-key"
-semaphore_ssh_key_public_password_store_location: "hosts/{{ansible_hostname}}/services/semaphore/{{ domain }}/ssh-public-key"
+semaphore_ssh_key_password_store_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/ssh-private-key'
+semaphore_ssh_key_public_password_store_location: 'hosts/{{ansible_facts.hostname}}/services/semaphore/{{ domain }}/ssh-public-key'
 semaphore_ssh_key_dir: "/opt/{{domain}}/semaphore/ssh"
 semaphore_ssh_private_key_path: "/opt/{{domain}}/semaphore/ssh/semaphore-key"
 semaphore_api_url: "http://localhost:3001/api"

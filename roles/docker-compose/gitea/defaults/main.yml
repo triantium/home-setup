@@ -2,10 +2,10 @@ service_name: gitea
 uri: gitea.triantium.de
 domain: triantium.ddns.net
 
-postgres_password_location: "hosts/{{ansible_hostname}}/services/postgres/{{ domain }}"
+postgres_password_location: 'hosts/{{ansible_facts.hostname}}/services/postgres/{{ domain }}'
 postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='error') }}"
 
-gitea_db_password_location: "hosts/{{ansible_hostname}}/services/gitea/{{ domain }}/db"
+gitea_db_password_location: 'hosts/{{ansible_facts.hostname}}/services/gitea/{{ domain }}/db'
 gitea_db_password: "{{ lookup('community.general.passwordstore', gitea_db_password_location, missing='create') }}"
 
 autorestic_location_name: gitea-backups

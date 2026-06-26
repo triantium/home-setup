@@ -4,7 +4,7 @@ domain: triantium.ddns.net
 smtp_password: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', missing='error') }}"
 
 
-blackbox_username_location: "hosts/{{ansible_hostname}}/services/monitoring-stack/{{ domain }}/blackbox-username"
+blackbox_username_location: 'hosts/{{ansible_facts.hostname}}/services/monitoring-stack/{{ domain }}/blackbox-username'
 blackbox_username: "{{ lookup('community.general.passwordstore', blackbox_username_location, missing='create') }}"
-blackbox_password_location: "hosts/{{ansible_hostname}}/services/monitoring-stack/{{ domain }}/blackbox-password"
+blackbox_password_location: 'hosts/{{ansible_facts.hostname}}/services/monitoring-stack/{{ domain }}/blackbox-password'
 blackbox_password: "{{ lookup('community.general.passwordstore', blackbox_password_location, missing='create') }}"
