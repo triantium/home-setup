@@ -47,6 +47,7 @@ services:
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql
+      - paperless_pgbackups:/backups
     environment:
       POSTGRES_DB: paperless
       POSTGRES_USER: paperless
@@ -89,7 +90,6 @@ services:
       - ./autorestic/config.yml:/etc/autorestic/config.yml
       - ./autorestic/cron:/etc/cron/
       - paperless_pgbackups:/backups/paperless_pgbackups
-      - pgdata:/backups/paperless_pgdata
       - data:/backups/paperless_data
       - media:/backups/paperless_media
       - export:/backups/paperless_export
