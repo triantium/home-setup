@@ -1,0 +1,11 @@
+services:
+  miniflux-digest:
+    image: ghcr.io/eleith/miniflux-digest:1.1.7
+    container_name: miniflux-digest
+    restart: unless-stopped
+    ports:
+      - 8085:8080
+    user: "1001:1001" # Optional: Set to your user/group ID
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./archive:/app/web/archive

@@ -1,0 +1,56 @@
+miniflux:
+  host: "https://triantium.ddns.net/miniflux"
+  api_token: "{{ lookup('community.general.passwordstore', 'token/triantium.ddns.net/miniflux', missing='error') }}"
+
+smtp:
+  host: "smtp.mailbox.org"
+  port: 465
+  user: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='login' , missing='error') }}"
+  password: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', missing='error') }}"
+  ssl: true
+
+ai:
+  api_key: "{{ lookup('community.general.passwordstore', 'token/gemini', missing='error') }}"
+
+digests:
+  - title: "Daily News"
+    #run_on_startup: true
+    schedule: "0 8 * * *"
+    host: "http://localhost:8085/"
+    view: "ai"
+    mark_as_read: true
+    email:
+      to: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='email' , missing='error') }}"
+      from: "news@triantium.de"
+    filters:
+      category_titles: ["News","Regional"]
+    categories:
+      - title: "Lokal"
+        description: "Meldungen aus Rennertshofen"
+      - title: "Regional"
+        description: "Meldungen aus den Regionen Neuburg-Schrobenhausen, Ingolstadt und Donauwörth"
+      - title: "Bayern"
+        description: "Meldungen aus Bayern."
+      - title: "Global"
+        description: "Meldungen aus der Welt und Deutschland globalen Netzwerk."
+  - title: "Feuerwehr"
+    #run_on_startup: true
+    schedule: "0 8 * * *"
+    host: "http://localhost:8085/"
+    view: "ai"
+    mark_as_read: true
+    email:
+      to: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='email' , missing='error') }}"
+      from: "news@triantium.de"
+    filters:
+      category_titles: ["Feuerwehrdienst"]
+
+
+  - title: "Weekly Catch-All"
+    run_on_startup: true
+    schedule: "@weekly"
+    host: "http://localhost:8085"
+    view: "ai"
+    email:
+      to: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='email' , missing='error') }}"
+      from: "news@triantium.de"
