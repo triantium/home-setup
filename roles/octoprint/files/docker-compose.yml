@@ -22,7 +22,7 @@ services:
 #      retries: 3
 #      start_period: 15s
   spoolman:
-    image: ghcr.io/donkie/spoolman:0.23.1
+    image: ghcr.io/donkie/spoolman:0.24.0
     restart: unless-stopped
     security_opt:
       - seccomp=unconfined  # Add this to allow proper time operations
