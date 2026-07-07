@@ -2,9 +2,11 @@
   ansible.builtin.copy:
     src: Dockerfile
     dest: "/opt/{{domain}}/semaphore/Dockerfile"
+  register: semaphore_dockerfile
 
 - name: Copy entrypoint script to target
   ansible.builtin.copy:
     src: semaphore-init.sh
     dest: "/opt/{{domain}}/semaphore/semaphore-init.sh"
     mode: '0755'
+  register: semaphore_init_script
