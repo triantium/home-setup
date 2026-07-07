@@ -11,33 +11,13 @@
       register: pass_pull
       changed_when: '"Already up to date" not in pass_pull.stdout'
 
-- hosts:
-    - pi
+- hosts: heimdall
   roles:
     - role: common-setup
     - role: geerlingguy.pip
     - role: geerlingguy.docker
     - role: vector
-
-- hosts: qnap
-  roles:
-    - role: docker-compose/node-exporter
-    - role: docker-compose/postgres
-    - role: docker-compose/navidrome
-    - role: docker-compose/paperless-ngx
-    - role: docker-compose/miniflux
-    - role: docker-compose/gitea
-    - role: docker-compose/home-assistant
-    - role: docker-compose/vector
-
-- hosts: gloin
-  roles:
-    - role: docker-compose/monitoring-stack
-    - role: docker-compose/meshtastic-web
-    - role: docker-compose/homer
-    - role: nginx
-    - role: docker-compose/fritzbox-exporter
-    - role: docker-compose/restic-exporter
+    - role: docker-compose/pi-hole
 
 - hosts: localhost
   connection: local
