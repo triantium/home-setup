@@ -1,43 +1,51 @@
-- hosts: localhost
-  connection: local
-  become: false
-  vars:
-    ansible_become: false
-    ansible_user: "{{ lookup('env', 'USER') }}"
-  gather_facts: false
-  tasks:
-    - name: Update local password store from remote
-      ansible.builtin.command: pass git pull
-      register: pass_pull
-      changed_when: '"Already up to date" not in pass_pull.stdout'
+- name: Setup infrastructure
+  ansible.builtin.import_playbook: deployments/00_setup.yaml
 
-- hosts:
-    - pi
-  roles:
-    - role: common-setup
-    - role: geerlingguy.pip
-    - role: geerlingguy.docker
-    - role: vector
+- name: Deploy Postgres
+  ansible.builtin.import_playbook: deployments/01_postgres.yaml
 
-- hosts: qnap
-  roles:
-    - role: docker-compose/node-exporter
-    - role: docker-compose/postgres
-    - role: docker-compose/navidrome
-    - role: docker-compose/paperless-ngx
-    - role: docker-compose/miniflux
-    - role: docker-compose/gitea
-    - role: docker-compose/home-assistant
-    - role: docker-compose/vector
+- name: Deploy Vector on QNAP
+  ansible.builtin.import_playbook: deployments/01_vector-qnap.yaml
 
-- hosts: gloin
-  roles:
-    - role: docker-compose/monitoring-stack
-    - role: docker-compose/meshtastic-web
-    - role: docker-compose/homer
-    - role: nginx
-    - role: docker-compose/fritzbox-exporter
-    - role: docker-compose/restic-exporter
+- name: Deploy Node Exporter
+  ansible.builtin.import_playbook: deployments/01_node-exporter.yaml
+
+- name: Deploy Navidrome
+  ansible.builtin.import_playbook: deployments/10_navidrome.yaml
+
+- name: Deploy Paperless-ngx
+  ansible.builtin.import_playbook: deployments/10_paperless-ngx.yaml
+
+- name: Deploy Miniflux
+  ansible.builtin.import_playbook: deployments/10_miniflux.yaml
+
+- name: Deploy Gitea
+  ansible.builtin.import_playbook: deployments/10_gitea.yaml
+
+- name: Deploy Home Assistant
+  ansible.builtin.import_playbook: deployments/10_home-assistant.yaml
+
+
+- name: Deploy Meshtastic Web
+  ansible.builtin.import_playbook: deployments/10_meshtastic-web.yaml
+
+- name: Deploy Homer
+  ansible.builtin.import_playbook: deployments/10_homer.yaml
+
+- name: Deploy Fritzbox Exporter
+  ansible.builtin.import_playbook: deployments/20_fritzbox-exporter.yaml
+
+- name: Deploy Restic Exporter
+  ansible.builtin.import_playbook: deployments/20_restic-exporter.yaml
+
+- name: Deploy Monitoring Stack
+  ansible.builtin.import_playbook: deployments/20_monitoring-stack.yaml
+
+- name: Deploy Nginx
+  ansible.builtin.import_playbook: deployments/30_nginx.yaml
+
+- name: Deploy Pi-hole
+  ansible.builtin.import_playbook: deployments/99_pihole.yaml
 
 - hosts: localhost
   connection: local

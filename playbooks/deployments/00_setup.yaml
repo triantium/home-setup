@@ -19,9 +19,6 @@
     - role: geerlingguy.docker
     - role: vector
 
-- hosts: qnap
-  roles:
-    - role: docker-compose/vector
 
 - hosts: localhost
   connection: local
