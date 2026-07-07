@@ -9,19 +9,19 @@
 
 - name: Template Autorestic Config
   ansible.builtin.template:
-    src: "{{ playbook_dir }}/../templates/autorestic/config.yml.j2"
+    src: "{{ shared_templates_dir }}/autorestic/config.yml.j2"
     dest: "/opt/{{domain}}/home-assistant/autorestic/config.yml"
   register: autorestic_template
 
 - name: Template Autorestic Crontab
   ansible.builtin.template:
-    src: "{{ playbook_dir }}/../templates/autorestic/crontab.j2"
+    src: "{{ shared_templates_dir }}/autorestic/crontab.j2"
     dest: "/opt/{{domain}}/home-assistant/autorestic/cron/crontab"
   register: autorestic_crontab_template
 
 - name: Copy Autorestic start_cron.sh
   ansible.builtin.template:
-    src: "{{ playbook_dir }}/../templates/autorestic/start_cron.sh"
+    src: "{{ shared_templates_dir }}/autorestic/start_cron.sh"
     dest: "/opt/{{domain}}/home-assistant/autorestic/cron/start_cron.sh"
   register: autorestic_start_cron_template
 

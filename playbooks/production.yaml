@@ -25,7 +25,6 @@
 - name: Deploy Home Assistant
   ansible.builtin.import_playbook: deployments/10_home-assistant.yaml
 
-
 - name: Deploy Meshtastic Web
   ansible.builtin.import_playbook: deployments/10_meshtastic-web.yaml
 
