@@ -34,7 +34,7 @@ qnap:
   hosts:
     nas.fritz.box:
       pass_alias: 'nas'
-      ansible_python_interpreter: /opt/QPython312/bin/python3
+      ansible_python_interpreter: /opt/python3/bin/python3
       ansible_host: nas.taila24d4b.ts.net
       ansible_become: False
       docker_cli: /share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker
