@@ -85,6 +85,10 @@
     dest: /etc/vector/vector.yaml
   register: vector_config
 
+- name: Validate Vector configuration
+  command: vector validate
+  register: vector_validate
+
 - name: Enable and start Vector
   systemd:
     name: vector

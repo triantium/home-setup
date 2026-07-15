@@ -43,8 +43,8 @@ sinks:
       source: docker
       host: "{{ ansible_hostname }}"
 {% raw %}
-      container: "{{ container_name }}"
-      image: "{{ image }}"
+      container: "docker-{{ container_name }}"
+      image: "docker-{{ image }}"
 {% endraw %}
 
   prometheus:

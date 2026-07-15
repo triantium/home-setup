@@ -95,8 +95,8 @@ sinks:
       source: syslog
       host: "{{ ansible_hostname }}"
 {% raw %}
-      severity: "{{ severity }}"
-      facility: "{{ facility }}"
+      severity: "syslog-{{ severity }}"
+      facility: "syslog-{{ facility }}"
 {% endraw %}
 
 {% endif %}
@@ -114,7 +114,7 @@ sinks:
       source: journald
       host: "{{ ansible_hostname }}"
 {% raw %}
-      unit: "{{ unit }}"
+      unit: "journald-{{ unit }}"
 {% endraw %}
 
 {% endif %}
@@ -131,8 +131,8 @@ sinks:
       source: docker
       host: "{{ ansible_hostname }}"
 {% raw %}
-      container: "{{ container_name }}"
-      image: "{{ image }}"
+      container: "docker-{{ container_name }}"
+      image: "docker-{{ image }}"
 {% endraw %}
 
   prometheus:
