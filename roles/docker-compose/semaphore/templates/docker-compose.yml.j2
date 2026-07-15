@@ -32,7 +32,7 @@ services:
       SEMAPHORE_LDAP_ACTIVATED: 'no'
       PASSWORD_STORE_DIR: /home/semaphore/.password-store
       SEMAPHORE_EMAIL_ALERT: 'true'
-      SEMAPHORE_EMAIL_SENDER: 'emaphore@triantium.de'
+      SEMAPHORE_EMAIL_SENDER: ${SEMAPHORE_EMAIL_SENDER}
       SEMAPHORE_EMAIL_HOST: '{{ semaphore_email_host }}'
       SEMAPHORE_EMAIL_PORT: '{{ semaphore_email_port }}'
       SEMAPHORE_EMAIL_USERNAME: '{{ semaphore_email_username }}'
@@ -43,6 +43,9 @@ services:
       SEMAPHORE_TELEGRAM_ALERT: 'true'
       SEMAPHORE_TELEGRAM_CHAT: '{{ semaphore_telegram_chat }}'
       SEMAPHORE_TELEGRAM_TOKEN: '{{ semaphore_telegram_token }}'
+      SEMAPHORE_WEB_ROOT: ${SEMAPHORE_WEB_ROOT}
+      SEMAPHORE_TASK_LOG_ENABLED: True
+      SEMAPHORE_EVENT_LOG_ENABLED: True
     volumes:
       - {{ semaphore_pass_store_path }}:/home/semaphore/.password-store:rw
       - {{ semaphore_gpg_dir }}/semaphore-private.key:/etc/semaphore/gpg/semaphore-private.key:ro

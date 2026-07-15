@@ -17,7 +17,7 @@
 
 - name: Schedule semaphore restart after the run
   ansible.builtin.shell:
-    cmd: "echo 'sleep 10 && {{ docker_cli }} compose restart semaphore' | nohup sh > /dev/null 2>&1 &"
+    cmd: "{{ docker_cli }} compose restart semaphore"
     chdir: "/opt/{{domain}}/semaphore"
   when: semaphore_env.changed or docker_compose_yaml.changed or semaphore_dockerfile.changed or semaphore_init_script.changed
   async: 1
