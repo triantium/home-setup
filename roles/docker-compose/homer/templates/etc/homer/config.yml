@@ -36,6 +36,7 @@ colors:
     link: "#3273dc"
     link-hover: "#2e4053"
     background-image: "../assets/wallpaper-light.jpeg" # Change wallpaper.jpeg to the name of your own custom wallpaper!
+    #background-image: "https://picsum.photos/1920/1080"
   dark:
     highlight-primary: "#181C3A"
     highlight-secondary: "#181C3A"
@@ -50,13 +51,14 @@ colors:
     link: "#c1c1c1"
     link-hover: "#fafafa"
     background-image: "../assets/wallpaper.jpeg"
+    #background-image: "https://picsum.photos/1920/1080"
 
 # Optional message
 
 # Optional navbar
 # links: [] # Allows for navbar (dark mode, layout, and search) without any links
 links:
-  - name: "Heimnetzwerk"
+  - name: "Start"
     icon: "fas fa-home"
     url: "#"
   # this will link to a second homer page that will load config from page2.yml and keep default config values as in config.yml file
@@ -67,10 +69,10 @@ links:
   - name: "Geek in Business"
     icon: "fas fa-glasses"
     url: "#geek"
-  - name: "Contribute"
-    icon: "fab fa-github"
-    url: "https://github.com/bastienwirtz/homer"
-    target: "_blank" # optional html a tag target attribute
+#  - name: "Contribute"
+#    icon: "fab fa-github"
+#    url: "https://github.com/bastienwirtz/homer"
+#    target: "_blank" # optional html a tag target attribute
   # this will link to a second homer page that will load config from additional-page.yml and keep default config values as in config.yml file
   # see url field and assets/additional-page.yml.dist used in this example:
   #- name: "another page!"
@@ -85,24 +87,14 @@ services:
     icon: "fas fa-social"
     items:
       - name: "Navidrome"
-
         logo: "assets/dashboard-icons/svg/navidrome.svg"
         subtitle: "Musik"
         url: "https://triantium.ddns.net/navidrome"
         target: "_blank" # optional html a tag target attribute
       - name: "Miniflux"
-
         logo: "assets/dashboard-icons/svg/miniflux.svg"
         subtitle: "RSS Feed Aggregator"
-
         url: "https://triantium.ddns.net/miniflux"
-        target: "_blank"
-      - name: "Jellyfin"
-
-        logo: "assets/dashboard-icons/svg/jellyfin.svg"
-        subtitle: "Medienstreaming"
-
-        url: "https://triantium.ddns.net/jellyfin"
         target: "_blank"
       - name: "Home Assistent"
 
@@ -113,9 +105,10 @@ services:
       - name: "Paperless"
         url: "https://triantium.ddns.net/paperless/"
         logo: "assets/dashboard-icons/svg/paperless-ngx.svg"
+        subtitle: "Document Management"
         type: "PaperlessNG"
         apikey: "{{lookup( 'community.general.passwordstore', 'token/triantium.ddns.net/paperless' )}}"
-        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://nas.fritz.box:8085/paperless"
+        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://nas.taila24d4b.ts.net:8085/paperless"
 
   - name: "Netwerk"
     icon: "fas fa-network-wired"
@@ -142,12 +135,12 @@ services:
 
         logo: "assets/dashboard-icons/png/octoprint.png"
         tag: "device"
-        url: "http://octopi.fritz.box"
+        url: "http://octopi.taila24d4b.ts.net"
       - name: NAS"
 
         logo: "assets/dashboard-icons/png/qnap.png"
         tag: "device"
-        url: "http://nas.fritz.box"
+        url: "http://nas.taila24d4b.ts.net"
         # type: "OctoPrint"
         target: "_blank" # optional html a tag target attribute
 
@@ -156,30 +149,30 @@ services:
     items:
       - name: "PiHole"
         logo: "assets/dashboard-icons/svg/pi-hole.svg"
-        #subtitle: "RSS Feed Aggregator"
-        url: "http://heimdall.fritz.box/admin"
+        url: "http://heimdall.taila24d4b.ts.net/admin"
         target: "_blank"
         type: "PiHole"
-        apikey: "{{lookup( 'community.general.passwordstore', 'hosts/heimdall/pihole/token' )}}"
-        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://heimdall.fritz.box"
+#        apikey: "{{lookup( 'community.general.passwordstore', 'hosts/heimdall/pihole/token' )}}"
+#        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://heimdall.taila24d4b.ts.net"
       - name: "Grafana"
         logo: "assets/dashboard-icons/svg/grafana.svg"
         subtitle: ""
-        url: "http://gloin.fritz.box:3333/"
+        url: "http://gloin.taila24d4b.ts.net:3333/"
         target: "_blank"
       - name: "Prometheus"
-        logo: "http://gloin.fritz.box:9999/favicon.ico"
+        type: "Prometheus"
+        logo: "http://gloin.taila24d4b.ts.net:9999/favicon.svg"
         subtitle: ""
-        url: "http://gloin.fritz.box:9999/graph?g0.expr=&g0.tab=1&g0.display_mode=lines&g0.show_exemplars=0&g0.range_input=1h"
+        endpoint: "http://{{ ansible_facts['hostname'] }}:8081/http://gloin.taila24d4b.ts.net:9999"
+        url: "http://gloin.taila24d4b.ts.net:9999/graph?g0.expr=&g0.tab=1&g0.display_mode=lines&g0.show_exemplars=0&g0.range_input=1h"
         target: "_blank"
       - name: "Gitea"
         logo: "assets/dashboard-icons/svg/gitea.svg"
         subtitle: "Unfancy Git"
-        url: "http://nas.fritz.box:3000"
+        url: "http://nas.taila24d4b.ts.net:3000"
         target: "_blank"
-      - name: "Meshtastic"
-
-        logo: "http://192.168.19.46/apple-touch-icon.png"
-        subtitle: "Private Messaging"
-        url: "http://192.168.19.46/"
+      - name: "Semaphore UI"
+        logo: "http://nas.taila24d4b.ts.net:3001/favicon.svg"
+        subtitle: "Unfancy Git"
+        url: "http://nas.taila24d4b.ts.net:3000"
         target: "_blank"
