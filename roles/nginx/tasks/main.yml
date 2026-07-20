@@ -4,3 +4,7 @@
 - name: Setup domain
   ansible.builtin.include_tasks:
     file: setup-domain.yml
+
+- name: Deploy website
+  ansible.builtin.include_tasks:
+    file: deploy-website.yml

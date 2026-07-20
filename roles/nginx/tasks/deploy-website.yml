@@ -1,0 +1,33 @@
+- name: Check if webroot is a git repository
+  ansible.builtin.stat:
+    path: "{{ webroot }}/.git"
+  register: webroot_git
+
+- name: Remove unmanaged webroot directory
+  ansible.builtin.file:
+    path: "{{ webroot }}"
+    state: absent
+  when: not webroot_git.stat.exists
+
+- name: Ensure webroot parent directory exists
+  ansible.builtin.file:
+    path: "/var/www/{{ domain_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Clone or update website repository
+  ansible.builtin.git:
+    repo: "https://github.com/triantium/website.git"
+    dest: "{{ webroot }}"
+    accept_hostkey: true
+    force: yes
+
+- name: Setup daily git pull cron job
+  ansible.builtin.cron:
+    name: "Pull latest website changes"
+    minute: "0"
+    hour: "4"
+    job: "git -C {{ webroot }} pull --ff-only"
+    user: root
