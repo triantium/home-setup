@@ -1,4 +1,4 @@
-FROM semaphoreui/semaphore:v2.18.27
+FROM semaphoreui/semaphore:v2.18.28
 
 USER root
 RUN apk add --no-cache pass gnupg bind-tools
