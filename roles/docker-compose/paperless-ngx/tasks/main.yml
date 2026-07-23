@@ -57,3 +57,12 @@
   command:
     chdir: '/opt/{{domain}}/paperless'
     cmd: "{{ docker_cli }} compose restart"
+
+- name: Wait for paperless to be reachable
+  ansible.builtin.uri:
+    url: "http://localhost:8085/paperless/"
+    status_code: 200
+  register: healthcheck
+  until: healthcheck.status == 200
+  retries: 30
+  delay: 10
