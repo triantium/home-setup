@@ -162,7 +162,7 @@ services:
       retries: 3
       start_period: 15s
   exporter:
-    image: ghcr.io/hansmi/prometheus-paperless-exporter:v0.0.9
+    image: ghcr.io/hansmi/prometheus-paperless-exporter:v0.0.10
     restart: on-failure
     init: true
     ports:
