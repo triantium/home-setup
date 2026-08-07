@@ -5,7 +5,12 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      - GITEA__server__SSH_PORT=222
+      - GITEA__server__DOMAIN=triantium.ddns.net
+      - GITEA__server__SSH_DOMAIN=triantium.ddns.net
+      - GITEA__server__ROOT_URL=https://triantium.ddns.net/git/
+#      - GITEA__server__DOMAIN=nas.taila24d4b.ts.net
+#      - GITEA__server__ROOT_URL=http://nas.taila24d4b.ts.net:3000/git/
+      - GITEA__server__SSH_PORT=2222
       - GITEA__server__LISTEN_PORT=22
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__HOST=postgres:5432
