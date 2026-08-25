@@ -1,0 +1,59 @@
+- name: Create directories for the kavita service
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "/opt/{{ domain }}/kavita"
+    - "/opt/{{ domain }}/kavita/autorestic"
+    - "/opt/{{ domain }}/kavita/autorestic/cron"
+    - "{{ kavita_config_dir }}"
+    - "{{ kavita_manga_dir }}"
+    - "{{ kavita_comics_dir }}"
+    - "{{ kavita_books_dir }}"
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: "/opt/{{ domain }}/kavita/docker-compose.yml"
+  register: docker_compose_yaml
+
+- name: Template Env
+  ansible.builtin.template:
+    src: env.j2
+    dest: "/opt/{{ domain }}/kavita/.env"
+  register: env_template
+
+- name: Template Autorestic Config
+  ansible.builtin.template:
+    src: "{{ shared_templates_dir }}/autorestic/config.yml.j2"
+    dest: "/opt/{{ domain }}/kavita/autorestic/config.yml"
+  register: autorestic_template
+
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ shared_templates_dir }}/autorestic/crontab.j2"
+    dest: "/opt/{{ domain }}/kavita/autorestic/cron/crontab"
+  register: autorestic_crontab_template
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ shared_templates_dir }}/autorestic/start_cron.sh"
+    dest: "/opt/{{ domain }}/kavita/autorestic/cron/start_cron.sh"
+  register: autorestic_start_cron_template
+
+- name: Pull the Images
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: "/opt/{{ domain }}/kavita"
+  when: docker_compose_yaml.changed
+
+- name: Start the kavita service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "/opt/{{ domain }}/kavita"
+
+- name: Restart on change
+  when: docker_compose_yaml.changed or env_template.changed or autorestic_template.changed or autorestic_crontab_template.changed or autorestic_start_cron_template.changed
+  ansible.builtin.command:
+    chdir: "/opt/{{ domain }}/kavita"
+    cmd: "{{ docker_cli }} compose restart"
