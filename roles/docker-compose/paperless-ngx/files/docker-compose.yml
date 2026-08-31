@@ -95,7 +95,7 @@ services:
       - export:/backups/paperless_export
     entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:3.1.0
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.1.1
     restart: unless-stopped
     depends_on:
       postgres-internal:
