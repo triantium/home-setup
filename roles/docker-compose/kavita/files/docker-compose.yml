@@ -1,6 +1,6 @@
 services:
   kavita:
-    image: ghcr.io/kareadita/kavita:latest
+    image: ghcr.io/kareadita/kavita:0.9.1
     container_name: kavita
     ports:
       - "${KAVITA_PORT:-5000}:5000"
@@ -14,6 +14,7 @@ services:
       - ${KAVITA_MANGA_DIR}:/manga
       - ${KAVITA_COMICS_DIR}:/comics
       - ${KAVITA_BOOKS_DIR}:/books
+      - ${KAVITA_EBOOKS_DIR}:/ebooks
     healthcheck:
       test: ["CMD-SHELL", "wget -q http://localhost:5000 -O /dev/null"]
       interval: 30s

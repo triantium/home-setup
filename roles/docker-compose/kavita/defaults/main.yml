@@ -2,13 +2,14 @@ service_name: kavita
 uri: kavita.triantium.de
 domain: triantium.ddns.net
 
-kavita_port: 5000
+kavita_port: 5010
 kavita_tz: Europe/Berlin
 
 kavita_config_dir: /opt/{{ domain }}/kavita/config
 kavita_manga_dir: /share/homes/pi/manga
 kavita_comics_dir: /share/homes/pi/comics
 kavita_books_dir: /share/homes/pi/books
+kavita_ebooks_dir: /share/homes/pi/ebooks
 
 autorestic_location_name: kavita-backups
 autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
