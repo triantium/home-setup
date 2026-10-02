@@ -28,6 +28,9 @@
 - name: Deploy Kavita
   ansible.builtin.import_playbook: deployments/10_kavita.yaml
 
+- name: Deploy Immich
+  ansible.builtin.import_playbook: deployments/10_immich.yaml
+
 - name: Deploy Meshtastic Web
   ansible.builtin.import_playbook: deployments/10_meshtastic-web.yaml
 

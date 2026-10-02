@@ -1,6 +1,16 @@
-- stat:
-    path: /etc/letsencrypt/renewal/{{domain_name}}.conf
+- name: Determine the hostnames certificates are requested for
+  ansible.builtin.set_fact:
+    certbot_domains: "{{ [domain_name] + (subdomain_vhosts | default([])) }}"
+
+- name: Check which certificates are already issued
+  ansible.builtin.stat:
+    path: /etc/letsencrypt/renewal/{{ item }}.conf
+  loop: "{{ certbot_domains }}"
   register: renewal_present
+
+- name: Check whether any certificate is still missing
+  ansible.builtin.set_fact:
+    certificate_missing: "{{ renewal_present.results | rejectattr('stat.exists') | list | length > 0 }}"
 
 - block:
     - name: Copy Site Configuration
@@ -19,30 +29,58 @@
         group: www-data
         state: link
 
+    # Comments out every "listen ... ssl" directive and the ssl_certificate*
+    # directives, so that nginx can start before a certificate exists.
+    #
+    # The marker ";#" is inserted directly in front of "ssl" rather than at the
+    # end of the line, which keeps the listen directive terminated by its ";"
+    # and moves the rest of the line behind the comment. Matching on "ssl"
+    # rather than on the port number matters because this repository also serves
+    # SSL on a non standard port (8123): a leftover "listen ... ssl" without a
+    # certificate is a hard error, while a missing port is not.
     - name: Comment out SSL related directives in configuration
-      command: sed -i -r 's/(listen .*443)/\1;#/g; s/(ssl_(certificate|certificate_key|trusted_certificate) )/#;#\1/g' /etc/nginx/sites-available/{{item}}.conf
-      when: renewal_present.stat.exists == False
+      command: sed -i -r 's/(listen [^#]*[^#[:space:]]) (ssl[^#]*)/\1 ;#\2/g; s/(ssl_(certificate|certificate_key|trusted_certificate) )/#;#\1/g' /etc/nginx/sites-available/{{item}}.conf
+      when: certificate_missing
       loop: "{{aliase}}"
 
     - name: Validate nginx configuration before reload
       command: nginx -t
       changed_when: false
-      when: renewal_present.stat.exists == False
+      when: certificate_missing
 
     - name: Reload nginx
       service:
         name: nginx
         state: reloaded
         enabled: yes
-      when: renewal_present.stat.exists == False
+      when: certificate_missing
 
-    - name: Obtain certificate
-      command: certbot certonly --webroot -d "{{domain_name}}" --email info@{{domain_name}} -w /var/www/_letsencrypt -n --agree-tos
-      when: renewal_present.stat.exists == False
+    # One certbot invocation per hostname, each requesting a single name.
+    # Certbot names a certificate lineage after the first -d it is given, so
+    # asking for the apex domain and a vhost in one invocation would add the
+    # vhost as a SAN on the existing apex certificate instead of creating a
+    # separate certificate under /etc/letsencrypt/live/<vhost>/, which is what
+    # the vhost configurations reference.
+    - name: Obtain certificate for the apex domain
+      command: >-
+        certbot certonly --webroot
+        -d {{ domain_name }}
+        --email info@{{ domain_name }}
+        -w /var/www/_letsencrypt -n --agree-tos
+      when: certificate_missing
+
+    - name: Obtain certificate for each subdomain vhost
+      command: >-
+        certbot certonly --webroot
+        -d {{ item }}
+        --email info@{{ domain_name }}
+        -w /var/www/_letsencrypt -n --agree-tos
+      loop: "{{ subdomain_vhosts | default([]) }}"
+      when: certificate_missing
 
     - name: Uncomment out SSL related directives in configuration
       command: sed -i -r 's/#?;#//g' /etc/nginx/sites-available/{{item}}.conf
-      when: renewal_present.stat.exists == False
+      when: certificate_missing
       loop: "{{aliase}}"
 
     - name: Validate nginx configuration before final reload

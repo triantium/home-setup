@@ -1,6 +1,12 @@
 domain_name:    triantium.ddns.net
 common_webroot: /var/www/
 webroot:        /var/www/{{domain_name}}/public
+
+# Hostnames served by a dedicated server block of their own. Each one needs a
+# certificate from Let's Encrypt in addition to the apex domain.
+subdomain_vhosts:
+  - myndir.triantium.de
+
 aliase:
   - triantium.ddns.net
   - restic.triantium.ddns.net
@@ -9,3 +15,4 @@ aliase:
   - kavita.triantium.ddns.net
   - paperless.triantium.ddns.net
   - git.triantium.ddns.net
+  - myndir.triantium.de

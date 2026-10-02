@@ -100,6 +100,7 @@ Each role under `docker-compose/` deploys a Docker Compose stack under `/opt/<do
 | **paperless-ngx** | Paperless-ngx | Document management with Redis, Tika/Gotenberg document processing, internal PostgreSQL, Prometheus exporter, autorestic backups. |
 | **jellyfin** | Jellyfin | Media server. |
 | **navidrome** | Navidrome | Music streaming server with AI/ListenBrainz plugin downloads and Last.fm integration. |
+| **immich** | Immich | Self-hosted photo and video backup/library with machine learning. Runs the server, machine learning, Valkey and vectorchord PostgreSQL containers, read-only external library mount and autorestic database backups. Served from its own vhost `myndir.triantium.de`, since Immich cannot be served from a sub-path. |
 | **minio** | MinIO | S3-compatible object storage. |
 | **miniflux** | Miniflux | RSS reader with central PostgreSQL, autorestic backups. |
 | **influxdb** | InfluxDB + Chronograf | Time-series monitoring stack (InfluxDB 2.x). |
