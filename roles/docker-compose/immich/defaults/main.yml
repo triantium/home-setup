@@ -5,6 +5,14 @@ domain: triantium.ddns.net
 immich_port: 2283
 immich_tz: Europe/Berlin
 
+# Immich evicts loaded models after 300s by default, which is shorter than the
+# gap between photo batches here, so CLIP and buffalo_l get unloaded and then
+# re-read from the cache volume on the next request. Observed ~32 GB of reads in
+# 35 minutes before this was raised. 0 keeps them resident, which needs ~2 GB of
+# RAM for the full model set.
+# https://immich.app/docs/features/ml-hardware-acceleration
+immich_ml_model_ttl: 0
+
 immich_data_dir: /opt/{{ domain }}/immich
 immich_upload_location: "{{ immich_data_dir }}/library"
 immich_db_data_location: "{{ immich_data_dir }}/postgres"

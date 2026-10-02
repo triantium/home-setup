@@ -52,6 +52,9 @@ services:
       - immich-model-cache:/cache
     environment:
       - TZ=${IMMICH_TZ:-Europe/Berlin}
+      # Default 300s evicts models faster than this deployment uses them,
+      # causing repeated re-reads from the cache volume
+      - MACHINE_LEARNING_MODEL_TTL=${MACHINE_LEARNING_MODEL_TTL:-0}
     restart: unless-stopped
 
 
@@ -84,9 +87,9 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 60s
+      timeout: 15s
+      retries: 10
 
   pgbackups:
     image: prodrigestivill/postgres-backup-local:18-alpine
