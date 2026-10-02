@@ -1,0 +1,131 @@
+# Immich must be served from the root path of its own hostname, it does not
+# support reverse proxy sub-paths such as `location /immich`.
+#
+# The `immich-server` and `immich-machine-learning` images have to use the same
+# version tag. The vector database and Redis images are pinned to the exact
+# revisions Immich ships with, so a Renovate bump of the application tag can
+# never silently mismatch its dependencies.
+#
+# `immich-server` and `immich-machine-learning` use the healthcheck baked into
+# the image (these are not Alpine based, so `wget` is not available to probe
+# them the way the other services in this repository are probed).
+#
+# The published host port is `IMMICH_SERVER_PORT` and deliberately NOT
+# `IMMICH_PORT`: both containers load this `.env` through `env_file`, and
+# `IMMICH_PORT` is an Immich variable that also controls the listening port of
+# the machine learning container (default 3003). Setting `IMMICH_PORT=2283`
+# there would make the machine learning service listen on 2283 while the server
+# still talks to it on 3003, and every machine learning job would fail with
+# "failed for all URLs".
+#
+# See https://docs.immich.app/install/docker-compose
+name: immich
+
+services:
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server:v3.2.4
+    env_file:
+      - .env
+    ports:
+      - "${IMMICH_SERVER_PORT:-2283}:2283"
+    environment:
+      - TZ=${IMMICH_TZ:-Europe/Berlin}
+    volumes:
+      - ${UPLOAD_LOCATION}:/data
+      #- ${IMMICH_EXTERNAL_LIBRARY_DIR}:/usr/src/app/external:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning:v3.2.4
+    env_file:
+      - .env
+    volumes:
+      - immich-model-cache:/cache
+    environment:
+      - TZ=${IMMICH_TZ:-Europe/Berlin}
+    restart: unless-stopped
+
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey:9@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
+    environment:
+      - TZ=${IMMICH_TZ:-Europe/Berlin}
+    restart: always
+    healthcheck:
+      test: redis-cli ping | grep -q PONG || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  database:
+    container_name: immich_postgres
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    environment:
+      - TZ=${IMMICH_TZ:-Europe/Berlin}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE_NAME}
+      - POSTGRES_INITDB_ARGS=--data-checksums
+      # The database lives on the NAS hard drives, not on an SSD
+      - DB_STORAGE_TYPE=HDD
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    shm_size: 128mb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local:18-alpine
+    container_name: immich_pgbackups
+    restart: unless-stopped
+    volumes:
+      - immich_pgbackups:/backups
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=database
+      - POSTGRES_CLUSTER=true
+      - POSTGRES_DB=${DB_DATABASE_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
+      - BACKUP_ON_START=TRUE
+      - SCHEDULE=@daily
+      - TZ=${IMMICH_TZ:-Europe/Berlin}
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+
+  autorestic:
+    image: pascaliske/autorestic:latest
+    container_name: immich_autorestic
+    restart: unless-stopped
+    environment:
+      - RESTIC_HOST=immich-server
+      - TZ=${IMMICH_TZ:-Europe/Berlin}
+    volumes:
+      - ./autorestic/config.yml:/etc/autorestic/config.yml
+      - ./autorestic/cron:/etc/cron/
+      - immich_pgbackups:/backups/immich_pgbackups
+      - ${UPLOAD_LOCATION}:/backups/immich_library
+    entrypoint: ["/bin/sh", "/etc/cron/start_cron.sh"]
+
+volumes:
+  immich-model-cache:
+  immich_pgbackups:
