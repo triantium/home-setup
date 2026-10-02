@@ -22,3 +22,17 @@ autorestic_location_name: immich-backups
 autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
 autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"
 autorestic_cron: "{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * *"
+
+# Back up only the original assets. Immich stores the untouched photos and
+# videos in upload/ and library/ and the small profile pictures in profile/.
+# Everything else below the upload location is derived and gets regenerated on
+# demand, so including it would bloat the repository for no benefit:
+#   thumbs/         previews and face thumbnails
+#   encoded-video/  re-encoded videos, the original is kept alongside
+#   backups/        Immich's own database dumps, redundant with pgbackups
+#
+# https://docs.immich.app/administration/backup-and-restore/
+autorestic_exclude:
+  - "immich_library/thumbs"
+  - "immich_library/encoded-video"
+  - "immich_library/backups"
