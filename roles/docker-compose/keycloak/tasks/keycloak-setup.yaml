@@ -1,0 +1,152 @@
+- name: Authenticate to Keycloak
+  uri:
+    url: "https://{{ domain }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "admin"
+      password: "{{ keycloak_admin_password }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    validate_certs: "{{ validate_certs | default(true) }}"
+    status_code: [200]
+    return_content: yes
+  register: keycloak_auth_response
+  retries: 3
+  delay: 5
+
+#- name: Show Login
+#  ansible.builtin.debug:
+#    msg: "{{ keycloak_auth_response.json.access_token }}"
+
+- name: Get Realms
+  retries: 10
+  delay: 15
+  uri:
+    url: "https://{{domain}}/admin/realms"
+    method: GET
+    body_format: json
+    headers:
+      Authorization: "Bearer {{ keycloak_auth_response.json.access_token }}"
+  register: keycloak_realms
+
+#- name: Show Realms
+#  ansible.builtin.debug:
+#    msg: "{{ keycloak_realms.json }}"
+
+- name: set Realm Name
+  set_fact:
+    realm_name: "{{ realm }}"
+
+- name: Check if specific realm exists
+  set_fact:
+    realm_exists: "{{ keycloak_realms.json | selectattr('realm', 'equalto', realm_name) | list | length > 0 }}"
+
+- name: Does Realm exist ?
+  ansible.builtin.debug:
+    msg: "{{realm_exists}}"
+
+- name: Ensure temp directory exists
+  file:
+    path: "{{ temp_config_path }}"
+    state: directory
+    mode: '0755'
+  when: not realm_exists
+
+- name: Template the realm configuration file
+  template:
+    src: "{{ external_url }}/{{ realm_template_file }}"
+    dest: "{{ temp_config_path }}/{{ realm }}.json"
+  when: not realm_exists
+
+- name: Read remote configuration file
+  slurp:
+    src: "{{ temp_config_path }}/{{ realm }}.json"
+  register: realm_config
+  when: not realm_exists
+
+- name: Create realm from file if it doesn't exist
+  uri:
+    url: "https://{{ domain }}/admin/realms"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_auth_response.json.access_token }}"
+    body: "{{ realm_config['content'] | b64decode | from_json }}"
+    body_format: json
+    status_code: [201,409] # Assume 409 Conflict means we already created it
+  when: not realm_exists
+  register: realm_creation_result
+
+- name: Cleanup templated config file
+  file:
+    path: "{{ temp_config_path }}/geekinbusiness.json"
+    state: absent
+  when: not realm_exists
+
+- name: Debug realm creation
+  debug:
+    msg: "Realm creation status: {{ realm_creation_result }}"
+  when: not realm_exists
+
+- name: Install required LDAP packages
+  apt:
+    name:
+      - python3-pip
+      - python3-ldap
+      - libldap2-dev
+      - libsasl2-dev
+      - ldap-utils
+      - python3-dev
+      - gcc
+    state: present
+
+- name: Wait for ldap-Port
+  ansible.builtin.wait_for:
+    port: 389
+    sleep: 5
+
+- name: Ensure LDAP users organizational unit exists
+  community.general.ldap_entry:
+    dn: "ou=users,{{ ldap_base_dn }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: users
+    server_uri: "ldap://localhost:389"
+    bind_dn: "{{ ldap_admin_dn }}"
+    bind_pw: "{{ ldap_admin_password }}"
+    state: present
+
+- name: Ensure LDAP groups organizational unit exists
+  community.general.ldap_entry:
+    dn: "ou=groups,{{ ldap_base_dn }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: users
+    server_uri: "ldap://localhost:389"
+    bind_dn: "{{ ldap_admin_dn }}"
+    bind_pw: "{{ ldap_admin_password }}"
+    state: present
+
+# Try to create a test user manually to verify LDAP functionality
+- name: Create test user in LDAP
+  ldap_entry:
+    dn: "cn=test,ou=users,dc=skillzinskullz,dc=de"
+    objectClass:
+      - top
+      - person
+      - organizationalPerson
+      - inetOrgPerson
+    attributes:
+      cn: "{{item.username}}"
+      sn: "{{item.first_name}} {{item.last_name}}"
+      uid: "{{item.username}}"
+      userPassword: "{{ item.password | password_hash('ldap_sha1') }}"
+    server_uri: "ldap://localhost:389"
+    bind_dn: "{{ ldap_admin_dn }}"
+    bind_pw: "{{ ldap_admin_password }}"
+    state: present
+  with_items: "{{ users }}"

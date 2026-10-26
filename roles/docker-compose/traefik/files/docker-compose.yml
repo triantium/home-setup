@@ -1,33 +1,55 @@
 networks:
-  traefiknet: {}
-volumes:
-  letsentcrypt: {}
-services:
+  traefik-network:
+    external: true
+  monitoring-network:
+    external: true
 
+volumes:
+  letsencrypt:
+    external: true
+
+services:
   traefik:
-    image: "traefik:v3.7"
+    image: "traefik:v3.6.7"
     container_name: "traefik"
+    labels:
+      prometheus-job: "traefik"
+      prometheus-port: 8082
     command:
-      #- "--log.level=DEBUG"
+      - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL_ADDRESS}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL_ADDRESS}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Enable Prometheus metrics
+      - "--metrics.prometheus=true"
+      # Configure Prometheus histogram buckets
+      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
+      # add Metric Routing
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      # Check for newer Traefik versions and optionally log that info
+      - "--global.checknewversion=true"
+      # Disable sending anonymous usage data to the Traefik maintainers
+      - "--global.sendanonymoususage=false"
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
-      - "letsentcrypt:/letsencrypt"
+      - "letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: always
     networks:
-      - traefiknet
+      - traefik-network
+      - monitoring-network
+
   whoami:
     image: "traefik/whoami"
     container_name: "simple-service"
@@ -35,6 +57,21 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`${DOMAIN_NAME}`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
+    restart: always
     networks:
-      - traefiknet
+      - traefik-network
+
+  certdumper:
+    image: "ldez/traefik-certs-dumper:v2.11.0"
+    entrypoint: sh -c '
+      while ! [ -e /data/acme.json ]
+      || ! [ `jq ".[] | .Certificates | length" /data/acme.json | jq -s "add" ` != 0 ]; do
+      sleep 1
+      ; done
+      && traefik-certs-dumper file --version v3 --watch
+      --source /data/acme.json --dest /data/certs
+      --post-hook "sh /hook.sh"'
+    volumes:
+      - "letsencrypt:/data"
+      - ./hook.sh:/hook.sh

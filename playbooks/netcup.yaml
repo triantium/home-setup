@@ -14,10 +14,18 @@
 - hosts:
     - netcup
   roles:
-    - role: common-setup
-    - role: geerlingguy.pip
-    - role: geerlingguy.docker
-    - role: vector
+    #- role: docker-compose/postgres
+    - role: docker-compose/keycloak
+#
+#- hosts:
+#    - netcup
+#  roles:
+#    - role: common-setup
+#    - role: geerlingguy.pip
+#    - role: geerlingguy.docker
+#    - role: vector
+#    - role: docker-compose/traefik
+#    - role: docker-compose/postgres
 
 
 - hosts: localhost

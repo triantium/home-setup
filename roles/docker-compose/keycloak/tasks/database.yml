@@ -5,15 +5,55 @@
   changed_when: network_create.rc == 0
   failed_when: network_create.rc != 0 and 'already exists' not in network_create.stderr
 
-- name: Ensure keycloak database and user exist on central postgres
-  ansible.builtin.shell:
-    cmd: >
-      {{ docker_cli }} run --rm --network postgres-net
-      -e PGPASSWORD={{ postgres_password }}
-      postgres:18 psql -h postgres -U postgres
-      -c "CREATE USER keycloak WITH PASSWORD '{{ keycloak_db_password }}';"
-      -c "CREATE DATABASE keycloak WITH OWNER keycloak;"
-      -c "GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;"
-  register: db_init
-  failed_when: false
-  changed_when: db_init.rc == 0
+- name: Install PostgreSQL Python driver for Ansible modules
+  ansible.builtin.apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Connect to database, create keycloak user
+  community.postgresql.postgresql_user:
+    login_user: postgres
+    login_password: "{{postgres_database_password}}"
+    login_db: postgres
+    login_host: 127.0.0.1
+    name: keycloak
+    password: "{{keycloak_db_password}}"
+
+- name: Create a new database with name "keycloak"
+  community.postgresql.postgresql_db:
+    login_user: postgres
+    login_password: "{{postgres_database_password}}"
+    login_host: 127.0.0.1
+    name: keycloak
+    comment: My Keycloadk Database
+    owner: keycloak
+
+- name: Create keycloak schema owned by keycloak user
+  community.postgresql.postgresql_schema:
+    login_db: keycloak
+    login_user: postgres
+    login_password: "{{postgres_database_password}}"
+    login_host: 127.0.0.1
+    name: keycloak
+    owner: keycloak
+
+- name: GRANT ALL PRIVILEGES ON SCHEMA keycloak TO keycloak
+  community.postgresql.postgresql_privs:
+    login_db: keycloak
+    login_user: postgres
+    login_password: "{{postgres_database_password}}"
+    login_host: 127.0.0.1
+    type: schema
+    objs: keycloak
+    privs: ALL
+    role: keycloak
+
+- name: GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak
+  community.postgresql.postgresql_privs:
+    login_db: keycloak
+    login_user: postgres
+    login_password: "{{postgres_database_password}}"
+    login_host: 127.0.0.1
+    privs: ALL
+    type: database
+    role: keycloak

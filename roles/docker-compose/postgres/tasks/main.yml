@@ -1,11 +1,11 @@
 - name: Create a directory for the postgres service
   ansible.builtin.file:
-    path: "/opt/{{domain}}/postgres"
+    path: "/opt/{{external_url}}/postgres"
     state: directory
 
 - name: Create a directory for the postgres service
   ansible.builtin.file:
-    path: "/opt/{{domain}}/postgres/{{item}}"
+    path: "/opt/{{external_url}}/postgres/{{item}}"
     state: directory
   loop:
     - pgadmin4
@@ -15,27 +15,27 @@
 - name: Templating Environment
   ansible.builtin.template:
     src: env.j2
-    dest: "/opt/{{domain}}/postgres/.env"
+    dest: "/opt/{{external_url}}/postgres/.env"
 
 - name: Template pgAdmin
   ansible.builtin.template:
     src: servers.json.j2
-    dest: "/opt/{{domain}}/postgres/pgadmin4/servers.json"
+    dest: "/opt/{{external_url}}/postgres/pgadmin4/servers.json"
 
 - name: Template Autorestic Crontab
   ansible.builtin.template:
     src: "{{ shared_templates_dir }}/autorestic/crontab.j2"
-    dest: "/opt/{{domain}}/postgres/autorestic/cron/crontab"
+    dest: "/opt/{{external_url}}/postgres/autorestic/cron/crontab"
 
 - name: Copy Autorestic start_cron.sh
   ansible.builtin.template:
     src: "{{ shared_templates_dir }}/autorestic/start_cron.sh"
-    dest: "/opt/{{domain}}/postgres/autorestic/cron/start_cron.sh"
+    dest: "/opt/{{external_url}}/postgres/autorestic/cron/start_cron.sh"
 
 - name: Template Autorestic Config
   ansible.builtin.template:
     src: "{{ shared_templates_dir }}/autorestic/config.yml.j2"
-    dest: "/opt/{{domain}}/postgres/autorestic/config.yml"
+    dest: "/opt/{{external_url}}/postgres/autorestic/config.yml"
 
 - name: Create external Docker network
   ansible.builtin.command:
@@ -47,22 +47,22 @@
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: "/opt/{{domain}}/postgres/docker-compose.yml"
+    dest: "/opt/{{external_url}}/postgres/docker-compose.yml"
   register: docker_compose_yaml
 
 - name: Start the postgres service with Docker Compose
   ansible.builtin.command:
     cmd: "{{ docker_cli }} compose up -d"
-    chdir: "/opt/{{domain}}/postgres"
+    chdir: "/opt/{{external_url}}/postgres"
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
-    chdir: "/opt/{{domain}}/postgres"
+    chdir: "/opt/{{external_url}}/postgres"
     cmd: "{{ docker_cli }} compose pull"
 
 - name: Restart on change
   when: docker_compose_yaml.changed
   command:
-    chdir: "/opt/{{domain}}/postgres"
+    chdir: "/opt/{{external_url}}/postgres"
     cmd: "{{ docker_cli }} compose restart"

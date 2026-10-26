@@ -1,35 +1,61 @@
 - name: Create a directory for the keycloak service
   ansible.builtin.file:
-    path: /opt/{{domain}}/keycloak
+    path: "{{ deployment_dir }}"
     state: directory
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt/{{domain}}/keycloak/docker-compose.yml
+    dest: "{{ deployment_dir }}/docker-compose.yml"
   register: docker_compose_yaml
 
-- name: Template Env
+- name: Templating Environment
   ansible.builtin.template:
-    src: env.j2
-    dest: /opt/{{domain}}/keycloak/.env
-  register: env_template
+    src: "{{ external_url }}/env.j2"
+    dest: "{{ deployment_dir }}/.env"
 
-- ansible.builtin.import_tasks: database.yml
+- name: Create openldap docker network to use for other containers
+  community.docker.docker_network:
+    name: openldap-network
 
-- name: Pull the Images
-  ansible.builtin.command:
-    cmd: "{{ docker_cli }} compose pull"
-    chdir: /opt/{{domain}}/keycloak
-  when: docker_compose_yaml.changed
+- name: Setup Database to Use for Keycloak
+  ansible.builtin.include_tasks:
+    file: database.yml
 
 - name: Start the keycloak service with Docker Compose
   ansible.builtin.command:
-    cmd: "{{ docker_cli }} compose up -d"
-    chdir: /opt/{{domain}}/keycloak
+    cmd: docker compose up -d
+    chdir: "{{ deployment_dir }}"
+
+- name: Pull on change
+  when: docker_compose_yaml.changed
+  command:
+    chdir: "{{ deployment_dir }}"
+    cmd: docker compose pull
 
 - name: Restart on change
-  when: docker_compose_yaml.changed or env_template.changed
+  when: docker_compose_yaml.changed
   command:
-    chdir: /opt/{{domain}}/keycloak
-    cmd: "{{ docker_cli }} compose restart"
+    chdir: "{{ deployment_dir }}"
+    cmd: docker compose restart
+
+- name: Wait for https-Port
+  ansible.builtin.wait_for:
+    port: 443
+    sleep: 5
+
+- name: Check Keycloak a few times, it may need a few retries
+  retries: 10
+  delay: 5
+  uri:
+    url: "https://{{domain}}"
+    method: GET
+  register: keycloak_response
+
+- name: Debug keycloak
+  ansible.builtin.debug:
+    msg: "{{ keycloak_response }}"
+
+- name: Setup Keycloak for use
+  ansible.builtin.include_tasks:
+    file: keycloak-setup.yaml

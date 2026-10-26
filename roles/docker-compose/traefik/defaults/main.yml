@@ -1,2 +1,2 @@
 service_name: traefik
-uri: whoami.skillzinskullz.de
+domain: whoami.{{external_url}}
