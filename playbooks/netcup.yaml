@@ -23,6 +23,15 @@
     immich_oidc_client_id: immich
     immich_oidc_client_secret_location: "services/keycloak/auth.{{ external_url }}/immich"
     immich_oidc_client_secret: "{{ lookup('community.general.passwordstore', immich_oidc_client_secret_location, missing='create') }}"
+    immich_smtp_enabled: true
+    immich_smtp_host: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='smtp') }}"
+    immich_smtp_port: 465
+    immich_smtp_username: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='login') }}"
+    immich_smtp_password: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org') }}"
+    immich_smtp_from: "auth@{{ external_url }}"
+    immich_smtp_reply_to: "auth@{{ external_url }}"
+    immich_smtp_secure: true
+    immich_smtp_ignore_cert: false
     immich_restic_host: myndir-immich
     autorestic_location_name: myndir-immich-backups
   roles:

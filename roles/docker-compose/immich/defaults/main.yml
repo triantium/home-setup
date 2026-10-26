@@ -37,6 +37,16 @@ immich_oidc_auto_launch: false
 immich_oidc_token_endpoint_auth_method: client_secret_post
 immich_oidc_signing_algorithm: RS256
 
+immich_smtp_enabled: false
+immich_smtp_host: ""
+immich_smtp_port: 587
+immich_smtp_username: ""
+immich_smtp_password: ""
+immich_smtp_from: ""
+immich_smtp_reply_to: ""
+immich_smtp_secure: true
+immich_smtp_ignore_cert: false
+
 # Read-only media library that is registered as an external library in the web UI
 immich_external_library_dir: /share/homes/pi/immich
 

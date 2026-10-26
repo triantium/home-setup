@@ -21,12 +21,12 @@
     dest: "{{ immich_data_dir }}/.env"
   register: env_template
 
-- name: Template Immich OIDC configuration
+- name: Template Immich configuration
   ansible.builtin.template:
     src: immich-config.json.j2
     dest: "{{ immich_data_dir }}/immich-config.json"
     mode: '0600'
-  when: immich_oidc_enabled
+  when: immich_oidc_enabled or immich_smtp_enabled
   register: immich_config_template
 
 - name: Template Autorestic Config
