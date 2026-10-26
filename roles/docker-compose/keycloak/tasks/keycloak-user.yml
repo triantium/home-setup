@@ -1,9 +1,25 @@
+- name: Authenticate to Keycloak for user {{ keycloak_user.username }}
+  uri:
+    url: "https://{{ domain }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "admin"
+      password: "{{ keycloak_admin_password }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    validate_certs: "{{ validate_certs | default(true) }}"
+    status_code: [200]
+  register: keycloak_user_auth
+  retries: 3
+  delay: 5
+
 - name: Look up user {{ keycloak_user.username }}
   uri:
     url: "https://{{ domain }}/admin/realms/{{ realm }}/users?username={{ keycloak_user.username | urlencode }}&exact=true"
     method: GET
     headers:
-      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+      Authorization: "Bearer {{ keycloak_user_auth.json.access_token }}"
     status_code: [200]
   register: keycloak_user_lookup
 
@@ -12,7 +28,7 @@
     url: "https://{{ domain }}/admin/realms/{{ realm }}/users"
     method: POST
     headers:
-      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+      Authorization: "Bearer {{ keycloak_user_auth.json.access_token }}"
     body_format: json
     body:
       username: "{{ keycloak_user.username }}"
@@ -35,7 +51,7 @@
     url: "https://{{ domain }}/admin/realms/{{ realm }}/users/{{ keycloak_user_id }}"
     method: PUT
     headers:
-      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+      Authorization: "Bearer {{ keycloak_user_auth.json.access_token }}"
     body_format: json
     body:
       id: "{{ keycloak_user_id }}"
@@ -51,7 +67,7 @@
     url: "https://{{ domain }}/admin/realms/{{ realm }}/users/{{ keycloak_user_id }}/reset-password"
     method: PUT
     headers:
-      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+      Authorization: "Bearer {{ keycloak_user_auth.json.access_token }}"
     body_format: json
     body:
       type: password
@@ -65,7 +81,7 @@
     url: "https://{{ domain }}/admin/realms/{{ realm }}/users/{{ keycloak_user_id }}/role-mappings/realm"
     method: POST
     headers:
-      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+      Authorization: "Bearer {{ keycloak_user_auth.json.access_token }}"
     body_format: json
     body: "{{ keycloak_realm_roles.json | selectattr('name', 'in', keycloak_user.roles | default([]) | map(attribute='role') | list) | list }}"
     status_code: [204]

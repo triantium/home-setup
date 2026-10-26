@@ -69,6 +69,15 @@ keycloak_db_password: "{{ lookup('community.general.passwordstore', keycloak_dat
 keycloak_db_url_host: postgres
 
 users:
+  - username: triantium
+    password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz/triantium', missing='create') }}"
+    email: triantium@mailbox.org
+    first_name: Manuel
+    last_name: Müller
+    enabled: true
+    roles:
+      - realm: skillzinskullz
+        role: admin
   - username: manuel
     password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz/manuel', missing='create') }}"
     email: manuel@triantium.de
