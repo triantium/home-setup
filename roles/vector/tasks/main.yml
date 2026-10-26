@@ -10,24 +10,18 @@
     path: /usr/share/keyrings/datadog-archive-keyring.gpg
     state: absent
 
-- name: Add Datadog APT keyring
-  shell:
-    cmd: curl -fsSL "https://keys.datadoghq.com/{{ item }}" | gpg --import --batch --no-default-keyring --keyring /usr/share/keyrings/datadog-archive-keyring.gpg
-  loop:
-    - DATADOG_APT_KEY_CURRENT.public
-    - DATADOG_APT_KEY_C0962C7D.public
-    - DATADOG_APT_KEY_F14F620E.public
-
-- name: Fix keyring permissions
-  file:
-    path: /usr/share/keyrings/datadog-archive-keyring.gpg
-    mode: '0644'
-
-- name: Add Vector apt repository
-  apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/datadog-archive-keyring.gpg] https://apt.vector.dev/ stable vector-0"
-    state: present
-    update_cache: true
+#
+#
+#- name: Add Vector apt repository
+#  deb822_repository:
+#    name: vector
+#    types: deb
+#    uris: https://apt.vector.dev
+#    suites: stable vector-0
+#    components:
+#      - vector-0
+#    state: present
+#    signed_by: https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public
 
 - name: Install Vector
   apt:

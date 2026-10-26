@@ -19,3 +19,9 @@ chezmoi_workaddress: ""
 
 chezmoi_keyboard_layout: "us"
 chezmoi_keyboard_variant: "altgr-intl"
+
+sudoers:
+  - name: triantium
+    shell: "/usr/bin/zsh"
+  - name: semaphore
+    shell: "/bin/bash"
