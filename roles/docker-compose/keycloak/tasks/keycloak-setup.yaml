@@ -205,3 +205,8 @@
 - name: Create Keycloak users
   ansible.builtin.include_tasks:
     file: keycloak-users.yml
+
+- name: Configure Keycloak OIDC client for Immich
+  ansible.builtin.include_tasks:
+    file: keycloak-oidc-client.yml
+  when: immich_oidc_enabled | default(false)

@@ -13,9 +13,22 @@
 
 - hosts:
     - netcup
+  vars:
+    immich_traefik_enabled: true
+    immich_publish_port: false
+    immich_domain: "{{ external_url }}"
+    immich_hostname: "myndir.{{ external_url }}"
+    immich_oidc_enabled: true
+    immich_oidc_issuer_url: "https://auth.{{ external_url }}/realms/skillzinskullz"
+    immich_oidc_client_id: immich
+    immich_oidc_client_secret_location: "services/keycloak/auth.{{ external_url }}/immich"
+    immich_oidc_client_secret: "{{ lookup('community.general.passwordstore', immich_oidc_client_secret_location, missing='create') }}"
+    immich_restic_host: myndir-immich
+    autorestic_location_name: myndir-immich-backups
   roles:
     #- role: docker-compose/postgres
     - role: docker-compose/keycloak
+    - role: docker-compose/immich
 #
 #- hosts:
 #    - netcup
@@ -26,6 +39,8 @@
 #    - role: vector
 #    - role: docker-compose/traefik
 #    - role: docker-compose/postgres
+#    - role: docker-compose/keycloak
+#    - role: docker-compose/immich
 
 
 - hosts: localhost
