@@ -1,0 +1,54 @@
+- name: Authenticate to Keycloak for user creation
+  uri:
+    url: "https://{{ domain }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "admin"
+      password: "{{ keycloak_admin_password }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    validate_certs: "{{ validate_certs | default(true) }}"
+    status_code: [200]
+  register: keycloak_users_auth
+  retries: 3
+  delay: 5
+
+- name: Get realm roles
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/roles"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+    status_code: [200]
+  register: keycloak_realm_roles
+
+- name: Create missing realm roles
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/roles"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+    body_format: json
+    body:
+      name: "{{ item }}"
+    status_code: [201, 409]
+  loop: "{{ users | selectattr('roles', 'defined') | map(attribute='roles') | flatten | map(attribute='role') | unique | list }}"
+  when: item not in keycloak_realm_roles.json | map(attribute='name') | list
+
+- name: Refresh realm roles
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/roles"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_users_auth.json.access_token }}"
+    status_code: [200]
+  register: keycloak_realm_roles
+
+- name: Ensure Keycloak users exist
+  ansible.builtin.include_tasks:
+    file: keycloak-user.yml
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: keycloak_user
+    label: "{{ keycloak_user.username }}"

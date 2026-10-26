@@ -88,6 +88,77 @@
     msg: "Realm creation status: {{ realm_creation_result }}"
   when: not realm_exists
 
+- name: Authenticate to Keycloak for LDAP federation setup
+  uri:
+    url: "https://{{ domain }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "admin"
+      password: "{{ keycloak_admin_password }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    validate_certs: "{{ validate_certs | default(true) }}"
+    status_code: [200]
+  register: keycloak_federation_auth
+  retries: 3
+  delay: 5
+
+- name: Get realm details
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_federation_auth.json.access_token }}"
+    status_code: [200]
+  register: keycloak_realm_details
+
+- name: Get user federation providers of the realm
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/components?type=org.keycloak.storage.UserStorageProvider"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_federation_auth.json.access_token }}"
+    status_code: [200]
+  register: keycloak_user_federation_providers
+
+- name: Find existing LDAP user federation provider
+  set_fact:
+    keycloak_ldap_component: "{{ keycloak_user_federation_providers.json | selectattr('name', 'equalto', keycloak_ldap_provider_name) | list | first | default({}) }}"
+
+- name: Create LDAP user federation provider
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/components"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_federation_auth.json.access_token }}"
+    body_format: json
+    body:
+      name: "{{ keycloak_ldap_provider_name }}"
+      providerId: ldap
+      providerType: org.keycloak.storage.UserStorageProvider
+      parentId: "{{ keycloak_realm_details.json.id }}"
+      config: "{{ keycloak_ldap_config }}"
+    status_code: [201]
+  when: keycloak_ldap_component | length == 0
+
+- name: Update LDAP user federation provider
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/components/{{ keycloak_ldap_component.id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_federation_auth.json.access_token }}"
+    body_format: json
+    body:
+      id: "{{ keycloak_ldap_component.id }}"
+      name: "{{ keycloak_ldap_provider_name }}"
+      providerId: ldap
+      providerType: org.keycloak.storage.UserStorageProvider
+      parentId: "{{ keycloak_realm_details.json.id }}"
+      config: "{{ keycloak_ldap_config }}"
+    status_code: [204]
+  when: keycloak_ldap_component | length > 0
+
 - name: Install required LDAP packages
   apt:
     name:
@@ -125,28 +196,12 @@
       - top
       - organizationalUnit
     attributes:
-      ou: users
+      ou: groups
     server_uri: "ldap://localhost:389"
     bind_dn: "{{ ldap_admin_dn }}"
     bind_pw: "{{ ldap_admin_password }}"
     state: present
 
-# Try to create a test user manually to verify LDAP functionality
-- name: Create test user in LDAP
-  ldap_entry:
-    dn: "cn=test,ou=users,dc=skillzinskullz,dc=de"
-    objectClass:
-      - top
-      - person
-      - organizationalPerson
-      - inetOrgPerson
-    attributes:
-      cn: "{{item.username}}"
-      sn: "{{item.first_name}} {{item.last_name}}"
-      uid: "{{item.username}}"
-      userPassword: "{{ item.password | password_hash('ldap_sha1') }}"
-    server_uri: "ldap://localhost:389"
-    bind_dn: "{{ ldap_admin_dn }}"
-    bind_pw: "{{ ldap_admin_password }}"
-    state: present
-  with_items: "{{ users }}"
+- name: Create Keycloak users
+  ansible.builtin.include_tasks:
+    file: keycloak-users.yml

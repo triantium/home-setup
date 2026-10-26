@@ -12,6 +12,45 @@ ldap_admin_dn: "cn=admin,{{ ldap_base_dn }}"
 ldap_password_location: "services/ldap/{{ ldap_domain_name }}/admin"
 ldap_admin_password: "{{ lookup('community.general.passwordstore', ldap_password_location, missing='create') }}"
 
+keycloak_ldap_provider_name: openldap
+keycloak_ldap_connection_url: "ldap://openldap:389"
+keycloak_ldap_users_dn: "ou=users,{{ ldap_base_dn }}"
+keycloak_ldap_username_attribute: uid
+keycloak_ldap_rdn_attribute: uid
+keycloak_ldap_uuid_attribute: entryUUID
+keycloak_ldap_user_object_classes: "person, organizationalPerson, inetOrgPerson"
+keycloak_ldap_config:
+  enabled: ["true"]
+  priority: ["0"]
+  fullSyncPeriod: ["-1"]
+  changedSyncPeriod: ["-1"]
+  cachePolicy: ["DEFAULT"]
+  pagination: ["true"]
+  connectionTrace: ["false"]
+  connectionUrl: ["{{ keycloak_ldap_connection_url }}"]
+  startTls: ["false"]
+  authType: ["simple"]
+  bindDn: ["{{ ldap_admin_dn }}"]
+  bindCredential: ["{{ ldap_admin_password }}"]
+  useTruststoreSpi: ["never"]
+  connectionPooling: ["true"]
+  usersDn: ["{{ keycloak_ldap_users_dn }}"]
+  usernameLDAPAttribute: ["{{ keycloak_ldap_username_attribute }}"]
+  rdnLDAPAttribute: ["{{ keycloak_ldap_rdn_attribute }}"]
+  uuidLDAPAttribute: ["{{ keycloak_ldap_uuid_attribute }}"]
+  userObjectClasses: ["{{ keycloak_ldap_user_object_classes }}"]
+  editMode: ["WRITABLE"]
+  syncRegistrations: ["true"]
+  vendor: ["other"]
+  searchScope: ["1"]
+  importEnabled: ["true"]
+  allowKerberosAuthentication: ["false"]
+  useKerberosForPasswordAuthentication: ["false"]
+  trustEmail: ["false"]
+  validatePasswordPolicy: ["false"]
+  usePasswordModifyExtendedOp: ["false"]
+  removeInvalidUsersEnabled: ["true"]
+
 # Email Einstellungen
 email_password_location: "accounts/mailbox.org"
 smtp_host: "{{ lookup('community.general.passwordstore', email_password_location , subkey='smtp' ) }}"
