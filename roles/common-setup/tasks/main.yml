@@ -16,6 +16,7 @@
       - unattended-upgrades
       - rsync
       - kitty # for terminfo
+      - zoxide
     state: present
 
 - name: Install chezmoi globally

@@ -35,8 +35,8 @@
     immich_restic_host: myndir-immich
     autorestic_location_name: myndir-immich-backups
   roles:
-    #- role: docker-compose/postgres
-    - role: docker-compose/keycloak
+    - role: docker-compose/traefik
+    #- role: docker-compose/keycloak
     - role: docker-compose/immich
 #
 #- hosts:

@@ -87,12 +87,12 @@ users:
     roles:
       - realm: skillzinskullz
         role: admin
-  - username: manuela
-    password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz.de/manuela', missing='create') }}"
-    email: manuela@triantium.de
-    first_name: Manuela
-    last_name: ---
-    enabled: true
-    roles:
-      - realm: skillzinskullz
-        role: user
+#  - username: manuela
+#    password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz.de/manuela', missing='create') }}"
+#    email: manuela@triantium.de
+#    first_name: Manuela
+#    last_name: ---
+#    enabled: true
+#    roles:
+#      - realm: skillzinskullz
+#        role: user

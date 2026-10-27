@@ -1,0 +1,43 @@
+{
+{% if immich_oidc_enabled %}
+  "oauth": {
+    "enabled": true,
+    "issuerUrl": {{ immich_oidc_issuer_url | to_json }},
+    "clientId": {{ immich_oidc_client_id | to_json }},
+    "clientSecret": {{ immich_oidc_client_secret | to_json }},
+    "scope": {{ immich_oidc_scope | to_json }},
+    "buttonText": {{ immich_oidc_button_text | to_json }},
+    "autoRegister": {{ immich_oidc_auto_register | bool | to_json }},
+    "autoLaunch": {{ immich_oidc_auto_launch | bool | to_json }},
+    "tokenEndpointAuthMethod": {{ immich_oidc_token_endpoint_auth_method | to_json }},
+    "signingAlgorithm": {{ immich_oidc_signing_algorithm | to_json }},
+    "profileSigningAlgorithm": "none",
+    "storageLabelClaim": "preferred_username",
+    "roleClaim": "immich_role",
+    "storageQuotaClaim": "immich_quota"
+  },
+{% endif %}
+{% if immich_smtp_enabled %}
+  "notifications": {
+    "smtp": {
+      "enabled": true,
+      "from": {{ immich_smtp_from | to_json }},
+      "replyTo": {{ immich_smtp_reply_to | to_json }},
+      "transport": {
+        "host": {{ immich_smtp_host | to_json }},
+        "ignoreCert": {{ immich_smtp_ignore_cert | bool | to_json }},
+        "password": {{ immich_smtp_password | to_json }},
+        "port": {{ immich_smtp_port | int }},
+        "secure": {{ immich_smtp_secure | bool | to_json }},
+        "username": {{ immich_smtp_username | to_json }}
+      }
+    }
+  },
+{% endif %}
+  "passwordLogin": {
+    "enabled": true
+  },
+  "server": {
+    "externalDomain": {{ ("https://" ~ immich_hostname) | to_json }}
+  }
+}
