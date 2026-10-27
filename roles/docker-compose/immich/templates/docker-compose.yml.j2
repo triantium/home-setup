@@ -42,15 +42,8 @@ services:
       - "traefik.http.routers.immich.tls=true"
       - "traefik.http.routers.immich.tls.certresolver=letsencrypt"
       - "traefik.http.services.immich.loadbalancer.passhostheader=true"
-      - "traefik.http.routers.immich.middlewares=immich-compress,immich-upload-limit"
-      - "traefik.http.services.immich.loadbalancer.serversTransport=immich-transport"
-      - "traefik.http.serversTransports.immich-transport.forwardingTimeouts.responseHeaderTimeout=0s"
-      - "traefik.http.serversTransports.immich-transport.forwardingTimeouts.idleConnTimeout=7200s"
+      - "traefik.http.routers.immich.middlewares=immich-compress"
       - "traefik.http.middlewares.immich-compress.compress=true"
-      - "traefik.http.middlewares.immich-upload-limit.buffering.maxRequestBodyBytes=5368709120"
-      - "traefik.http.middlewares.immich-upload-limit.buffering.memRequestBodyBytes=209715200"
-      - "traefik.http.middlewares.immich-upload-limit.buffering.maxResponseBodyBytes=0"
-      - "traefik.http.middlewares.immich-upload-limit.buffering.memResponseBodyBytes=0"
       - "traefik.docker.network={{ immich_traefik_network }}"
 {% endif %}
     env_file:
