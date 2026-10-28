@@ -1,0 +1,746 @@
+- id: '1719482184159'
+  alias: Divera alarm Light On
+  description: ''
+  use_blueprint:
+    path: fwmarcel/divera-blueprint.yaml
+    input:
+      divera_sensor:
+      - sensor.ffw_bertoldsheim_alarm
+      target_action:
+      - action: scene.create
+        metadata: {}
+        data:
+          scene_id: bevor_alarm
+          snapshot_entities:
+          - light.deckenleuchte
+          - light.hallway_lights
+          - light.klo
+          - light.kuche
+          - switch.nachtlicht
+          - light.essbereich
+          - light.wohnbereich
+          - light.h60a1
+          - light.lena
+          - light.bedroom_lights
+          - light.wiz_rgbww_tunable_c481c6
+          - light.livingroom_lights
+          - light.wiz_rgbw_tunable_ef0718
+      - metadata: {}
+        data:
+          brightness_pct: 100
+        target:
+          label_id: alarmlight
+        action: light.turn_on
+      - action: assist_satellite.announce
+        metadata: {}
+        data:
+          preannounce: true
+          message: 'Alarm. Meldung: {{ states.sensor.ffw_bertoldsheim_alarm.state
+            }}'
+        target:
+          device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+      - delay:
+          hours: 0
+          minutes: 3
+          seconds: 0
+          milliseconds: 0
+      - action: scene.turn_on
+        metadata: {}
+        data:
+          transition: 120
+        target:
+          entity_id: scene.bevor_alarm
+- id: '1719484100702'
+  alias: Rauchmelder
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: aedf350add087d0642483a97d8f8a48f
+    entity_id: a03e5d88b7d9985fc4bbfc0beeb71b9a
+    domain: binary_sensor
+  - type: turned_on
+    platform: device
+    device_id: 46272ca3c48705d940aa3f7c9087238d
+    entity_id: 61f6c5af919c112d429e592f572fbf29
+    domain: binary_sensor
+  - type: turned_on
+    platform: device
+    device_id: 4de1ab0039a60912ed7898a02c822f5f
+    entity_id: 8d4bbb11ae055469d59f4dd7847f274a
+    domain: binary_sensor
+  - type: turned_on
+    platform: device
+    device_id: 65232d8cc0906433ff1ed06a78f4d006
+    entity_id: ba364c1791d5a61a5e6fdbd3de3c3c00
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 100
+      rgb_color:
+      - 255
+      - 255
+      - 255
+    target:
+      label_id: alarmlight
+  mode: single
+- id: '1728480690534'
+  alias: Trockner arbeitet
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.tp_trockner_derzeitiger_verbrauch
+      starting_threshold: 300
+      pre_actions:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          message: Trockner läuft
+          target: 320105306
+        enabled: false
+      actions:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          target: 320105306
+          message: Trockner ist fertig
+        enabled: false
+      finishing_threshold: 100
+      finishing_hysteresis: 2
+      starting_hysteresis: 2
+- id: '1728480893975'
+  alias: Waschmaschine arbeitet
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.tp_waschmaschine_derzeitiger_verbrauch
+      starting_threshold: 75
+      finishing_threshold: 40
+      actions:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          target: 320105306
+          message: Waschmaschine ist fertig
+        enabled: false
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: Waschmaschine fertig
+      pre_actions:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          target: 320105306
+          message: Waschmaschine läuft
+        enabled: false
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: Waschmaschine gestartet
+      starting_hysteresis: 2
+      finishing_hysteresis: 2
+- id: '1746606781593'
+  alias: Manu Frei
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.work_status
+    from:
+    to: Frei
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 10
+      rgb_color:
+      - 23
+      - 248
+      - 6
+    target:
+      label_id: statuslicht
+  mode: single
+- id: '1746606804495'
+  alias: Manu Bitte nicht stören
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.work_status
+    from:
+    to: DND
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      rgb_color:
+      - 255
+      - 212
+      - 0
+      brightness_pct: 10
+    target:
+      label_id: statuslicht
+  mode: single
+- id: '1746606881380'
+  alias: Manu On Call
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.work_status
+    from:
+    to: On Call
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      rgb_color:
+      - 128
+      - 0
+      - 123
+      brightness_pct: 10
+    target:
+      label_id: statuslicht
+  mode: single
+- id: '1746607134167'
+  alias: Manu Pause
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.work_status
+    from:
+    to: Pause
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      rgb_color:
+      - 29
+      - 0
+      - 246
+      brightness_pct: 10
+    target:
+      label_id: statuslicht
+  mode: single
+- id: '1746607301573'
+  alias: Manu Beschäftigt
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.work_status
+    from:
+    to: Beschäftigt
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      rgb_color:
+      - 255
+      - 0
+      - 0
+      brightness_pct: 10
+    target:
+      label_id: statuslicht
+  mode: single
+- id: '1746690562402'
+  alias: Manu Off Work
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_select.work_status
+    from:
+    to: Off Work
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      label_id: statuslicht
+  mode: single
+- id: '1759826317929'
+  alias: Waschmaschinen und Trockner Update
+  description: ''
+  triggers:
+  - type: changed_states
+    device_id: ed19ca3f076b0293395b3b163d1f8924
+    entity_id: 15717f508c6e623575df83d07f267426
+    domain: switch
+    trigger: device
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - type: changed_states
+    device_id: a1ed43e6438a570ebc813c800303c12d
+    entity_id: 99f9169908562d6474db6b2cc5fc7de4
+    domain: switch
+    trigger: device
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - type: changed_states
+    device_id: 9aa72047801004cdc989c5f81c756607
+    entity_id: 7b33cc2a962ac0c5e09b6af79bac0f8a
+    domain: switch
+    trigger: device
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  conditions: []
+  actions:
+  - action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_7558481929_320105306
+    data:
+      message: Waschmaschine tat irgendetwas
+  mode: single
+- id: '1759911971043'
+  alias: Sonnenaufgang
+  description: ''
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 00:10:00
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: d4f4791b9035fbf2140f63e59e09fc05
+    entity_id: bbb288cdee3168927466eb52a4653018
+    domain: switch
+  - type: turn_off
+    device_id: 77e2c8df970ffc3bac5f115235cfa7c5
+    entity_id: dc134c97a03e5430b8ca8081d5d165d8
+    domain: switch
+  - type: turn_off
+    device_id: 1c8f36f6150a556b59e30ff5b6f11cd6
+    entity_id: afcf80790f1b145c0d37d2beb5eb0cc3
+    domain: switch
+  - type: turn_off
+    device_id: 95141bfbb3c717fc2e9ef272195aba3e
+    entity_id: 4c1f04507c94ff89846a8cdadf1fb0f9
+    domain: light
+  mode: single
+- id: '1759912028592'
+  alias: Sonnenuntergang
+  description: ''
+  triggers:
+  - trigger: sun
+    event: sunset
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: d4f4791b9035fbf2140f63e59e09fc05
+    entity_id: bbb288cdee3168927466eb52a4653018
+    domain: switch
+  - type: turn_on
+    device_id: 77e2c8df970ffc3bac5f115235cfa7c5
+    entity_id: dc134c97a03e5430b8ca8081d5d165d8
+    domain: switch
+  mode: single
+- id: '1759933442004'
+  alias: Homekomming
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - device_tracker.a25_von_manu
+    from:
+    to: home
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  conditions: []
+  actions:
+  - action: assist_satellite.announce
+    metadata: {}
+    data:
+      message: Manuela ist zuhause
+      preannounce: true
+    target:
+      device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+  mode: single
+- id: '1759933501579'
+  alias: Lena kommt nach Hause
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - device_tracker.a13_von_leni
+    from:
+    to: home
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  conditions: []
+  actions:
+  - action: assist_satellite.announce
+    metadata: {}
+    data:
+      message: Lena ist zuhause
+      preannounce: true
+    target:
+      device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+  mode: single
+- id: '1759934416480'
+  alias: Octoprint ist fertig
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.octoprint_printing
+    from: 'on'
+    to: 'off'
+  conditions: []
+  actions:
+  - action: assist_satellite.announce
+    metadata: {}
+    data:
+      preannounce: true
+      message: 3D Drucker möchte abgeräumt werden.
+    target:
+      device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+  mode: single
+- id: '1759936454381'
+  alias: Thomas ist zuhause
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - device_tracker.redmi_note_14_pro
+    from:
+    to: home
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  conditions: []
+  actions:
+  - action: assist_satellite.announce
+    metadata: {}
+    data:
+      message: Thomas ist zuhause
+      preannounce: true
+    target:
+      device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+    enabled: false
+  - repeat:
+      count: 5
+      sequence:
+      - type: toggle
+        device_id: 1c8f36f6150a556b59e30ff5b6f11cd6
+        entity_id: afcf80790f1b145c0d37d2beb5eb0cc3
+        domain: switch
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - type: toggle
+        device_id: 1c8f36f6150a556b59e30ff5b6f11cd6
+        entity_id: afcf80790f1b145c0d37d2beb5eb0cc3
+        domain: switch
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+  mode: single
+- id: '1759936538799'
+  alias: Manuel ist zuhause
+  description: ''
+  triggers:
+  - trigger: zone
+    entity_id: person.manuel_muller
+    zone: zone.home
+    event: enter
+  conditions: []
+  actions:
+  - action: assist_satellite.announce
+    metadata: {}
+    data:
+      message: Manuel ist zuhause
+      preannounce: true
+    target:
+      entity_id: assist_satellite.home_assistant_voice_0992e1_assist_satellit
+  mode: single
+- id: '1762333669966'
+  alias: Octoprint läuft länger nicht mehr
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.octoprint_printing
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+  conditions: []
+  actions:
+  - action: assist_satellite.announce
+    metadata: {}
+    data:
+      preannounce: true
+      message: 3D Drucker möchte abgeräumt werden.
+    target:
+      device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+  - device_id: 40a1995c1fb24e4f69596d89bc483a22
+    domain: climate
+    entity_id: 264a6cb18c840c02f54edd1b1ba0cce5
+    type: set_hvac_mode
+    hvac_mode: 'off'
+  mode: single
+- id: '1766073006412'
+  alias: 'Dekolichter um 23:30 aus '
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:30:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: 1c8f36f6150a556b59e30ff5b6f11cd6
+    entity_id: afcf80790f1b145c0d37d2beb5eb0cc3
+    domain: switch
+  - type: turn_off
+    device_id: 95141bfbb3c717fc2e9ef272195aba3e
+    entity_id: 4c1f04507c94ff89846a8cdadf1fb0f9
+    domain: light
+  mode: single
+- id: '1766073080698'
+  alias: Dekolichter um 4:45 ein
+  description: ''
+  triggers:
+  - trigger: time
+    at: 04:45:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 1c8f36f6150a556b59e30ff5b6f11cd6
+    entity_id: afcf80790f1b145c0d37d2beb5eb0cc3
+    domain: switch
+  - type: turn_on
+    device_id: 95141bfbb3c717fc2e9ef272195aba3e
+    entity_id: 4c1f04507c94ff89846a8cdadf1fb0f9
+    domain: light
+  mode: single
+- id: '1767018524495'
+  alias: Bad Offen
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bad_fenstersensor_alarm
+    from:
+    to:
+    - 'on'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  conditions: []
+  actions:
+  - repeat:
+      while:
+      - type: is_open
+        condition: device
+        device_id: 4d1d1570767023a5360a6bd9146e2d00
+        entity_id: aa6ef837e1a5f706c8143f5e56a14e03
+        domain: binary_sensor
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+      sequence:
+      - action: assist_satellite.announce
+        metadata: {}
+        target:
+          device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+        data:
+          message: Bad Fenster ist offen
+          preannounce: true
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+  mode: single
+- id: '1767083211395'
+  alias: Schlafzimmer offen
+  description: ''
+  triggers:
+  - type: opened
+    device_id: 6ac58981b80624e898579e5224c9d33b
+    entity_id: 8de2f09acaf945a5dbabcb9e27142a0b
+    domain: binary_sensor
+    trigger: device
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  conditions: []
+  actions:
+  - repeat:
+      while:
+      - type: is_open
+        condition: device
+        device_id: 6ac58981b80624e898579e5224c9d33b
+        entity_id: 8de2f09acaf945a5dbabcb9e27142a0b
+        domain: binary_sensor
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 30
+      sequence:
+      - action: assist_satellite.announce
+        metadata: {}
+        target:
+          device_id: 0a4660d72a0bf44f0aad5dc907e006d9
+        data:
+          message: Schlafzimmer Fenster ist offen
+          preannounce: true
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+  mode: single
+- id: '1777989951775'
+  alias: Gang besetzt
+  description: ''
+  triggers:
+  - type: motion
+    device_id: eb1573f8273c2da7a3683f899fa1e852
+    entity_id: b9c7a6769bac9ad06743672fb8cd1471
+    domain: binary_sensor
+    metadata:
+      secondary: false
+    trigger: device
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunset
+        before: sunrise
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          area_id: gang
+        data:
+          brightness_pct: 12
+    - conditions:
+      - condition: sun
+        after: sunrise
+        before: sunset
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          area_id: gang
+        data:
+          brightness_pct: 83
+  mode: single
+- id: '1777990378162'
+  alias: Gang unbesetzt
+  description: ''
+  triggers:
+  - type: no_motion
+    device_id: eb1573f8273c2da7a3683f899fa1e852
+    entity_id: b9c7a6769bac9ad06743672fb8cd1471
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      area_id: gang
+    data: {}
+  mode: single
+- id: '1790062481985'
+  alias: Im Büro
+  description: ''
+  triggers:
+  - trigger: motion.detected
+    target:
+      entity_id: binary_sensor.anwesenheitssensor_buro_bewegung
+    options:
+      behavior: each
+      for:
+        hours: 0
+        minutes: 10
+        seconds: 0
+  conditions: []
+  actions:
+  - action: climate.set_temperature
+    metadata: {}
+    target:
+      entity_id: climate.arbeitszimmer_2
+    data:
+      temperature: 20
+  mode: single
+- id: '1790062580263'
+  alias: Büro verlassen
+  description: ''
+  triggers:
+  - trigger: motion.cleared
+    target:
+      entity_id: binary_sensor.anwesenheitssensor_buro_bewegung
+    options:
+      behavior: each
+      for:
+        hours: 0
+        minutes: 45
+        seconds: 0
+  conditions: []
+  actions:
+  - action: climate.set_temperature
+    metadata: {}
+    target:
+      entity_id: climate.arbeitszimmer_2
+    data:
+      temperature: 8
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id: light.wiz_rgbw_tunable_ef0718
+    data: {}
+  mode: single

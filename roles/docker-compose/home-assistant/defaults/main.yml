@@ -10,3 +10,5 @@ autorestic_exclude:
   - "home-assistant_v2.db"
   - "*.log"
   - "*.log.*"
+
+telegram_token: "{{ lookup('community.general.passwordstore', 'token/telegram/homeassistant', missing='error') }}"

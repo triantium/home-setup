@@ -1,0 +1,69 @@
+blueprint:
+  name: Divera alarm automation
+  description: Trigger some actions when a new Divera alarm is triggered.
+  domain: automation
+  author: fwmarcel
+  source_url: https://github.com/fwmarcel/home-assistant-divera/blob/main/divera-blueprint.yaml
+  homeassistant:
+    min_version: 2022.4.0
+  input:
+    divera_sensor:
+      name: Divera sensor
+      description: The sensor which show the current divera alarm state
+      selector:
+        entity:
+          integration: divera
+          domain:
+          - sensor
+          multiple: true
+    self_addressed:
+      name: Self addressed
+      description: Check if I was addressed myself
+      selector:
+        boolean: {}
+      default: true
+    abort_keyword:
+      name: (optional) Abort keyword
+      description: '(optional) Alarm title/keyword when the action should not be triggered.
+        For example: Probealarm'
+      default: ''
+      selector:
+        text:
+          multiline: false
+          multiple: false
+    target_action:
+      name: Action
+      description: What should be done, when a new divera alarm is triggered?
+      selector:
+        action: {}
+mode: parallel
+max: 10
+variables:
+  self_addressed: !input self_addressed
+trigger:
+- platform: state
+  entity_id: !input divera_sensor
+  attribute: id
+  not_to:
+  - unknown
+condition:
+  condition: and
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: !input divera_sensor
+      state:
+      - !input abort_keyword
+      - unknown
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: '{{ not self_addressed }}'
+    - condition: state
+      entity_id: !input divera_sensor
+      attribute: self_addressed
+      state: true
+action:
+- choose:
+  default: !input target_action

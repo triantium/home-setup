@@ -1,0 +1,56 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.19.35
+    - 192.168.19.10
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Text-to-speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+#--- InfluxDB ---
+#influxdb:
+#    host: nas.fritz.box
+#    port: 8086
+#    api_version: 2
+#    verify_ssl: false
+#    ssl: false
+#    bucket: home
+#    organization: 143267ff36dec01e
+#    token: xxx
+#    max_retries: 10
+# Listenbrainz
+sensor:
+  - platform: rest
+    name: listenbrainz
+    scan_interval: 120
+    resource: https://api.listenbrainz.org/1/user/triantium/listens?count=1
+    json_attributes_path: "payload.listens[0].track_metadata"
+    json_attributes:
+      - "track_name"
+      - "artist_name"
+      - "release_name"
+    value_template: '{% raw %}{{ value_json.payload.listens[0].listened_at|timestamp_utc }}{% endraw %}'
+# Telegram
+telegram_bot:
+  - platform: polling
+    api_key: "{{ telegram_token }}"
+    allowed_chat_ids:
+      - 320105306
+notify:
+  - platform: telegram
+    name: "triantium"
+    chat_id: 320105306

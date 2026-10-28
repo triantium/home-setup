@@ -1,0 +1,4 @@
+*.log.*
+custom_components
+*.db
+*.db*
