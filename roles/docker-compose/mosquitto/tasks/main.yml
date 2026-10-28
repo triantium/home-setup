@@ -1,27 +1,54 @@
 - name: Create a directory for the mosquitto service
   ansible.builtin.file:
-    path: /opt//mosquitto
+    path: "{{ item }}"
     state: directory
+  with_items:
+    - "/opt/{{ domain }}"
+    - "/opt/{{ domain }}/mosquitto"
+    - "/opt/{{ domain }}/mosquitto/config"
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt//mosquitto/docker-compose.yml
+    dest: "/opt/{{ domain }}/mosquitto/docker-compose.yml"
   register: docker_compose_yaml
+
+- name: Template mosquitto.conf
+  ansible.builtin.template:
+    src: mosquitto.conf.j2
+    dest: "/opt/{{ domain }}/mosquitto/config/mosquitto.conf"
+  register: mosquitto_conf_template
+
+- name: Generate mosquitto password file
+  ansible.builtin.shell: |
+    {{ docker_cli }} run --rm -v /opt/{{ domain }}/mosquitto/config:/mosquitto/config eclipse-mosquitto:2.0.22 sh -c '
+    rm -f /mosquitto/config/pwfile
+    {% for user in mosquitto_users %}
+    mosquitto_passwd -b {% if loop.first %}-c{% endif %} /mosquitto/config/pwfile "{{ user.username }}" "{{ user.password }}"
+    {% endfor %}
+    '
+  register: mosquitto_pwfile_result
+  changed_when: mosquitto_pwfile_result.rc == 0
+
+- name: Template Env
+  ansible.builtin.template:
+    src: env.j2
+    dest: "/opt/{{ domain }}/mosquitto/.env"
+  register: env_template
 
 - name: Start the mosquitto service with Docker Compose
   ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: /opt//mosquitto
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "/opt/{{ domain }}/mosquitto"
 
 - name: Pull on change
   when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
-    cmd: docker compose pull
+  ansible.builtin.command:
+    chdir: "/opt/{{ domain }}/mosquitto"
+    cmd: "{{ docker_cli }} compose pull"
 
 - name: Restart on change
-  when: docker_compose_yaml.changed
-  command:
-    chdir: /opt/monitoring-stack
-    cmd: docker compose restart
+  when: docker_compose_yaml.changed or env_template.changed or mosquitto_conf_template.changed or mosquitto_pwfile_result.changed
+  ansible.builtin.command:
+    chdir: "/opt/{{ domain }}/mosquitto"
+    cmd: "{{ docker_cli }} compose restart"
