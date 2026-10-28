@@ -1,43 +1,152 @@
-version: '3'
-
 volumes:
-  keycloak-data:
+  letsencrypt:
+    external: true
+
+networks:
+  traefik-network:
+    external: true
+  monitoring-network:
+    external: true
+  openldap-network:
+    external: true
+  postgres-net:
+    external: true
+  keycloak:
 
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.8.1
-    ports:
-       - 8080:8080
-       - 8443:8443
-       - 9000:9000
+    labels:
+      # Enable Traefik for this container
+      - "traefik.enable=true"
+      # Match incoming requests on a specific hostname
+      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_DOMAIN_NAME}`)"
+      # Assign the router to a named Traefik service
+      - "traefik.http.routers.keycloak.service=keycloak"
+      # Use the 'websecure' (HTTPS) entry point
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      # Define the internal container port for routing
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      # Enable TLS on this router
+      - "traefik.http.routers.keycloak.tls=true"
+      # Use Let's Encrypt for certificate management
+      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      # Pass the original Host header to the container
+      - "traefik.http.services.keycloak.loadbalancer.passhostheader=true"
+      # Apply a compression middleware
+      - "traefik.http.routers.keycloak.middlewares=compresstraefik"
+      # Define settings for the compression middleware
+      - "traefik.http.middlewares.compresstraefik.compress=true"
+      # Specify which Docker network Traefik should use for routing
+      - "traefik.docker.network=traefik-network"
+      - "prometheus-job=prometheus"
+      - "prometheus-port=9000"
+    #    ports:
+    #      - 8080:8080
+    #      - 9000:9000 # managment
     environment:
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
       KC_DB: postgres
-      KC_DB_URL_HOST: postgres
-      KC_DB_URL_PORT: 5432
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-      KC_HOSTNAME: localhost
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB_SCHEMA: keycloak
+      KC_DB_URL_HOST: ${KEYCLOAK_URL_HOST}
+      KC_DB_USERNAME: ${KEYCLOAK_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KC_HTTP_ENABLED: 'true'
+      KC_PROXY_HEADERS: 'xforwarded'
+      PROXY_ADDRESS_FORWARDING: 'true'
+      KC_HOSTNAME: ${DOMAIN_NAME}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     entrypoint:
-     - '/opt/keycloak/bin/kc.sh'
-     - 'start'
-     - '--https-certificate-file=/opt/keycloak/certs/cert.pem'
-     - '--https-certificate-key-file=/opt/keycloak/certs/key.pem'
+      - '/opt/keycloak/bin/kc.sh'
+      - 'start'
+      - '--https-certificate-file=/certs/certs/certs/auth.skillzinskullz.de.crt'
+      - '--https-certificate-key-file=/certs/certs/private/auth.skillzinskullz.de.key'
     volumes:
-      - ./certs:/opt/keycloak/certs/
-      - keycloak-data:/opt/keycloak/data
+      - letsencrypt:/certs/
     networks:
-      postgres-net:
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health/ready -o /dev/null"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      - traefik-network
+      - monitoring-network
+      - postgres-net
+      - keycloak
 
-networks:
-  postgres-net:
-    external: true
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    environment:
+      LDAP_LOG_LEVEL: "256"
+      LDAP_ORGANISATION: "Skillz In Skullz"
+      LDAP_DOMAIN: "skillzinskullz.de"
+      LDAP_BASE_DN: "skillzinskullz.de"
+      LDAP_ADMIN_PASSWORD: "${LDAP_ADMIN_PASSWORD}"
+      LDAP_CONFIG_PASSWORD: "${LDAP_CONFIG_PASSWORD}"
+      LDAP_READONLY_USER: "false"
+      #LDAP_READONLY_USER_USERNAME: "readonly"
+      LDAP_RFC2307BIS_SCHEMA: "false" #gitleaks:allow
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_DH_PARAM_FILENAME: "dhparam.pem"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      KEEP_EXISTING_CONFIG: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+      #LDAP_REPLICATION_CONFIG_SYNCPROV: 'binddn="cn=admin,cn=config" bindmethod=simple credentials="$$LDAP_CONFIG_PASSWORD" searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical'
+      #LDAP_REPLICATION_DB_SYNCPROV: 'binddn="cn=admin,$$LDAP_BASE_DN" bindmethod=simple credentials="$$LDAP_ADMIN_PASSWORD" searchbase="$$LDAP_BASE_DN" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=1 starttls=critical'
+      #LDAP_REPLICATION_HOSTS: "#PYTHON2BASH:['ldap://ldap.example.org','ldap://ldap2.example.org']"
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./ldap:/var/lib/ldap
+      - ./slap.d:/etc/ldap/slapd.d
+      - ./certs/:/container/service/slapd/assets/certs/
+    ports:
+      - "127.0.0.1:389:389"
+    #      - "636:636"
+    networks:
+      - keycloak
+      - openldap-network
+    # For replication to work correctly, domainname and hostname must be
+    # set correctly so that "hostname"."domainname" equates to the
+    # fully-qualified domain name for the host.
+    #       domainname: "${DOMAIN_NAME}"
+    #      hostname: "${HOST_NAME}"
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    labels:
+      # Enable Traefik for this container
+      - "traefik.enable=true"
+      # Match incoming requests on a specific hostname
+      - "traefik.http.routers.phpldapadmin.rule=Host(`${LDAP_ADMIN_DOMAIN_NAME}`)"
+      # Assign the router to a named Traefik service
+      - "traefik.http.routers.phpldapadmin.service=phpldapadmin"
+      # Use the 'websecure' (HTTPS) entry point
+      - "traefik.http.routers.phpldapadmin.entrypoints=websecure"
+      # Define the internal container port for routing
+      - "traefik.http.services.phpldapadmin.loadbalancer.server.port=80"
+      # Enable TLS on this router
+      - "traefik.http.routers.phpldapadmin.tls=true"
+      # Use Let's Encrypt for certificate management
+      - "traefik.http.routers.phpldapadmin.tls.certresolver=letsencrypt"
+      # Pass the original Host header to the container
+      - "traefik.http.services.phpldapadmin.loadbalancer.passhostheader=true"
+      # Specify which Docker network Traefik should use for routing
+      - "traefik.docker.network=traefik-network"
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    #    ports:
+    #      - "8081:80"
+    depends_on:
+      - openldap
+    networks:
+      - traefik-network
+      - keycloak

@@ -1,8 +1,12 @@
 service_name: immich
-uri: myndir.triantium.de
-domain: triantium.ddns.net
+uri: myndir.skillzinskullz.de
+immich_domain: triantium.ddns.net
 
+immich_hostname: "{{ uri }}"
 immich_port: 2283
+immich_publish_port: true
+immich_traefik_enabled: false
+immich_traefik_network: traefik-network
 immich_tz: Europe/Berlin
 
 # Immich evicts loaded models after 300s by default, which is shorter than the
@@ -13,19 +17,42 @@ immich_tz: Europe/Berlin
 # https://immich.app/docs/features/ml-hardware-acceleration
 immich_ml_model_ttl: 0
 
-immich_data_dir: /opt/{{ domain }}/immich
+immich_data_dir: /opt/{{ immich_domain }}/immich
 immich_upload_location: "{{ immich_data_dir }}/library"
 immich_db_data_location: "{{ immich_data_dir }}/postgres"
 immich_db_username: immich
 immich_db_database_name: immich
-immich_db_password_location: 'hosts/{{ ansible_facts.hostname }}/services/immich/{{ domain }}'
+immich_db_password_location: 'hosts/{{ ansible_facts.hostname }}/services/immich/{{ immich_domain }}'
 immich_db_password: "{{ lookup('community.general.passwordstore', immich_db_password_location, missing='create') }}"
+
+immich_oidc_enabled: false
+immich_oidc_issuer_url: ""
+immich_oidc_client_id: immich
+immich_oidc_client_secret_location: "services/keycloak/auth.{{ external_url | default(immich_domain) }}/immich"
+immich_oidc_client_secret: "{{ lookup('community.general.passwordstore', immich_oidc_client_secret_location, missing='create') }}"
+immich_oidc_scope: "openid email profile"
+immich_oidc_button_text: "Login with Keycloak"
+immich_oidc_auto_register: true
+immich_oidc_auto_launch: false
+immich_oidc_token_endpoint_auth_method: client_secret_post
+immich_oidc_signing_algorithm: RS256
+
+immich_smtp_enabled: false
+immich_smtp_host: ""
+immich_smtp_port: 587
+immich_smtp_username: ""
+immich_smtp_password: ""
+immich_smtp_from: ""
+immich_smtp_reply_to: ""
+immich_smtp_secure: true
+immich_smtp_ignore_cert: false
 
 # Read-only media library that is registered as an external library in the web UI
 immich_external_library_dir: /share/homes/pi/immich
 
 immich_healthcheck_port: "{{ immich_port }}"
 
+immich_restic_host: immich-server
 autorestic_location_name: immich-backups
 autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
 autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"

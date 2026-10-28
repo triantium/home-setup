@@ -1,6 +1,7 @@
 - hosts:
    - pi
    - divera
+   - netcup
   tasks:
     - name: Upgrade all repositories
       apt:

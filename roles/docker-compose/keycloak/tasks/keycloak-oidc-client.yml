@@ -1,0 +1,132 @@
+- name: Authenticate to Keycloak for OIDC client setup
+  uri:
+    url: "https://{{ domain }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "admin"
+      password: "{{ keycloak_admin_password }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    validate_certs: "{{ validate_certs | default(true) }}"
+    status_code: [200]
+  register: keycloak_oidc_client_auth
+  retries: 3
+  delay: 5
+
+- name: Look up OIDC client {{ immich_oidc_client_id }}
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/clients?clientId={{ immich_oidc_client_id | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_oidc_client_auth.json.access_token }}"
+    status_code: [200]
+  register: keycloak_oidc_client_lookup
+
+- name: Define OIDC client configuration
+  set_fact:
+    keycloak_immich_client:
+      clientId: "{{ immich_oidc_client_id }}"
+      name: "Immich"
+      description: "Immich photo library"
+      rootUrl: "https://{{ immich_hostname }}"
+      baseUrl: "/"
+      redirectUris:
+        - "https://{{ immich_hostname }}/auth/login"
+        - "https://{{ immich_hostname }}/user-settings"
+        - "app.immich:///oauth-callback"
+      webOrigins:
+        - "https://{{ immich_hostname }}"
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      implicitFlowEnabled: false
+      directAccessGrantsEnabled: false
+      serviceAccountsEnabled: false
+      enabled: true
+      clientAuthenticatorType: client-secret
+      secret: "{{ immich_oidc_client_secret }}"
+      attributes:
+        post.logout.redirect.uris: "https://{{ immich_hostname }}/*"
+  no_log: true
+
+- name: Create OIDC client {{ immich_oidc_client_id }}
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/clients"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_oidc_client_auth.json.access_token }}"
+    body_format: json
+    body: "{{ keycloak_immich_client }}"
+    status_code: [201]
+  when: keycloak_oidc_client_lookup.json | length == 0
+  register: keycloak_oidc_client_creation
+  no_log: true
+
+- name: Determine OIDC client ID for {{ immich_oidc_client_id }}
+  set_fact:
+    keycloak_oidc_client_uuid: >-
+      {{ (keycloak_oidc_client_lookup.json | first).id if keycloak_oidc_client_lookup.json | length > 0
+         else (keycloak_oidc_client_creation.location | urlsplit('path')).split('/')[-1] }}
+
+- name: Update OIDC client {{ immich_oidc_client_id }}
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/clients/{{ keycloak_oidc_client_uuid }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_oidc_client_auth.json.access_token }}"
+    body_format: json
+    body: "{{ keycloak_immich_client | combine({'id': keycloak_oidc_client_uuid}) }}"
+    status_code: [204]
+  when: keycloak_oidc_client_lookup.json | length > 0
+  no_log: true
+
+- name: Get protocol mappers for OIDC client {{ immich_oidc_client_id }}
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/clients/{{ keycloak_oidc_client_uuid }}/protocol-mappers/models"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_oidc_client_auth.json.access_token }}"
+    status_code: [200]
+  register: keycloak_oidc_client_mappers
+
+- name: Find immich_role protocol mapper
+  set_fact:
+    keycloak_immich_role_mapper: "{{ keycloak_oidc_client_mappers.json | selectattr('name', 'equalto', 'immich_role') | list | first | default({}) }}"
+
+- name: Define immich_role protocol mapper
+  set_fact:
+    keycloak_immich_role_mapper_config:
+      name: immich_role
+      protocol: openid-connect
+      protocolMapper: oidc-usermodel-realm-role-mapper
+      consentRequired: false
+      config:
+        claim.name: immich_role
+        jsonType.label: String
+        multivalued: "true"
+        access.token.claim: "true"
+        id.token.claim: "true"
+        userinfo.token.claim: "true"
+
+- name: Create immich_role protocol mapper
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/clients/{{ keycloak_oidc_client_uuid }}/protocol-mappers/models"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ keycloak_oidc_client_auth.json.access_token }}"
+    body_format: json
+    body: "{{ keycloak_immich_role_mapper_config }}"
+    status_code: [201]
+  when: keycloak_immich_role_mapper | length == 0
+
+- name: Update immich_role protocol mapper
+  uri:
+    url: "https://{{ domain }}/admin/realms/{{ realm }}/clients/{{ keycloak_oidc_client_uuid }}/protocol-mappers/models/{{ keycloak_immich_role_mapper.id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ keycloak_oidc_client_auth.json.access_token }}"
+    body_format: json
+    body: "{{ keycloak_immich_role_mapper_config | combine({'id': keycloak_immich_role_mapper.id}) }}"
+    status_code: [204]
+  when: keycloak_immich_role_mapper | length > 0

@@ -1,2 +1,20 @@
 service_name: mosquitto
 uri: mosquitto.triantium.de
+domain: triantium.ddns.net
+
+mqtt_exporter_user: exporter
+mqtt_exporter_password_location: 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/exporter'
+mqtt_exporter_password: "{{ lookup('community.general.passwordstore', mqtt_exporter_password_location, missing='create') }}"
+
+# Add additional users as needed
+mosquitto_users:
+  - username: "{{ mqtt_exporter_user }}"
+    password: "{{ mqtt_exporter_password }}"
+  - username: "homeassistent"
+    password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/homeassistent', missing='create') }}"
+  - username: "homebutton"
+    password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/homebutton', missing='create') }}"
+  - username: "triantium"
+    password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/triantium', missing='create') }}"
+  - username: "meshtastic"
+    password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/meshtastic', missing='create') }}"

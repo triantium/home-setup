@@ -9,9 +9,9 @@
     - "{{ immich_data_dir }}/autorestic"
     - "{{ immich_data_dir }}/autorestic/cron"
 
-- name: Copy docker-compose.yml to target host
-  ansible.builtin.copy:
-    src: docker-compose.yml
+- name: Template docker-compose.yml to target host
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
     dest: "{{ immich_data_dir }}/docker-compose.yml"
   register: docker_compose_yaml
 
@@ -20,6 +20,14 @@
     src: env.j2
     dest: "{{ immich_data_dir }}/.env"
   register: env_template
+
+- name: Template Immich configuration
+  ansible.builtin.template:
+    src: immich-config.json.j2
+    dest: "{{ immich_data_dir }}/immich-config.json"
+    mode: '0600'
+  when: immich_oidc_enabled or immich_smtp_enabled
+  register: immich_config_template
 
 - name: Template Autorestic Config
   ansible.builtin.template:
@@ -51,7 +59,7 @@
     chdir: "{{ immich_data_dir }}"
 
 - name: Restart on change
-  when: docker_compose_yaml.changed or env_template.changed or autorestic_template.changed or autorestic_crontab_template.changed or autorestic_start_cron_template.changed
+  when: docker_compose_yaml.changed or env_template.changed or immich_config_template.changed or autorestic_template.changed or autorestic_crontab_template.changed or autorestic_start_cron_template.changed
   ansible.builtin.command:
     chdir: "{{ immich_data_dir }}"
     cmd: "{{ docker_cli }} compose restart"

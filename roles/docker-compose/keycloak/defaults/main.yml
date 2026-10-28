@@ -1,10 +1,98 @@
-service_name: keycloak
-uri: keycloak.triantium.de
+domain: auth.{{ external_url }}
+deployment_dir: /opt/{{ external_url }}/keycloak
+password_location: "services/keycloak/{{ domain }}/admin"
+keycloak_admin_password: "{{ lookup('community.general.passwordstore', password_location , missing='create' ) }}"
+temp_config_path: "/tmp/keycloak/{{domain}}"
+realm: "skillzinskullz"
+realm_template_file: "skillzinskullz.json.j2"
 
-domain: triantium.ddns.net
+ldap_domain_name: ldap.{{ external_url }}
+ldap_base_dn: "dc=skillzinskullz,dc=de"
+ldap_admin_dn: "cn=admin,{{ ldap_base_dn }}"
+ldap_password_location: "services/ldap/{{ ldap_domain_name }}/admin"
+ldap_admin_password: "{{ lookup('community.general.passwordstore', ldap_password_location, missing='create') }}"
 
-postgres_password_location: 'hosts/{{ansible_facts.hostname}}/services/postgres/{{ domain }}'
-postgres_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='error') }}"
+keycloak_ldap_provider_name: openldap
+keycloak_ldap_connection_url: "ldap://openldap:389"
+keycloak_ldap_users_dn: "ou=users,{{ ldap_base_dn }}"
+keycloak_ldap_username_attribute: uid
+keycloak_ldap_rdn_attribute: uid
+keycloak_ldap_uuid_attribute: entryUUID
+keycloak_ldap_user_object_classes: "person, organizationalPerson, inetOrgPerson"
+keycloak_ldap_config:
+  enabled: ["true"]
+  priority: ["0"]
+  fullSyncPeriod: ["-1"]
+  changedSyncPeriod: ["-1"]
+  cachePolicy: ["DEFAULT"]
+  pagination: ["true"]
+  connectionTrace: ["false"]
+  connectionUrl: ["{{ keycloak_ldap_connection_url }}"]
+  startTls: ["false"]
+  authType: ["simple"]
+  bindDn: ["{{ ldap_admin_dn }}"]
+  bindCredential: ["{{ ldap_admin_password }}"]
+  useTruststoreSpi: ["never"]
+  connectionPooling: ["true"]
+  usersDn: ["{{ keycloak_ldap_users_dn }}"]
+  usernameLDAPAttribute: ["{{ keycloak_ldap_username_attribute }}"]
+  rdnLDAPAttribute: ["{{ keycloak_ldap_rdn_attribute }}"]
+  uuidLDAPAttribute: ["{{ keycloak_ldap_uuid_attribute }}"]
+  userObjectClasses: ["{{ keycloak_ldap_user_object_classes }}"]
+  editMode: ["WRITABLE"]
+  syncRegistrations: ["true"]
+  vendor: ["other"]
+  searchScope: ["1"]
+  importEnabled: ["true"]
+  allowKerberosAuthentication: ["false"]
+  useKerberosForPasswordAuthentication: ["false"]
+  trustEmail: ["false"]
+  validatePasswordPolicy: ["false"]
+  usePasswordModifyExtendedOp: ["false"]
+  removeInvalidUsersEnabled: ["true"]
 
-keycloak_db_password_location: 'hosts/{{ansible_facts.hostname}}/services/keycloak/{{ domain }}/db'
-keycloak_db_password: "{{ lookup('community.general.passwordstore', keycloak_db_password_location, missing='create') }}"
+# Email Einstellungen
+email_password_location: "accounts/mailbox.org"
+smtp_host: "{{ lookup('community.general.passwordstore', email_password_location , subkey='smtp' ) }}"
+smtp_port: 465
+smtp_from: auth@{{external_url}}
+smtp_username: "{{ lookup('community.general.passwordstore', email_password_location , subkey='login' ) }}"
+smtp_password: "{{ lookup('community.general.passwordstore', email_password_location ) }}"
+
+postgres_password_location: 'hosts/{{ansible_facts.hostname}}/services/postgres/{{ external_url }}'
+postgres_database_password: "{{ lookup('community.general.passwordstore', postgres_password_location, missing='create') }}"
+
+keycloak_database_password_location: "services/databases/{{ external_url }}/postgres/keycloak"
+keycloak_db_name: keycloak
+keycloak_db_user: keycloak
+keycloak_db_password: "{{ lookup('community.general.passwordstore', keycloak_database_password_location , missing='create' ) }}"
+keycloak_db_url_host: postgres
+
+users:
+  - username: triantium
+    password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz.de/triantium', missing='create') }}"
+    email: triantium@mailbox.org
+    first_name: Manuel
+    last_name: Müller
+    enabled: true
+    roles:
+      - realm: skillzinskullz
+        role: admin
+  - username: manuel
+    password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz.de/manuel', missing='create') }}"
+    email: manuel@triantium.de
+    first_name: Manuel
+    last_name: Müller
+    enabled: true
+    roles:
+      - realm: skillzinskullz
+        role: admin
+#  - username: manuela
+#    password: "{{ lookup('community.general.passwordstore', 'accounts/auth.skillzinskullz.de/manuela', missing='create') }}"
+#    email: manuela@triantium.de
+#    first_name: Manuela
+#    last_name: ---
+#    enabled: true
+#    roles:
+#      - realm: skillzinskullz
+#        role: user

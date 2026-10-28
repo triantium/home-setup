@@ -1,37 +1,77 @@
 - name: Create a directory for the traefik service
   ansible.builtin.file:
-    path: /opt/traefik
+    path: "{{item}}"
     state: directory
-
-- name: Create a directory for the traefik service
-  ansible.builtin.file:
-    path: /opt/traefik/{{uri}}
-    state: directory
+  with_items:
+    - "/opt/{{external_url}}"
+    - "/opt/{{external_url}}/traefik"
 
 - name: Copy docker-compose.yml to target host
   ansible.builtin.copy:
     src: docker-compose.yml
-    dest: /opt/traefik/{{uri}}/docker-compose.yml
+    dest: /opt/{{external_url}}/traefik/docker-compose.yml
+  register: docker_compose_yaml
+
+- name: Copy docker-compose.yml to target host
+  ansible.builtin.copy:
+    src: hook.sh
+    dest: /opt/{{external_url}}/traefik/hook.sh
+    mode: "0777"
   register: docker_compose_yaml
 
 - name: Templating Environment
   ansible.builtin.template:
     src: env.j2
-    dest: /opt/traefik/{{uri}}/.env
+    dest: /opt/{{external_url}}/traefik/.env
+
+- name: Create treafik docker network to use for other containers
+  community.docker.docker_network:
+    name: traefik-network
+
+# since this is probably the first role to be applied to each server
+- name: Create monitoring docker network to use for other containers
+  community.docker.docker_network:
+    name: monitoring-network
+
+- name: Create a volume
+  community.docker.docker_volume:
+    name: letsencrypt
 
 - name: Start the traefik service with Docker Compose
   ansible.builtin.command:
     cmd: docker compose up -d
-    chdir: /opt/traefik/{{uri}}
+    chdir: /opt/{{external_url}}/traefik
 
 - name: Pull on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/traefik/{{uri}}
+    chdir: /opt/{{external_url}}/traefik
     cmd: docker compose pull
 
 - name: Restart on change
   when: docker_compose_yaml.changed
   command:
-    chdir: /opt/traefik/{{uri}}
+    chdir: /opt/{{external_url}}/traefik
     cmd: docker compose restart
+
+- name: Wait for http-Port
+  ansible.builtin.wait_for:
+    port: 80
+    sleep: 5
+
+- name: Wait for https-Port
+  ansible.builtin.wait_for:
+    port: 443
+    sleep: 5
+
+- name: Check Service
+  retries: 10
+  delay: 15
+  uri:
+    url: "https://{{ domain }}"
+    method: GET
+  register: whoami_response
+
+- name: Debug whoami
+  ansible.builtin.debug:
+    msg: "{{ whoami_response }}"

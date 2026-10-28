@@ -21,26 +21,57 @@
 # See https://docs.immich.app/install/docker-compose
 name: immich
 
+{% if immich_traefik_enabled %}
+networks:
+  default:
+  {{ immich_traefik_network }}:
+    external: true
+
+{% endif %}
 services:
   immich-server:
     container_name: immich_server
     image: ghcr.io/immich-app/immich-server:v3.3.5
+{% if immich_traefik_enabled %}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.immich.rule=Host(`${IMMICH_DOMAIN_NAME}`)"
+      - "traefik.http.routers.immich.service=immich"
+      - "traefik.http.routers.immich.entrypoints=websecure"
+      - "traefik.http.services.immich.loadbalancer.server.port={{ immich_port }}"
+      - "traefik.http.routers.immich.tls=true"
+      - "traefik.http.routers.immich.tls.certresolver=letsencrypt"
+      - "traefik.http.services.immich.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.immich.middlewares=immich-compress"
+      - "traefik.http.middlewares.immich-compress.compress=true"
+      - "traefik.docker.network={{ immich_traefik_network }}"
+{% endif %}
     env_file:
       - .env
+{% if immich_publish_port %}
     ports:
       - "${IMMICH_SERVER_PORT:-2283}:2283"
+{% endif %}
     environment:
       - TZ=${IMMICH_TZ:-Europe/Berlin}
     volumes:
       - ${UPLOAD_LOCATION}:/data
       #- ${IMMICH_EXTERNAL_LIBRARY_DIR}:/usr/src/app/external:ro
       - /etc/localtime:/etc/localtime:ro
+{% if immich_oidc_enabled or immich_smtp_enabled %}
+      - ./immich-config.json:/usr/src/app/immich-config.json:ro
+{% endif %}
     depends_on:
       redis:
         condition: service_healthy
       database:
         condition: service_healthy
     restart: unless-stopped
+{% if immich_traefik_enabled %}
+    networks:
+      - default
+      - {{ immich_traefik_network }}
+{% endif %}
 
 
   immich-machine-learning:
@@ -120,7 +151,7 @@ services:
     container_name: immich_autorestic
     restart: unless-stopped
     environment:
-      - RESTIC_HOST=immich-server
+      - RESTIC_HOST=${IMMICH_RESTIC_HOST:-immich-server}
       - TZ=${IMMICH_TZ:-Europe/Berlin}
     volumes:
       - ./autorestic/config.yml:/etc/autorestic/config.yml

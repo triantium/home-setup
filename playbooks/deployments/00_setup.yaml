@@ -13,6 +13,7 @@
 
 - hosts:
     - pi
+    - netcup
   roles:
     - role: common-setup
     - role: geerlingguy.pip
