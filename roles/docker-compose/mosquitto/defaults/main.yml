@@ -16,3 +16,5 @@ mosquitto_users:
     password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/homebutton', missing='create') }}"
   - username: "triantium"
     password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/triantium', missing='create') }}"
+  - username: "meshtastic"
+    password: "{{ lookup('community.general.passwordstore', 'hosts/{{ ansible_facts.hostname }}/services/mosquitto/{{ domain }}/meshtastic', missing='create') }}"
