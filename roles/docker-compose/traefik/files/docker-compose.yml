@@ -63,7 +63,7 @@ services:
       - traefik-network
 
   certdumper:
-    image: "ldez/traefik-certs-dumper:v2.11.0"
+    image: "ldez/traefik-certs-dumper:v2.11.4"
     entrypoint: sh -c '
       while ! [ -e /data/acme.json ]
       || ! [ `jq ".[] | .Certificates | length" /data/acme.json | jq -s "add" ` != 0 ]; do
