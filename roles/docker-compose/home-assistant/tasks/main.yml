@@ -4,6 +4,7 @@
     state: directory
   loop:
     - "/opt/{{domain}}/home-assistant"
+    - "/opt/{{domain}}/home-assistant/whisper-data"
     - "/opt/{{domain}}/home-assistant/autorestic"
     - "/opt/{{domain}}/home-assistant/autorestic/cron"
 

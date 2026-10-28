@@ -15,6 +15,16 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+  whisper:
+    image: rhasspy/wyoming-whisper:3.8.1
+    container_name: whisper
+    restart: always
+    command: --model base-int8 --language de
+    volumes:
+        - ./whisper-data:/data
+        - /etc/localtime:/etc/localtime:ro
+    ports:
+        - 10300:10300
   autorestic:
     image: pascaliske/autorestic:latest
     restart: always
