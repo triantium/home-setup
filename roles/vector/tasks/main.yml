@@ -5,28 +5,42 @@
       - curl
     state: present
 
-- name: Remove stale keyring from previous failed runs
+- name: Create apt keyrings directory
   file:
-    path: /usr/share/keyrings/datadog-archive-keyring.gpg
-    state: absent
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
 
-#
-#
-#- name: Add Vector apt repository
-#  deb822_repository:
-#    name: vector
-#    types: deb
-#    uris: https://apt.vector.dev
-#    suites: stable vector-0
-#    components:
-#      - vector-0
-#    state: present
-#    signed_by: https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public
+- name: Download Vector (Datadog) apt signing key
+  get_url:
+    url: https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public
+    dest: /etc/apt/keyrings/datadog-archive-keyring.asc
+    mode: '0644'
+
+- name: Add Vector apt repository
+  deb822_repository:
+    name: vector
+    types: deb
+    uris: https://apt.vector.dev
+    suites: stable
+    components:
+      - vector-0
+    signed_by: /etc/apt/keyrings/datadog-archive-keyring.asc
+    state: present
+
+- name: Remove legacy Vector apt source and keyring
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/apt_vector_dev.list
+    - /usr/share/keyrings/datadog-archive-keyring.gpg
 
 - name: Install Vector
   apt:
     name: vector
     state: present
+    update_cache: true
 
 - name: Add vector user to docker group
   user:
