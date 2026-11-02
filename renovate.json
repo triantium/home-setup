@@ -16,6 +16,26 @@
       "matchUpdateTypes": ["major"],
       "matchPackageNames": ["postgres"],
       "automerge": false
+    },
+    {
+      "matchPackageNames": [
+        "ghcr.io/immich-app/immich-server",
+        "ghcr.io/immich-app/immich-machine-learning"
+      ],
+      "groupName": "immich images"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)templates/.*\\.ya?ml\\.j2$/",
+        "/(^|/)templates/.*\\.yml$/"
+      ],
+      "matchStrings": [
+        "image:\\s*(?<depName>[^:\\s@]+(?:/[^:\\s@]+)*):(?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }
