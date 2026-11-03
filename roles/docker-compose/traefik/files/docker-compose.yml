@@ -22,6 +22,8 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.transport.respondingTimeouts.readTimeout=600s"
+      - "--entryPoints.websecure.transport.respondingTimeouts.idleTimeout=600s"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
