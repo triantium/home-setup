@@ -1,0 +1,78 @@
+- name: Create directories for the opencloud service
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: '1000'
+    group: '1000'
+    mode: '0755'
+  loop:
+    - "{{ opencloud_data_dir }}"
+    - "{{ opencloud_oc_config_dir }}"
+    - "{{ opencloud_oc_data_dir }}"
+    - "{{ opencloud_apps_dir }}"
+    - "{{ opencloud_ldap_certs_dir }}"
+    - "{{ opencloud_ldap_data_dir }}"
+    - "{{ opencloud_data_dir }}/autorestic"
+    - "{{ opencloud_data_dir }}/autorestic/cron"
+    - "{{ opencloud_data_dir }}/config"
+
+- name: Set ownership for LDAP directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: '1001'
+    group: '0'
+    mode: '0775'
+  loop:
+    - "{{ opencloud_ldap_certs_dir }}"
+    - "{{ opencloud_ldap_data_dir }}"
+
+- name: Copy static files to target host
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: "docker-compose.yml", dest: "{{ opencloud_data_dir }}/docker-compose.yml" }
+    - { src: "config/", dest: "{{ opencloud_data_dir }}/config/" }
+  register: static_files_copy_result
+
+- name: Template Env
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ opencloud_data_dir }}/.env"
+  register: env_template
+
+- name: Template Autorestic Config
+  ansible.builtin.template:
+    src: "{{ shared_templates_dir }}/autorestic/config.yml.j2"
+    dest: "{{ opencloud_data_dir }}/autorestic/config.yml"
+  register: autorestic_template
+
+- name: Template Autorestic Crontab
+  ansible.builtin.template:
+    src: "{{ shared_templates_dir }}/autorestic/crontab.j2"
+    dest: "{{ opencloud_data_dir }}/autorestic/cron/crontab"
+  register: autorestic_crontab_template
+
+- name: Copy Autorestic start_cron.sh
+  ansible.builtin.template:
+    src: "{{ shared_templates_dir }}/autorestic/start_cron.sh"
+    dest: "{{ opencloud_data_dir }}/autorestic/cron/start_cron.sh"
+  register: autorestic_start_cron_template
+
+- name: Pull the Images
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose pull"
+    chdir: "{{ opencloud_data_dir }}"
+  when: static_files_copy_result.changed
+
+- name: Start the opencloud service with Docker Compose
+  ansible.builtin.command:
+    cmd: "{{ docker_cli }} compose up -d"
+    chdir: "{{ opencloud_data_dir }}"
+
+- name: Restart on change
+  when: static_files_copy_result.changed or env_template.changed or autorestic_template.changed or autorestic_crontab_template.changed or autorestic_start_cron_template.changed
+  ansible.builtin.command:
+    chdir: "{{ opencloud_data_dir }}"
+    cmd: "{{ docker_cli }} compose restart"

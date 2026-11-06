@@ -1,0 +1,17 @@
+- hosts: netcup
+  vars:
+    opencloud_domain: cloud.{{ external_url }}
+    opencloud_idp_domain: auth.{{ external_url }}
+    opencloud_idp_issuer_url: "https://auth.{{ external_url }}/realms/skillzinskullz"
+    opencloud_idp_account_url: "https://auth.{{ external_url }}/realms/skillzinskullz/account"
+    opencloud_smtp_enabled: true
+    opencloud_smtp_host: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='smtp') }}"
+    opencloud_smtp_port: 465
+    opencloud_smtp_username: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='login') }}"
+    opencloud_smtp_password: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org') }}"
+    opencloud_smtp_sender: "auth@{{ external_url }}"
+    opencloud_restic_host: cloud-opencloud
+    autorestic_location_name: cloud-opencloud-backups
+  roles:
+    - role: docker-compose/traefik
+    - role: docker-compose/opencloud

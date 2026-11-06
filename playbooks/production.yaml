@@ -30,6 +30,8 @@
 
 - name: Deploy Immich
   ansible.builtin.import_playbook: deployments/10_immich.yaml
+- name: Deploy OpenCloud
+  ansible.builtin.import_playbook: deployments/10_opencloud.yaml
 
 - name: Deploy Meshtastic Web
   ansible.builtin.import_playbook: deployments/10_meshtastic-web.yaml

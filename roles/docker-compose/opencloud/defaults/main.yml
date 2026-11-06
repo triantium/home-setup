@@ -1,0 +1,35 @@
+service_name: opencloud
+opencloud_domain: cloud.{{ external_url }}
+opencloud_hostname: "{{ opencloud_domain }}"
+opencloud_port: 9200
+
+opencloud_data_dir: /opt/{{ external_url }}/opencloud
+opencloud_oc_config_dir: "{{ opencloud_data_dir }}/oc-config"
+opencloud_oc_data_dir: "{{ opencloud_data_dir }}/oc-data"
+opencloud_apps_dir: "{{ opencloud_data_dir }}/apps"
+opencloud_ldap_certs_dir: "{{ opencloud_data_dir }}/ldap-certs"
+opencloud_ldap_data_dir: "{{ opencloud_data_dir }}/ldap-data"
+
+opencloud_insecure: false
+opencloud_demo_users: false
+opencloud_default_language: en
+
+opencloud_idp_domain: auth.{{ external_url }}
+opencloud_idp_issuer_url: "https://auth.{{ external_url }}/realms/skillzinskullz"
+opencloud_idp_account_url: "https://auth.{{ external_url }}/realms/skillzinskullz/account"
+
+opencloud_ldap_bind_password_location: "services/opencloud/{{ opencloud_domain }}/ldap_bind"
+opencloud_ldap_bind_password: "{{ lookup('community.general.passwordstore', opencloud_ldap_bind_password_location, missing='create') }}"
+
+opencloud_smtp_enabled: true
+opencloud_smtp_host: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='smtp') }}"
+opencloud_smtp_port: 465
+opencloud_smtp_username: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org', subkey='login') }}"
+opencloud_smtp_password: "{{ lookup('community.general.passwordstore', 'accounts/mailbox.org') }}"
+opencloud_smtp_sender: "auth@{{ external_url }}"
+opencloud_smtp_from: "auth@{{ external_url }}"
+
+autorestic_location_name: opencloud-backups
+autorestic_cron_minute: "{{ 60 | random(seed=inventory_hostname + '_' + service_name + '_cron_min') }}"
+autorestic_cron_hour: "{{ 24 | random(seed=inventory_hostname + '_' + service_name + '_cron_hour') }}"
+autorestic_cron: "{{ autorestic_cron_minute }} {{ autorestic_cron_hour }} * * *"

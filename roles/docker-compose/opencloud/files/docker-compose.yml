@@ -1,0 +1,148 @@
+services:
+  opencloud:
+    image: ${OC_DOCKER_IMAGE:-opencloudeu/opencloud-rolling}:${OC_DOCKER_TAG:-9.0.0}
+    user: ${OC_CONTAINER_UID_GID:-1000:1000}
+    networks:
+      - opencloud-net
+      - traefik-network
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "opencloud init || true; opencloud server"]
+    environment:
+      OC_URL: https://${OC_DOMAIN}
+      OC_LOG_LEVEL: ${LOG_LEVEL:-info}
+      OC_LOG_COLOR: "${LOG_PRETTY:-false}"
+      OC_LOG_PRETTY: "${LOG_PRETTY:-false}"
+      PROXY_TLS: "false"
+      OC_INSECURE: "${INSECURE:-false}"
+      PROXY_ENABLE_BASIC_AUTH: "${PROXY_ENABLE_BASIC_AUTH:-false}"
+      IDM_CREATE_DEMO_USERS: "${DEMO_USERS:-false}"
+      IDM_ADMIN_PASSWORD: "${INITIAL_ADMIN_PASSWORD:-admin}"
+      NOTIFICATIONS_SMTP_HOST: "${SMTP_HOST}"
+      NOTIFICATIONS_SMTP_PORT: "${SMTP_PORT}"
+      NOTIFICATIONS_SMTP_SENDER: "${SMTP_SENDER:-OpenCloud Notifications <notifications@opencloud.test>}"
+      NOTIFICATIONS_SMTP_USERNAME: "${SMTP_USERNAME}"
+      NOTIFICATIONS_SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      NOTIFICATIONS_SMTP_INSECURE: "${SMTP_INSECURE:-false}"
+      NOTIFICATIONS_SMTP_AUTHENTICATION: "${SMTP_AUTHENTICATION}"
+      NOTIFICATIONS_SMTP_ENCRYPTION: "${SMTP_TRANSPORT_ENCRYPTION:-none}"
+      FRONTEND_ARCHIVER_MAX_SIZE: "10000000000"
+      FRONTEND_CHECK_FOR_UPDATES: "${CHECK_FOR_UPDATES:-true}"
+      PROXY_CSP_CONFIG_FILE_LOCATION: /etc/opencloud/csp.yaml
+      OC_PASSWORD_POLICY_BANNED_PASSWORDS_LIST: banned-password-list.txt
+      OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD: "${OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD:-true}"
+      OC_SHARING_PUBLIC_WRITEABLE_SHARE_MUST_HAVE_PASSWORD: "${OC_SHARING_PUBLIC_WRITEABLE_SHARE_MUST_HAVE_PASSWORD:-false}"
+      OC_PASSWORD_POLICY_DISABLED: "${OC_PASSWORD_POLICY_DISABLED:-false}"
+      OC_PASSWORD_POLICY_MIN_CHARACTERS: "${OC_PASSWORD_POLICY_MIN_CHARACTERS:-8}"
+      OC_PASSWORD_POLICY_MIN_LOWERCASE_CHARACTERS: "${OC_PASSWORD_POLICY_MIN_LOWERCASE_CHARACTERS:-1}"
+      OC_PASSWORD_POLICY_MIN_UPPERCASE_CHARACTERS: "${OC_PASSWORD_POLICY_MIN_UPPERCASE_CHARACTERS:-1}"
+      OC_PASSWORD_POLICY_MIN_DIGITS: "${OC_PASSWORD_POLICY_MIN_DIGITS:-1}"
+      OC_PASSWORD_POLICY_MIN_SPECIAL_CHARACTERS: "${OC_PASSWORD_POLICY_MIN_SPECIAL_CHARACTERS:-1}"
+      OC_ENABLE_GUEST_LINKS: "${OC_ENABLE_GUEST_LINKS:-false}"
+      OC_DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-en}
+      PROXY_HTTP_ADDR: "0.0.0.0:9200"
+      OC_LDAP_URI: ldaps://ldap-server:1636
+      OC_LDAP_INSECURE: "true"
+      OC_LDAP_BIND_DN: "cn=admin,dc=opencloud,dc=eu"
+      OC_LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD:-admin}
+      OC_LDAP_GROUP_BASE_DN: "ou=groups,dc=opencloud,dc=eu"
+      OC_LDAP_USER_BASE_DN: "ou=users,dc=opencloud,dc=eu"
+      OC_LDAP_USER_FILTER: "(objectclass=inetOrgPerson)"
+      GRAPH_LDAP_SERVER_UUID: "false"
+      GRAPH_LDAP_REFINT_ENABLED: "true"
+      FRONTEND_READONLY_USER_ATTRIBUTES: "user.onPremisesSamAccountName,user.displayName,user.mail,user.passwordProfile,user.accountEnabled,user.appRoleAssignments"
+      PROXY_OIDC_REWRITE_WELLKNOWN: "true"
+      OC_OIDC_CLIENT_ID: ${OC_OIDC_CLIENT_ID}
+      OC_OIDC_CLIENT_SCOPES: ${OC_OIDC_CLIENT_SCOPES}
+      WEB_OIDC_SCOPE: ${WEB_OIDC_SCOPE:-openid profile email groups}
+      PROXY_ROLE_ASSIGNMENT_OIDC_CLAIM: ${PROXY_ROLE_ASSIGNMENT_OIDC_CLAIM:-roles}
+      WEBFINGER_WEB_OIDC_CLIENT_ID: ${WEBFINGER_WEB_OIDC_CLIENT_ID:-web}
+      WEBFINGER_WEB_OIDC_CLIENT_SCOPES: ${WEBFINGER_WEB_OIDC_CLIENT_SCOPES:-openid profile email}
+      WEBFINGER_ANDROID_OIDC_CLIENT_ID: ${WEBFINGER_ANDROID_OIDC_CLIENT_ID:-OpenCloudAndroid}
+      WEBFINGER_ANDROID_OIDC_CLIENT_SCOPES: ${WEBFINGER_ANDROID_OIDC_CLIENT_SCOPES:-openid profile email offline_access}
+      WEBFINGER_IOS_OIDC_CLIENT_ID: ${WEBFINGER_IOS_OIDC_CLIENT_ID:-OpenCloudIOS}
+      WEBFINGER_IOS_OIDC_CLIENT_SCOPES: ${WEBFINGER_IOS_OIDC_CLIENT_SCOPES:-openid profile email offline_access}
+      WEBFINGER_DESKTOP_OIDC_CLIENT_ID: ${WEBFINGER_DESKTOP_OIDC_CLIENT_ID:-OpenCloudDesktop}
+      WEBFINGER_DESKTOP_OIDC_CLIENT_SCOPES: ${WEBFINGER_DESKTOP_OIDC_CLIENT_SCOPES:-openid profile email offline_access}
+      PROXY_ROLE_ASSIGNMENT_DRIVER: ${PROXY_ROLE_ASSIGNMENT_DRIVER:-oidc}
+      OC_OIDC_ISSUER: ${IDP_ISSUER_URL}
+      OC_EXCLUDE_RUN_SERVICES: idm,idp
+      OC_LDAP_SERVER_WRITE_ENABLED: "true"
+      PROXY_AUTOPROVISION_ACCOUNTS: "true"
+      PROXY_USER_OIDC_CLAIM: "sub"
+      PROXY_AUTOPROVISION_CLAIM_USERNAME: "sub"
+      PROXY_AUTOPROVISION_CLAIM_GROUPS: "${PROXY_AUTOPROVISION_CLAIM_GROUPS:-groups}"
+      PROXY_USER_CS3_CLAIM: "username"
+      OC_LDAP_USER_SCHEMA_ID: "opencloudUUID"
+      OC_LDAP_GROUP_SCHEMA_ID: "opencloudUUID"
+      OC_LDAP_DISABLE_USER_MECHANISM: "attribute"
+      OC_ADMIN_USER_ID: ""
+      SETTINGS_SETUP_DEFAULT_ASSIGNMENTS: "false"
+      GRAPH_ASSIGN_DEFAULT_USER_ROLE: ${GRAPH_ASSIGN_DEFAULT_USER_ROLE:-false}
+      GRAPH_USERNAME_MATCH: "none"
+      IDP_DOMAIN: ${IDP_DOMAIN}
+      WEB_OPTION_ACCOUNT_EDIT_LINK_HREF: ${IDP_ACCOUNT_URL}
+    volumes:
+      - ./config/opencloud/csp.yaml:/etc/opencloud/csp.yaml
+      - ./config/opencloud/apps.yaml:/etc/opencloud/apps.yaml
+      - ./config/opencloud/banned-password-list.txt:/etc/opencloud/banned-password-list.txt
+      - ${OC_CONFIG_DIR}:/etc/opencloud
+      - ${OC_DATA_DIR}:/var/lib/opencloud
+      - ${OC_APPS_DIR:-./config/opencloud/apps}:/var/lib/opencloud/web/assets/apps
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.opencloud.rule=Host(`${OC_DOMAIN}`)"
+      - "traefik.http.routers.opencloud.entrypoints=websecure"
+      - "traefik.http.routers.opencloud.tls=true"
+      - "traefik.http.routers.opencloud.tls.certresolver=letsencrypt"
+      - "traefik.http.services.opencloud.loadbalancer.server.port=9200"
+      - "traefik.docker.network=traefik-network"
+    restart: always
+
+  ldap-server:
+    image: bitnamilegacy/openldap:2.6
+    networks:
+      - opencloud-net
+    entrypoint: [ "/bin/sh", "/opt/bitnami/scripts/openldap/docker-entrypoint-override.sh", "/opt/bitnami/scripts/openldap/run.sh" ]
+    environment:
+      BITNAMI_DEBUG: true
+      LDAP_TLS_VERIFY_CLIENT: never
+      LDAP_ENABLE_TLS: "yes"
+      LDAP_TLS_CA_FILE: /opt/bitnami/openldap/share/openldap.crt
+      LDAP_TLS_CERT_FILE: /opt/bitnami/openldap/share/openldap.crt
+      LDAP_TLS_KEY_FILE: /opt/bitnami/openldap/share/openldap.key
+      LDAP_ROOT: "dc=opencloud,dc=eu"
+      LDAP_ADMIN_PASSWORD: ${LDAP_BIND_PASSWORD:-admin}
+    volumes:
+      - ./config/ldap/ldif/10_base.ldif:/ldifs/10_base.ldif
+      - ./config/ldap/schemas/10_opencloud_schema.ldif:/schemas/10_opencloud_schema.ldif
+      - ./config/ldap/docker-entrypoint-override.sh:/opt/bitnami/scripts/openldap/docker-entrypoint-override.sh
+      - ${LDAP_CERTS_DIR}:/opt/bitnami/openldap/share
+      - ${LDAP_DATA_DIR}:/bitnami/openldap
+    restart: always
+
+  autorestic:
+    image: pascaliske/autorestic:latest
+    restart: always
+    environment:
+      - RESTIC_HOST=opencloud
+    volumes:
+      - ./autorestic/config.yml:/etc/autorestic/config.yml
+      - ./autorestic/cron:/etc/cron/
+      - ${OC_CONFIG_DIR}:/backups/opencloud_config
+      - ${OC_DATA_DIR}:/backups/opencloud_data
+      - ${LDAP_DATA_DIR}:/backups/ldap_data
+    entrypoint: [ "/bin/sh", "/etc/cron/start_cron.sh" ]
+    networks:
+      - opencloud-net
+
+volumes:
+  opencloud-config:
+  opencloud-data:
+  ldap-certs:
+  ldap-data:
+
+networks:
+  opencloud-net:
+  traefik-network:
+    external: true
