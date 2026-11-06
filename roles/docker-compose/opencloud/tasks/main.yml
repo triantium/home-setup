@@ -76,3 +76,7 @@
   ansible.builtin.command:
     chdir: "{{ opencloud_data_dir }}"
     cmd: "{{ docker_cli }} compose restart"
+
+- name: Configure Keycloak client for OpenCloud
+  ansible.builtin.include_tasks:
+    file: keycloak-client.yml

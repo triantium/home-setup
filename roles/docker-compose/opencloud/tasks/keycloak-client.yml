@@ -1,0 +1,216 @@
+- name: Authenticate to Keycloak for OpenCloud client setup
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "admin"
+      password: "{{ lookup('community.general.passwordstore', 'services/keycloak/auth.' ~ external_url ~ '/admin') }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    validate_certs: "{{ validate_certs | default(true) }}"
+    status_code: [200]
+  register: opencloud_keycloak_auth
+  retries: 3
+  delay: 5
+  no_log: true
+
+- name: Define OpenCloud Keycloak clients
+  set_fact:
+    opencloud_keycloak_clients:
+      - clientId: web
+        name: OpenCloud Web
+        redirectUris:
+          - "https://{{ opencloud_domain }}/"
+          - "https://{{ opencloud_domain }}/oidc-callback.html"
+          - "https://{{ opencloud_domain }}/oidc-silent-redirect.html"
+        webOrigins:
+          - "https://{{ opencloud_domain }}"
+        postLogoutRedirectUris: "+"
+        backchannelLogoutUrl: "https://{{ opencloud_domain }}/backchannel_logout"
+      - clientId: OpenCloudAndroid
+        name: OpenCloud Android
+        redirectUris:
+          - "oc://android.opencloud.eu"
+        webOrigins: []
+        postLogoutRedirectUris: "oc://android.opencloud.eu"
+        backchannelLogoutUrl: ""
+      - clientId: OpenCloudIOS
+        name: OpenCloud iOS
+        redirectUris:
+          - "oc://ios.opencloud.eu"
+        webOrigins: []
+        postLogoutRedirectUris: "oc://ios.opencloud.eu"
+        backchannelLogoutUrl: ""
+      - clientId: OpenCloudDesktop
+        name: OpenCloud Desktop
+        redirectUris:
+          - "http://127.0.0.1"
+          - "http://localhost"
+        webOrigins: []
+        postLogoutRedirectUris: "+"
+        backchannelLogoutUrl: ""
+
+- name: Look up OpenCloud Keycloak client
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/clients?clientId={{ item.clientId | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    status_code: [200]
+  register: opencloud_keycloak_client_lookup
+  loop: "{{ opencloud_keycloak_clients }}"
+  loop_control:
+    label: "{{ item.clientId }}"
+  no_log: true
+
+- name: Create missing OpenCloud Keycloak clients
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/clients"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body:
+      clientId: "{{ item.item.clientId }}"
+      name: "{{ item.item.name }}"
+      description: "OpenCloud {{ item.item.name }}"
+      rootUrl: "https://{{ opencloud_domain }}"
+      baseUrl: "/"
+      redirectUris: "{{ item.item.redirectUris }}"
+      webOrigins: "{{ item.item.webOrigins }}"
+      protocol: openid-connect
+      publicClient: true
+      standardFlowEnabled: true
+      implicitFlowEnabled: false
+      directAccessGrantsEnabled: false
+      serviceAccountsEnabled: false
+      enabled: true
+      attributes:
+        post.logout.redirect.uris: "{{ item.item.postLogoutRedirectUris }}"
+        backchannel.logout.session.required: "true"
+        backchannel.logout.revoke.offline.tokens: "false"
+        backchannel.logout.url: "{{ item.item.backchannelLogoutUrl }}"
+    status_code: [201, 409]
+  loop: "{{ opencloud_keycloak_client_lookup.results }}"
+  loop_control:
+    label: "{{ item.item.clientId }}"
+  when: item.json | length == 0
+  no_log: true
+
+- name: Update existing OpenCloud Keycloak clients
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/clients/{{ item.json[0].id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body:
+      id: "{{ item.json[0].id }}"
+      clientId: "{{ item.item.clientId }}"
+      name: "{{ item.item.name }}"
+      description: "OpenCloud {{ item.item.name }}"
+      rootUrl: "https://{{ opencloud_domain }}"
+      baseUrl: "/"
+      redirectUris: "{{ item.item.redirectUris }}"
+      webOrigins: "{{ item.item.webOrigins }}"
+      protocol: openid-connect
+      publicClient: true
+      standardFlowEnabled: true
+      implicitFlowEnabled: false
+      directAccessGrantsEnabled: false
+      serviceAccountsEnabled: false
+      enabled: true
+      attributes:
+        post.logout.redirect.uris: "{{ item.item.postLogoutRedirectUris }}"
+        backchannel.logout.session.required: "true"
+        backchannel.logout.revoke.offline.tokens: "false"
+        backchannel.logout.url: "{{ item.item.backchannelLogoutUrl }}"
+    status_code: [204]
+  loop: "{{ opencloud_keycloak_client_lookup.results }}"
+  loop_control:
+    label: "{{ item.item.clientId }}"
+  when: item.json | length > 0
+  no_log: true
+
+- name: Ensure OpenCloud realm roles exist
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/roles"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body:
+      name: "{{ item }}"
+    status_code: [201, 409]
+  loop:
+    - opencloudAdmin
+    - opencloudSpaceAdmin
+    - opencloudUser
+    - opencloudGuest
+  no_log: true
+
+- name: Get OpenCloud realm role representations
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/roles/{{ item }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    status_code: [200]
+  register: opencloud_role_reps
+  loop:
+    - opencloudAdmin
+    - opencloudUser
+  no_log: true
+
+- name: Get Keycloak users for OpenCloud role assignment
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/users?max=1000"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    status_code: [200]
+  register: opencloud_keycloak_users
+  no_log: true
+
+- name: Get realm role mappings for Keycloak users
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/users/{{ item.id }}/role-mappings/realm"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    status_code: [200]
+  register: opencloud_user_role_mappings
+  loop: "{{ opencloud_keycloak_users.json }}"
+  loop_control:
+    label: "{{ item.username }}"
+  no_log: true
+
+- name: Assign opencloudUser role to all users
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/users/{{ item.id }}/role-mappings/realm"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body: "{{ opencloud_role_reps.results | selectattr('item','equalto','opencloudUser') | map(attribute='json') | list }}"
+    status_code: [204]
+  loop: "{{ opencloud_keycloak_users.json }}"
+  loop_control:
+    label: "{{ item.username }}"
+  no_log: true
+
+- name: Assign opencloudAdmin role to admin users
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/users/{{ item.id }}/role-mappings/realm"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body: "{{ opencloud_role_reps.results | selectattr('item','equalto','opencloudAdmin') | map(attribute='json') | list }}"
+    status_code: [204]
+  loop: "{{ opencloud_keycloak_users.json }}"
+  loop_control:
+    label: "{{ item.username }}"
+  when: "'admin' in (opencloud_user_role_mappings.results | selectattr('item.id','equalto',item.id) | map(attribute='json') | flatten | map(attribute='name') | list)"
+  no_log: true
