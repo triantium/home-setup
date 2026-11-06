@@ -79,6 +79,12 @@
       baseUrl: "/"
       redirectUris: "{{ item.item.redirectUris }}"
       webOrigins: "{{ item.item.webOrigins }}"
+      defaultClientScopes:
+        - web-origins
+        - profile
+        - roles
+        - basic
+        - email
       protocol: openid-connect
       publicClient: true
       standardFlowEnabled: true
@@ -114,6 +120,12 @@
       baseUrl: "/"
       redirectUris: "{{ item.item.redirectUris }}"
       webOrigins: "{{ item.item.webOrigins }}"
+      defaultClientScopes:
+        - web-origins
+        - profile
+        - roles
+        - basic
+        - email
       protocol: openid-connect
       publicClient: true
       standardFlowEnabled: true
@@ -148,4 +160,61 @@
   register: opencloud_keycloak_auth
   retries: 3
   delay: 5
+  no_log: true
+
+- name: Get protocol mappers for OpenCloud Keycloak clients
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/clients/{{ item.json[0].id }}/protocol-mappers/models"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    status_code: [200]
+  register: opencloud_client_mappers
+  loop: "{{ opencloud_keycloak_client_lookup.results }}"
+  loop_control:
+    label: "{{ item.item.clientId }}"
+  no_log: true
+
+- name: Define roles protocol mapper configuration
+  set_fact:
+    opencloud_roles_mapper_config:
+      name: roles
+      protocol: openid-connect
+      protocolMapper: oidc-usermodel-realm-role-mapper
+      consentRequired: false
+      config:
+        claim.name: roles
+        jsonType.label: String
+        multivalued: "true"
+        access.token.claim: "true"
+        id.token.claim: "true"
+        userinfo.token.claim: "true"
+
+- name: Create roles protocol mapper for OpenCloud clients
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/clients/{{ item.item.json[0].id }}/protocol-mappers/models"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body: "{{ opencloud_roles_mapper_config }}"
+    status_code: [201, 409]
+  loop: "{{ opencloud_client_mappers.results }}"
+  loop_control:
+    label: "{{ item.item.clientId }}"
+  no_log: true
+
+- name: Update roles protocol mapper for OpenCloud clients
+  uri:
+    url: "https://{{ opencloud_idp_domain }}/admin/realms/skillzinskullz/clients/{{ item.item.json[0].id }}/protocol-mappers/models/{{ (item.json | selectattr('name','equalto','roles') | list | first).id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ opencloud_keycloak_auth.json.access_token }}"
+    body_format: json
+    body: "{{ opencloud_roles_mapper_config | combine({'id': (item.json | selectattr('name','equalto','roles') | list | first).id}) }}"
+    status_code: [204]
+  loop: "{{ opencloud_client_mappers.results }}"
+  loop_control:
+    label: "{{ item.item.clientId }}"
+  when: (item.json | selectattr('name','equalto','roles') | list | length) > 0
   no_log: true
