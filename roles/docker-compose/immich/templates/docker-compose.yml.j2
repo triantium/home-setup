@@ -31,7 +31,7 @@ networks:
 services:
   immich-server:
     container_name: immich_server
-    image: ghcr.io/immich-app/immich-server:v3.3.6
+    image: ghcr.io/immich-app/immich-server:v3.4.1
 {% if immich_traefik_enabled %}
     labels:
       - "traefik.enable=true"
@@ -76,7 +76,7 @@ services:
 
   immich-machine-learning:
     container_name: immich_machine_learning
-    image: ghcr.io/immich-app/immich-machine-learning:v3.3.6
+    image: ghcr.io/immich-app/immich-machine-learning:v3.4.1
     env_file:
       - .env
     volumes:
