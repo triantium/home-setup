@@ -16,7 +16,7 @@ services:
       retries: 3
       start_period: 15s
   whisper:
-    image: rhasspy/wyoming-whisper:3.8.1
+    image: rhasspy/wyoming-whisper:3.9.0
     container_name: whisper
     restart: always
     command: --model base-int8 --language de
