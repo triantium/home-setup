@@ -1,6 +1,6 @@
 services:
   homer:
-    image: b4bz/homer:v26.11.3
+    image: b4bz/homer:v26.11.4
     #pull_policy: always
     volumes:
       - ./etc/homer:/www/assets
