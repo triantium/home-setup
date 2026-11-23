@@ -72,7 +72,7 @@ services:
       - keycloak
 
   openldap:
-    image: osixia/openldap:1.5.0
+    image: osixia/openldap:2.6.15
     container_name: openldap
     environment:
       LDAP_LOG_LEVEL: "256"
