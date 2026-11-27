@@ -1,7 +1,7 @@
 version:              '3'
 services:
   influxdb:
-    image:            influxdb:2.9.1
+    image:            influxdb:2.10.1
     ports:
       - '8086:8086'
     volumes:
@@ -17,7 +17,7 @@ services:
       retries: 3
       start_period: 15s
   chronograf:
-    image:            chronograf:1.11.7
+    image:            chronograf:1.11.8
     ports:
       - '8888:8888'
     volumes:

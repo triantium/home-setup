@@ -2,7 +2,7 @@
 services:
   pihole:
     container_name: pihole
-    image: pihole/pihole:2026.10.1
+    image: pihole/pihole:2026.11.0
     ports:
       # DNS Ports
       - "53:53/tcp"
@@ -54,7 +54,7 @@ services:
 #      - ./unbound:/opt/unbound/etc/unbound/
   exporter:
     container_name: exporter
-    image: ekofr/pihole-exporter:v1.3.1
+    image: ekofr/pihole-exporter:v1.4.0
     ports:
       - 9617:9617
     environment:
